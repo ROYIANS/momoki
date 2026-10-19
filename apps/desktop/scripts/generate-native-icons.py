@@ -11,7 +11,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from PIL import Image, __version__ as pillow_version
+from PIL import Image, ImageDraw, __version__ as pillow_version
 
 
 PACKAGE = Path(__file__).resolve().parent.parent
@@ -20,6 +20,9 @@ TARGET = PACKAGE / "src-tauri" / "icons"
 SOURCE = PACKAGE / "assets" / "app-icon-cream-1024.png"
 BRAND_DIR = ROOT / "packages" / "distribution" / "public" / "brand"
 BACKGROUND = (244, 240, 232, 255)
+# Windows does not mask a square ICO. This is the rounded-rect radius used by the
+# approved cream tile, as a fraction of each ICO frame's side.
+WINDOWS_RADIUS_RATIO = 0.2237
 PNG_SIZES = {"16x16.png": 16, "32x32.png": 32, "64x64.png": 64, "128x128.png": 128,
              "128x128@2x.png": 256, "icon.png": 512}
 DESKTOP_FILES = (*PNG_SIZES, "icon.icns", "icon.ico")
@@ -114,12 +117,59 @@ def icns_check(path):
     return report
 
 
+def rounded_alpha(size):
+    scale = 4
+    big = Image.new("L", (size * scale, size * scale), 0)
+    ImageDraw.Draw(big).rounded_rectangle(
+        (0, 0, size * scale - 1, size * scale - 1),
+        radius=max(1, round(size * WINDOWS_RADIUS_RATIO * scale)),
+        fill=255,
+    )
+    mask = big.resize((size, size), Image.Resampling.LANCZOS)
+    # Lanczos reaches into the curve on small frames and leaves the corners slightly opaque.
+    pixels = mask.load()
+    for y in range(size):
+        for x in range(size):
+            if pixels[x, y] < 16:
+                pixels[x, y] = 0
+    return mask
+
+
+def round_windows_ico(path):
+    """Mask each Tauri ICO frame. PNG and ICNS stay square so macOS can apply its own mask."""
+    with Image.open(path) as container:
+        sizes = sorted(container.ico.sizes())
+        frames = []
+        for width, height in sizes:
+            frame = container.ico.getimage((width, height)).convert("RGBA")
+            frame.putalpha(rounded_alpha(width))
+            frames.append(frame)
+    # Pillow drops any size larger than the first image, so the 256 frame must lead.
+    frames.sort(key=lambda frame: frame.size, reverse=True)
+    frames[0].save(path, format="ICO", sizes=[frame.size for frame in frames], append_images=frames[1:])
+
+
+def ico_frame_check(image, label, size):
+    if image.size != (size, size):
+        raise ValueError(f"{label}: expected {size}x{size}, found {image.size}")
+    rgba = image.convert("RGBA")
+    corners = [rgba.getpixel(point) for point in [(0, 0), (size - 1, 0), (0, size - 1), (size - 1, size - 1)]]
+    if any(pixel[3] != 0 for pixel in corners):
+        raise ValueError(f"{label}: Windows corners must be transparent, found {corners}")
+    edge = rgba.getpixel((size // 2, 0))
+    if edge != BACKGROUND:
+        raise ValueError(f"{label}: top edge must stay cream #f4f0e8, found {edge}")
+    if rgba.getchannel("R").getextrema()[0] >= 100:
+        raise ValueError(f"{label}: logo artwork is absent")
+    return {"size": size, "corners": [list(pixel) for pixel in corners], "topEdge": list(edge)}
+
+
 def ico_check(path):
     with Image.open(path) as container:
         sizes = sorted(container.ico.sizes())
         if sizes != [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (256, 256)]:
             raise ValueError(f"ICO member sizes differ from the pinned Tauri set: {sizes}")
-        return [image_check(container.ico.getimage(size), f"icon.ico/{size[0]}", size[0]) for size in sizes]
+        return [ico_frame_check(container.ico.getimage(size), f"icon.ico/{size[0]}", size[0]) for size in sizes]
 
 
 def inspect(directory):
@@ -156,12 +206,13 @@ def generate(pnpm):
         for name in DESKTOP_FILES:
             shutil.copyfile(generated / name, directory / name)
         canonicalize_icns(directory / "icon.icns")
+        round_windows_ico(directory / "icon.ico")
         report = inspect(directory)
         if before != web_hashes():
             raise ValueError("Web branding changed during native icon generation")
         manifest = {"format": "cuepoint.native-icons.v1", "source": SOURCE.relative_to(ROOT).as_posix(),
                     "sourceSha256": sha256(SOURCE), "sourceSize": [1024, 1024], "background": "#f4f0e8",
-                    "composition": "approved opaque tile copied as-is; no resize, crop, or composite",
+                    "composition": "approved opaque tile copied as-is for PNG and ICNS; Windows ICO frames use a rounded-rect alpha mask at 0.2237 of the side",
                     "generator": {"pillow": pillow_version, "tauriCli": TAURI_VERSION,
                                   "icnsOrdering": "ascending member tag (CLI hash-map iteration normalized)",
                                   "icnsMembers": "original repository modern PNG set ic07..ic14; legacy small entries omitted"},

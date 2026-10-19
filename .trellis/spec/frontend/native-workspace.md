@@ -130,27 +130,34 @@ await navigator.mediaDevices.getUserMedia({audio: deviceId ? {deviceId: {exact: 
 Native icon generation is an asset contract, not a change to the shared Web
 artwork. The source is the dedicated committed opaque tile
 `apps/desktop/assets/app-icon-cream-1024.png`: 1024 pixels, fully opaque,
-full-bleed cream `#F4F0E8` with the colour frog mark. The Web logo is a
+full-bleed cream `#F4F0E8` with the frog character and no black disc. The Web logo is a
 transparent stencil (black ink) and would vanish on a dark tile, so it is not a
 native input and is never composited. `apps/desktop/scripts/generate-native-icons.py`
-validates the tile, copies its pixels unmodified (no crop, resize, composite or
-reconstruction), uses the installed pinned Tauri CLI and installs only desktop
-PNG, ICO and ICNS resources. The ICNS preserves the repository's eight modern
-PNG member types (`ic07`-`ic14`); independently verify macOS decoding rather than
-accepting one image library's interpretation.
+validates the tile, copies its pixels unmodified into the PNG set and ICNS (no
+crop, resize, composite or reconstruction), then masks only the Windows ICO.
+macOS applies its own squircle, so PNG and ICNS stay square and fully opaque.
+Windows does not mask a square ICO, so each ICO frame gets a rounded-rect alpha
+mask with radius 0.2237 of that frame's side: the four corners are transparent
+and the middle of each straight edge stays `[244,240,232,255]`. The generator
+uses the installed pinned Tauri CLI and installs only desktop PNG, ICO and ICNS
+resources. The ICNS preserves the repository's eight modern PNG member types
+(`ic07`-`ic14`); independently verify macOS decoding rather than accepting one
+image library's interpretation.
 
 Run the script with a Python runtime containing Pillow and the explicitly
 approved local pnpm path. `--check` is read-only and verifies source equality
-with the committed tile, every PNG/ICNS/ICO alpha range and corner RGB, artwork
-presence and provenance hashes. `--check --bundle /absolute/path/Application.app`
+with the committed tile, opaque PNG/ICNS alpha and cream corners, transparent ICO
+corners with a cream top edge, artwork presence and provenance hashes.
+`--check --bundle /absolute/path/Application.app`
 resolves `CFBundleIconFile` from the actual built app and requires its icon bytes
 to match the tracked ICNS. Web brand hashes recorded during generation are
 evidence, not permanent constraints on unrelated future Web artwork edits.
 
-Required assertions: all pixels have alpha 255; all corners are `[244,240,232,255]`;
-dark mark ink is present (a blank tile fails); `source.png` has the committed
-tile's pixels; rerunning generation produces identical native bytes; the packaged
-icon matches. A transparent or differently colored member is a failed gate even
-if a larger member looks correct. Replacing the Web logo to fix the native tile is
-wrong; changing the tile asset deliberately, regenerating the native resources and
-checking the actual bundle is correct.
+Required assertions: PNG and ICNS pixels have alpha 255 and corners
+`[244,240,232,255]`; every ICO frame has transparent corners and a cream top-edge
+pixel; dark mark ink is present (a blank tile fails); `source.png` has the
+committed tile's pixels; rerunning generation produces identical native bytes;
+the packaged ICNS matches. A transparent PNG or ICNS member, or a square ICO, is
+a failed gate even if a larger member looks correct. Replacing the Web logo to
+fix the native tile is wrong; changing the tile asset deliberately, regenerating
+the native resources and checking the actual bundle is correct.

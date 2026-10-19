@@ -1,13 +1,13 @@
 {
   "format": "cuepoint.native-icons.v1",
   "source": "apps/desktop/assets/app-icon-cream-1024.png",
-  "sourceSha256": "9a0a7534812e50a084c5f93543853b35c0ed7bdda02ebc52190de1b814f4f442",
+  "sourceSha256": "b58dfdb2aab91b2443512c689cb4eaed0d3ccaa19175f5acc8c8afea2403c0fb",
   "sourceSize": [
     1024,
     1024
   ],
   "background": "#f4f0e8",
-  "composition": "approved opaque tile copied as-is; no resize, crop, or composite",
+  "composition": "approved opaque tile copied as-is for PNG and ICNS; Windows ICO frames use a rounded-rect alpha mask at 0.2237 of the side",
   "generator": {
     "pillow": "12.3.0",
     "tauriCli": "2.12.1",
@@ -15,26 +15,27 @@
     "icnsMembers": "original repository modern PNG set ic07..ic14; legacy small entries omitted"
   },
   "webHashes": {
-    "packages/distribution/public/brand/README.md": "c170a72870be41beb1c1417ad5ec0b3b4d31ead4629ecd51c3a6b1b900da927f",
+    "packages/distribution/public/brand/README.md": "f849ba9255f00b09354f9d54d0e6e7d96b7a2a4f7a2a07fa571ea9b82793d488",
     "packages/distribution/public/brand/apple-touch-icon.png": "555ef2bb3c9a1b3ec6e0358f6b683dd038f30bcdc6b7b24049fd4ee6c2fdb85f",
     "packages/distribution/public/brand/favicon.ico": "187d751efc1a700a7e01ea9cd2e2c6d8755e46a826bd96ea6fa9126609479c2d",
     "packages/distribution/public/brand/logo-16.png": "a54a6b1f5bc6da00de840a65abbeae77607816ff6197c4ed83ad11bff0175a57",
     "packages/distribution/public/brand/logo-32.png": "fdd0604832f78bb3b7eb89c41f0d12e792ae2a0f8c3b3cda0ccbb7f9a928a936",
     "packages/distribution/public/brand/logo-48.png": "f53374fedb992a34e12585ed1802b0197546024249c3ebc64ece8071d92a6843",
+    "packages/distribution/public/brand/logo-loop.mp4": "eaba48164e43036b7b9005cd2116a56320f90fc3ff83b2f6dbc6cc05ed3b03a6",
     "packages/distribution/public/brand/logo.webp": "bd8bb450bdc0930e8ca01134fafeba9bb3e0edfec3f8a0d996bd3cfb08035cd8",
     "packages/distribution/public/brand/og-card.png": "c03d26f22993b87f3fb2af04cde58cf1e72cea453624ddb941d4f7c8c185c143",
     "packages/distribution/public/brand/sponsor-wechat.jpg": "7502389c1853a4472fb7b25f77dcbdb11070583e4830a4ec89636bce9d5dfab7",
     "apps/web/index.html": "7656992c946d6c13a41c91b9a2e04f65a3d9e4c7313ff0f04656e40dd695bd72"
   },
   "files": {
-    "source.png": "4a1dea1d0ea993546cc4ff8aebc71d80c12dfab634e40c5da66f14ea6499a4b3",
-    "16x16.png": "577711a8843ef29b96caadc7438293d24b1b0fa59d9f83e14678b9037422c80f",
-    "32x32.png": "e4ddaa9ac0b9792a361ae2118064b66ae5c33da8246d042a3c465a01179543eb",
-    "64x64.png": "5b7e26247d491dcff06576511f5d711e8d73d28ad6ad68c88a68856d98358c56",
-    "128x128.png": "9eb2c5e33e7470aa067ce687b672782f0adbd23cc02ab6d4f2030345997fd5b5",
-    "128x128@2x.png": "8ed315efcc30fe4b0bbb587944674d1b5e317a4ca3642ba61ca40147716f467d",
-    "icon.png": "2adf0129bd77605bc2fe47ae5f2e89c14b976802f5a7b8990272c6b19eaed199",
-    "icon.icns": "fdbb84ff05aa2211b9aed7c5846a0df17b7cc141fba9655aef01282b20dd9ce1",
-    "icon.ico": "1e7fde4c9b3ad53dd7c4ff550c459d254078b51c9601bb87b4d8cd6f4a1c662b"
+    "source.png": "b58dfdb2aab91b2443512c689cb4eaed0d3ccaa19175f5acc8c8afea2403c0fb",
+    "16x16.png": "854ee0ef0c1470380a6474eb4cdbf47203015d25252c73d9ae6aab30cac4cd71",
+    "32x32.png": "4ad6e9ce0d35bbdd7db67d0250750f0eabd96840e0c1f7861c461f990951d7b5",
+    "64x64.png": "b2cb315409092d46d2b2b8cb298f1bc894e90f91de8f77b5ca9d73befcc3d21f",
+    "128x128.png": "0b9a8b8a15c0fe19c36983d0a2ccf17b3c05a1ea99d2cef2d6d73280dc65320b",
+    "128x128@2x.png": "4323233ec6a0919c3852a4dd2d52e78dcc4d3a00158a7983c2bb12af33cc2538",
+    "icon.png": "cf95a89d4a0ae052ae29ea1d7f45c3c9800b59611853911d98c0bd9998a12fe2",
+    "icon.icns": "20741f890458f6138dc6160f4b82d960cd817e398bceacad842205861cd06854",
+    "icon.ico": "fc68fa1862f6ae516337bfcb1af8f39d5642db1043deb0a55636a98c314d7c96"
   }
 }
