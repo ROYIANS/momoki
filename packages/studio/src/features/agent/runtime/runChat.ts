@@ -51,7 +51,7 @@ function createStudioRuntimeHost(db:ProductStore,ownership:ThreadOwnership,apiKe
     observe({...feedbackIdentity,type:'started',threadId:run.threadId,assistantMessageId:run.assistantMessageId});
     // This must use the original explicit transport, not the observation wrapper below.
     const credentials=createRunCredentials(db,apiKey,!!fetchImpl);
-    const scope:TableScope=[db.deviceSettings,db.projects,db.agentRuns,db.agentToolCalls,db.agentJobs,db.chatThreads,db.chatMessages,db.agentTasks,db.agentGenerationJobs,db.agentTaskRecords,db.agentTaskRecordVersions,db.agentGenerationBatches,db.agentGenerationBatchItems];
+    const scope:TableScope=[db.deviceSettings,db.projects,db.agentRuns,db.agentToolCalls,db.agentJobs,db.chatThreads,db.chatMessages,db.agentTasks,db.agentGenerationJobs,db.agentTaskRecords,db.agentTaskRecordVersions,db.agentGenerationBatches,db.agentGenerationBatchItems,db.agentPendingInputs];
     const guard=async<T>(run:AgentRun,operation:(tx:StoreTx)=>Promise<T>,tables:TableScope=scope):Promise<T>=>db.transaction('rw',tables,async tx=>{
         assertThreadOwnership(ownership,run.threadId);
         if (ownership.threadId !== run.threadId) throw new Error('执行锁与对话归属不匹配');
@@ -124,7 +124,7 @@ function createStudioRuntimeHost(db:ProductStore,ownership:ThreadOwnership,apiKe
         finishingCheck:(run,output,continuation,signal)=>{ownership.assertHeld();return saveAgentFinishingCheck(run.id,run.modelStep!,output,continuation,signal,db);},
         commitRound:(run,result,details,output)=>guard(run,tx=>saveToolRound(run.id,result.content,result.toolCalls!,details.map(detail=>({...detail,recovery:productRecovery(detail)})),result.continuation,output,tx,activity)),
         offeredNames:(run,step)=>step === undefined ? getOfferedToolNames(run) : toolNamesForCall(run,step),
-        settle:(run,status,output,error,reason)=>guard(run,async tx=>{await finishAgentRun(run.id,status,output,error,reason,tx,activity);return (await tx.agentRuns.get(run.id))!.status;},[db.agentRuns,db.chatMessages,db.chatThreads,db.deviceSettings]),
+        settle:(run,status,output,error,reason)=>guard(run,async tx=>{await finishAgentRun(run.id,status,output,error,reason,tx,activity);return (await tx.agentRuns.get(run.id))!.status;},[db.agentRuns,db.chatMessages,db.chatThreads,db.deviceSettings,db.agentPendingInputs]),
         tools:{
             registry,
             readRound:run=>{

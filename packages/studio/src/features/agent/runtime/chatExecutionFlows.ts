@@ -44,6 +44,8 @@ export interface NewChatMessage {
     feedback?: ExecutionFeedbackInvocation;
     onThreadReady?: (thread: ChatThread) => void;
     onAdmitted?: (run: AgentRun) => void;
+    /** Queue delivery: the begin transaction validates and deletes this row. */
+    pendingInput?: {id: string; revision: number};
 }
 
 export async function executeNewChatMessage(input: NewChatMessage, binding: ChatExecutionBinding) {
@@ -77,7 +79,8 @@ export async function executeNewChatMessage(input: NewChatMessage, binding: Chat
             const run = await beginAgentRun({admission: input.admission, expectedOwner: {projectId: input.projectId},
                 threadId: target.id, connector, model, content: input.content, attachments: input.attachments,
                 modelMetadata: input.modelMetadata, reasoningEffort: input.reasoningEffort,
-                interactionMode: input.originThreadId ? input.interactionMode : "smart"}, store);
+                interactionMode: input.originThreadId ? input.interactionMode : "smart",
+                ...(input.pendingInput ? {pendingInput: input.pendingInput} : {})}, store);
             input.onAdmitted?.(run);
             feedback?.admitted(run);
             await executeChatRun(run, connector.apiKey, controller, fetchImpl, registry, store, ownership, feedback?.runtime);

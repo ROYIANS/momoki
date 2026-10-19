@@ -37,6 +37,7 @@ import {assertReasoningEffort, selectAgentProtocol} from "../../settings/models/
 import {deriveChatTitle} from "../models/chatTitle";
 import {assertChatAdmissionIdentity, normalizeSubmittedChatContent} from "../models/chatSubmission";
 import type {ChatAdmissionIdentity} from "../models/chatSubmission";
+import {consumePendingInput, PendingInputConflictError} from "./agentPendingInputs";
 
 export function connectorRunIdentity(connector: ConnectorConfig): AgentRun["connector"] {
     const url = new URL(connector.baseUrl.trim());
@@ -74,6 +75,8 @@ export async function beginAgentRun(input: {
     interactionMode?: AgentInteractionMode;
     createTask?: boolean;
     modelMetadata?: ChatModelMetadata;
+    /** Delivers a queued item: its row is validated and deleted in this same transaction. */
+    pendingInput?: Readonly<{id: string; revision: number}>;
 }, store?: ProductStore): Promise<AgentRun> {
     const db = store ?? productDb;
     prepareThreadActivityKey(input.threadId);
@@ -82,6 +85,8 @@ export async function beginAgentRun(input: {
     // Capture before catalog preparation so a caller cannot replace IDs while begin awaits.
     const admission = input.admission ? {...input.admission} : undefined;
     const expectedOwner = input.expectedOwner ? {...input.expectedOwner} : undefined;
+    const pendingInput = input.pendingInput ? {...input.pendingInput} : undefined;
+    if (pendingInput && (!admission || input.retryOfRunId !== undefined)) throw new Error("待发送消息必须使用其预分配的提交标识");
     if (admission) {
         assertChatAdmissionIdentity(admission);
         if (input.retryOfRunId !== undefined) throw new Error("重新生成不能复用新消息提交标识");
@@ -210,6 +215,9 @@ export async function beginAgentRun(input: {
             createdAt: at,
             updatedAt: at,
         };
+        // Delivery gate: a gone or edited queue row aborts the whole begin (nothing is created).
+        const delivered = pendingInput ? await consumePendingInput(db, {...pendingInput, threadId: thread.id, userMessageId}) : undefined;
+        if (delivered && delivered.content !== content) throw new PendingInputConflictError("changed");
         if (!previous) await db.chatMessages.add({
             id: userMessageId,
             threadId: thread.id,
@@ -218,6 +226,7 @@ export async function beginAgentRun(input: {
                 attachments: selectedReferences.references,
                 referenceContext: selectedReferences
             } : {}),
+            ...(delivered?.source === "system" ? {origin: "system" as const, ...(delivered.display ? {display: delivered.display} : {})} : {}),
             createdAt: at,
             status: "complete"
         });
@@ -266,7 +275,7 @@ export async function finishAgentRun(runId: string, status: Exclude<AgentRunStat
     const db = store ?? productDb;
     const activity = preparedActivity ?? await prepareRunActivityKey(runId, db);
     // Terminal output and its public revision share the original transaction.
-    await db.transaction("rw", [db.agentRuns, db.chatMessages, db.chatThreads, db.deviceSettings], (tx) =>
+    await db.transaction("rw", [db.agentRuns, db.chatMessages, db.chatThreads, db.deviceSettings, db.agentPendingInputs], (tx) =>
         settleRun(tx, runId, status, {output, error, finishReason, activity}).then(() => undefined));
 }
 
@@ -274,7 +283,7 @@ export async function finishAgentRun(runId: string, status: Exclude<AgentRunStat
 export async function interruptThreadRuns(threadId: string, store?: ProductStore): Promise<void> {
     const db = store ?? productDb;
     const activity = prepareThreadActivityKey(threadId);
-    await db.transaction("rw", [db.deviceSettings, db.chatThreads, db.agentRuns, db.agentToolCalls, db.chatMessages, db.contextCompactions, db.agentGenerationJobs, db.agentGenerationBatches, db.agentGenerationBatchItems], async (db) => {
+    await db.transaction("rw", [db.deviceSettings, db.chatThreads, db.agentRuns, db.agentToolCalls, db.chatMessages, db.contextCompactions, db.agentGenerationJobs, db.agentGenerationBatches, db.agentGenerationBatchItems, db.agentPendingInputs], async (db) => {
         const runs = await db.agentRuns.where("threadId").equals(threadId).toArray();
         for (const run of runs) {
             await upgradeLegacyPlanCalls(run.id, db);

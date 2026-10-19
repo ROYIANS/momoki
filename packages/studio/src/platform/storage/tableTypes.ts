@@ -1,4 +1,5 @@
 import type {AgentJob, AgentJobResultChunk} from "../../features/agent/models/agentJob";
+import type {AgentPendingInput} from "../../features/agent/models/agentPendingInput";
 import type {DesktopMediaImport} from "../../features/library/models/desktopMediaImport";
 import type {
     AudioChapter,
@@ -42,6 +43,7 @@ import type {Shot} from "./../../features/video/models/shots";
 
 export interface ProductRows {
     desktopMediaImports: DesktopMediaImport;
+    agentPendingInputs: AgentPendingInput;
     agentJobs: AgentJob;
     agentJobResultChunks: AgentJobResultChunk;
     audioChapters: AudioChapter;

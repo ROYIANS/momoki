@@ -10,6 +10,14 @@ export interface ThreadLockManager {
     }, callback: (lock: unknown) => Promise<T>): Promise<T>;
 }
 
+/** The thread is executing in another page; callers that merely probe (queue drain) treat this as "not now". */
+export class ThreadLockBusyError extends Error {
+    constructor() {
+        super("此对话正在另一个页面执行，请先在那里停止或等待完成");
+        this.name = "ThreadLockBusyError";
+    }
+}
+
 function browserLocks(): ThreadLockManager {
     if (typeof navigator === "undefined" || !navigator.locks) {
         throw new Error("此浏览器无法安全协调执行，请使用支持 Web Locks 的浏览器并通过 HTTPS 或 localhost 打开");
@@ -45,7 +53,7 @@ export function withOwnedExecution<T>(ownership:ThreadOwnership,threadId:string,
 /** An execution-only lease never runs recovery against a newly created run. */
 export async function withExecutionOwnership<T>(threadId:string,execute:(ownership:ThreadOwnership)=>Promise<T>,locks:ThreadLockManager=browserLocks()):Promise<T> {
     return locks.request(`cuepoint:agent:${threadId}`,{ifAvailable:true},async lock=>{
-        if (!lock) throw new Error("此对话正在另一个页面执行，请先在那里停止或等待完成");
+        if (!lock) throw new ThreadLockBusyError();
         const state:CapabilityState={held:true,executing:false,accepting:true,threadId};
         const ownership:ThreadOwnership={
             [ownershipBrand]:true,threadId,assertHeld(){assertThreadOwnership(ownership,threadId);}

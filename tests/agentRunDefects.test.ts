@@ -33,7 +33,7 @@ describe("settleRun is the only terminal-state writer", () => {
             const run = await begin();
             await db.agentRuns.update(run.id, {status: "running", pauseReason: "model_step_limit"});
             const activity = prepareThreadActivityKey(run.threadId);
-            await db.transaction("rw", [db.agentRuns, db.chatMessages, db.chatThreads, db.deviceSettings], async (tx) => {
+            await db.transaction("rw", [db.agentRuns, db.chatMessages, db.chatThreads, db.deviceSettings, db.agentPendingInputs], async (tx) => {
                 await settleRun(tx, run.id, status, {activity, error: `${status}-error`});
             });
             const saved = await db.agentRuns.get(run.id);

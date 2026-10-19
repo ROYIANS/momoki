@@ -48,7 +48,7 @@ async function requireProject(run: AgentRun, store?: ProductStore) {
     if (thread?.projectId !== run.projectId || run.projectId && !await db.projects.get(run.projectId)) throw new Error("关联项目已不存在或归属不匹配");
 }
 
-const tables = (store?: ProductStore) => (db => [db.deviceSettings, db.projects, db.agentRuns, db.agentToolCalls, db.agentJobs, db.chatThreads, db.chatMessages, db.agentTasks, db.agentGenerationJobs, db.agentTaskRecords, db.agentTaskRecordVersions, db.agentGenerationBatches, db.agentGenerationBatchItems])(store ?? productDb);
+const tables = (store?: ProductStore) => (db => [db.deviceSettings, db.projects, db.agentRuns, db.agentToolCalls, db.agentJobs, db.chatThreads, db.chatMessages, db.agentTasks, db.agentGenerationJobs, db.agentTaskRecords, db.agentTaskRecordVersions, db.agentGenerationBatches, db.agentGenerationBatchItems, db.agentPendingInputs])(store ?? productDb);
 
 async function requireLatestRun(run: AgentRun, store?: ProductStore): Promise<void> {
     const db = store ?? productDb;

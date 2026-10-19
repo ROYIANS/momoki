@@ -4,6 +4,8 @@ import {canSettleRun} from '@cuepoint/agent-core';
 import type {StoreTx} from "../../../platform/storage/types";
 import type {AgentRun, AgentRunOutput, AgentRunStatus} from "../models/agent";
 import {nowIso} from "../../../platform/identity";
+import type {AgentPendingInputHeldReason} from "../models/agentPendingInput";
+import {holdPendingInputs} from "./agentPendingInputs";
 
 const SETTLED_MESSAGE_STATUS = {
     completed: "complete",
@@ -11,6 +13,10 @@ const SETTLED_MESSAGE_STATUS = {
     cancelled: "aborted",
     interrupted: "interrupted"
 } as const;
+
+const HOLD_REASON: Partial<Record<AgentRunStatus, AgentPendingInputHeldReason>> = {
+    cancelled: "stopped", failed: "failed", interrupted: "interrupted"
+};
 
 /**
  * The one writer for a run's terminal state, shared by every caller that ends an
@@ -60,6 +66,10 @@ export async function settleRun(db: StoreTx, runId: string, status: Exclude<Agen
         updatedAt: at,
         endedAt: at,
     });
+    // Queued follow-ups never outlive a stop/failure/interruption as auto-sendable items. Ending an already
+    // interrupted/failed run again does not count: its queue was held when it first stopped.
+    const reason = HOLD_REASON[status];
+    if (reason && (run.status === "running" || run.status === "waiting_approval")) await holdPendingInputs(db, run.threadId, reason);
     await publishAssistantActivity(options.activity, run, db);
     return true;
 }

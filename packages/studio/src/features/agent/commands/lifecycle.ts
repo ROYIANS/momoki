@@ -18,7 +18,8 @@ export async function discardEmptyChatThread(id: Id, store?: ProductStore): Prom
 export async function deleteChatThread(id: Id, store?: ProductStore): Promise<void> {
     const db = store ?? productDb;
     const activity = prepareThreadActivityKey(id);
-    await db.transaction("rw", [...PRODUCTION_TABLES, db.deviceSettings, db.chatThreads, db.chatMessages, db.agentRuns, db.agentToolCalls, db.agentJobs, db.agentJobResultChunks, db.agentTasks, db.contextCompactions, db.agentTaskRecords, db.agentTaskRecordVersions, db.agentTaskWrapups, db.agentTaskWrapupVersions], async (db) => {
+    await db.transaction("rw", [...PRODUCTION_TABLES, db.deviceSettings, db.chatThreads, db.chatMessages, db.agentRuns, db.agentToolCalls, db.agentJobs, db.agentJobResultChunks, db.agentTasks, db.contextCompactions, db.agentTaskRecords, db.agentTaskRecordVersions, db.agentTaskWrapups, db.agentTaskWrapupVersions, db.agentPendingInputs], async (db) => {
+        await db.agentPendingInputs.where("threadId").equals(id).delete();
         for (const job of await db.agentJobs.where("threadId").equals(id).toArray()) await db.agentJobResultChunks.where("jobId").equals(job.id).delete();
         await db.agentJobs.where("threadId").equals(id).delete();
         const jobs = await db.agentGenerationJobs.where("threadId").equals(id).toArray();

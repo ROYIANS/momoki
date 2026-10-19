@@ -64,6 +64,7 @@ export async function deleteProject(id: Id, store?: ProductStore, preparedReport
             db.agentJobs, db.agentJobResultChunks,
             db.deviceSettings,
             db.desktopMediaImports,
+            db.agentPendingInputs,
         ],
         async (db) => {
             const jobs = await db.agentJobs.where("projectId").equals(id).toArray();
@@ -75,6 +76,7 @@ export async function deleteProject(id: Id, store?: ProductStore, preparedReport
                 await clearAgentReportActivity(prepared.activity, job.id, db);
             }
             await db.desktopMediaImports.where("projectId").equals(id).delete();
+            await db.agentPendingInputs.where("projectId").equals(id).filter(item => item.source === "system").delete();
             for (const job of jobs) await db.agentJobResultChunks.where("jobId").equals(job.id).delete();
             await db.agentJobs.where("projectId").equals(id).delete();
             for (const table of AUDIO_TABLES) await db.table(table.name).where("projectId").equals(id).delete();

@@ -12,7 +12,16 @@ import type {RunAction} from "../models/chatRunAction";
 import {readAgentAdmission} from "../queries/agentAdmission";
 import {createExecutionFeedbackController, type ExecutionFeedbackInvocation, type ExecutionFeedbackSnapshot} from "./executionFeedback";
 import {executeNewChatMessage, resolveChatRunAction, retryFrozenChatRun, type ChatExecutionBinding} from "./chatExecutionFlows";
-import {recoverAbandonedRuns, withThreadRunLock} from "./runOwnership";
+import {recoverAbandonedRuns, ThreadLockBusyError, withThreadRunLock} from "./runOwnership";
+import {runBlocksThread} from "../models/agentToolSelection";
+import {cancelAgentRun} from "../commands/agentTools";
+import type {AgentPendingInput, AgentPendingInputMode, AgentPendingInputSubmit} from "../models/agentPendingInput";
+import type {ChatAdmissionIdentity} from "../models/chatSubmission";
+import type {ReferenceAttachment} from "../../references/models/references";
+import {
+    editPendingInput, enqueueUserInput, holdPendingInput, holdPendingInputs, movePendingInput, nextQueuedInput,
+    PendingInputConflictError, removePendingInput, setPendingMode, threadsWithQueuedSystemInputs
+} from "../commands/agentPendingInputs";
 
 const invocationBrand: unique symbol = Symbol("AgentInvocation");
 /** Opaque local identity; persisted IDs never reconstruct an invocation owner. */
@@ -27,7 +36,7 @@ export interface AgentExecutionSnapshot {
     readonly active: boolean;
     readonly stopping: boolean;
     readonly token?: AgentExecutionToken;
-    readonly kind?: "submit" | "retry" | "decision" | "check" | "recovery" | "taskWrapup" | "videoBatch" | "audioBatch" | "contextCompaction";
+    readonly kind?: "submit" | "retry" | "decision" | "check" | "recovery" | "taskWrapup" | "videoBatch" | "audioBatch" | "contextCompaction" | "queue";
     readonly feedback?: Readonly<ExecutionFeedbackSnapshot>;
     readonly attempts: readonly ChatSubmissionAttempt[];
     readonly error?: string;
@@ -42,6 +51,8 @@ interface Invocation {
     stopping: boolean;
     wrapupId?: string;
     kind: NonNullable<AgentExecutionSnapshot["kind"]>;
+    /** Startup continuation: a chain of queue dispatches that only ever delivers system items. */
+    systemOnly: boolean;
 }
 interface ThreadState {
     invocation?: Invocation;
@@ -53,6 +64,10 @@ interface ThreadState {
     listeners: Set<() => void>;
     error?: string;
 }
+
+/** Kinds whose normal end may hand the thread to the next queued item. */
+const DRAINING_KINDS: ReadonlySet<string> = new Set(["submit", "retry", "decision", "queue"]);
+const MAX_DISPATCH_ERROR = 200;
 
 /** Copy only local submitted data; never store a ConnectorConfig/API key in snapshots. */
 function freezeAttempt(attempt: ChatSubmissionAttempt): ChatSubmissionAttempt {
@@ -140,11 +155,16 @@ export function createAgentExecutionService(options: ChatExecutionBinding) {
             for (const threadId of new Set(rows.map(row => row.threadId))) await recoverTaskWrapups(threadId, binding.locks, binding.store);
             const compactions = await binding.store.contextCompactions.filter(row => row.status === "running" && row.origin === "manual").toArray();
             for (const threadId of new Set(compactions.map(row => row.threadId))) await recoverManualCompactions(threadId, binding.locks, binding.store);
+            // Startup continues only system items (a user-confirmed adoption); queued user items stay visible
+            // for an explicit "send now" so a restart never auto-sends a paid request the user typed.
+            try {
+                for (const threadId of await threadsWithQueuedSystemInputs(binding.store)) scheduleDrain(threadId, true);
+            } catch { /* The queue stays durable; a later drain or explicit send picks it up. */ }
         })();
         return initialized;
     }
     function claim(threadId: string, kind: Invocation["kind"], operation: (entry: Invocation) => Promise<void>,
-                   submitted?: ChatSubmissionAttempt, taskId?: string): AgentExecutionHandle {
+                   submitted?: ChatSubmissionAttempt, taskId?: string, systemOnly = false): AgentExecutionHandle {
         if (!admissionOpen) throw new Error("应用正在退出，暂时无法开始执行");
         const owner = state(threadId);
         if (owner.invocation) throw new Error("当前对话尚有执行未结束，请等待完成或先停止");
@@ -157,7 +177,7 @@ export function createAgentExecutionService(options: ChatExecutionBinding) {
         let resolveDone!: () => void;
         let rejectDone!: (cause: unknown) => void;
         const done = new Promise<void>((resolve, reject) => {resolveDone = resolve; rejectDone = reject;});
-        const entry: Invocation = {token, controller, done, stopping: false, kind,
+        const entry: Invocation = {token, controller, done, stopping: false, kind, systemOnly,
             feedback: owner.feedbackOwner.begin(token.id, threadId)};
         owner.invocation = entry;
         owner.error = undefined;
@@ -165,13 +185,19 @@ export function createAgentExecutionService(options: ChatExecutionBinding) {
         owner.lastFeedback = {token, invocation: entry.feedback};
         publish(threadId, owner);
         void (async () => {
+            let finishedNormally = false;
             try {
                 await initialize();
                 // Closing admission or stopping a reserved preparation never dispatches later.
                 if (!controller.signal.aborted) await operation(entry);
-                else if (submitted) patchAttempt(threadId, submitted.admission.userMessageId,
-                    {phase: "failed", error: "发送已停止"});
+                else {
+                    if (submitted) patchAttempt(threadId, submitted.admission.userMessageId,
+                        {phase: "failed", error: "发送已停止"});
+                    // A stopped queue dispatch keeps its items, but never sends them on its own.
+                    if (kind === "queue") await holdPendingInputs(binding.store, threadId, "stopped");
+                }
                 resolveDone();
+                finishedNormally = true;
             } catch (cause) {
                 // Error content is retained by the concrete operation/durable run, never by a toast callback.
                 owner.error ??= "执行未完成";
@@ -186,6 +212,9 @@ export function createAgentExecutionService(options: ChatExecutionBinding) {
                     owner.invocation = undefined;
                     publish(threadId, owner);
                 }
+                // Invocation, work slot and lock are released only after the original completion; the next queued
+                // item starts only after a clean end that no Stop touched and that left no error behind.
+                if (finishedNormally && !entry.stopping && !owner.error && DRAINING_KINDS.has(kind)) scheduleDrain(threadId, entry.systemOnly);
             }
         })();
         reservation.follow(done);
@@ -272,6 +301,128 @@ export function createAgentExecutionService(options: ChatExecutionBinding) {
             if (checked && !checked.ok && !checked.aborted) state(input.threadId).error = checked.message;
         });
     }
+    function dispatchFailure(cause: unknown): string {
+        const message = cause instanceof Error && cause.message ? cause.message : "发送失败";
+        return message.length > MAX_DISPATCH_ERROR ? `${message.slice(0, MAX_DISPATCH_ERROR)}…` : message;
+    }
+    /** Settings a queued item is delivered with: frozen for user items, the thread's latest for system items (D7). */
+    async function queuedSettings(item: AgentPendingInput) {
+        if (item.submit) return {...item.submit, frozen: true as const};
+        const thread = await binding.store.chatThreads.get(item.threadId);
+        if (!thread?.connectorId || !thread.model) throw new Error("找不到此对话最近使用的连接和模型，请手动发送");
+        const selection = thread.reasoningSelection;
+        const submit: AgentPendingInputSubmit = {
+            connector: {id: thread.connectorId, definitionId: "", baseUrl: ""}, model: thread.model,
+            reasoningEffort: selection?.connectorId === thread.connectorId && selection.model === thread.model ? selection.value : undefined,
+            interactionMode: thread.interactionMode ?? "smart", taskMode: thread.taskMode === true
+        };
+        return {...submit, frozen: false as const};
+    }
+    /**
+     * Delivers one queued item as a fresh turn under the already claimed invocation. The begin transaction deletes
+     * the row, so a repeated or cross-tab dispatch can only deliver once. Not delivered means it stays visible
+     * (held on failure), never lost and never silently resent.
+     */
+    async function dispatchItem(entry: Invocation, threadId: string, itemId: string, explicit: boolean) {
+        const store = binding.store;
+        const fail = (message: string) => {if (explicit) state(threadId).error = message;};
+        const item = await store.agentPendingInputs.get(itemId);
+        if (!item || item.threadId !== threadId) {
+            if (explicit) throw new PendingInputConflictError("gone");
+            return;
+        }
+        // The row may have been held (Stop, failure) after the drain picked it: only an explicit send delivers held cards.
+        if (!explicit && (item.status !== "queued" || entry.systemOnly && item.source !== "system")) return;
+        const blockers = (await store.agentRuns.where("threadId").equals(threadId).toArray()).filter(runBlocksThread);
+        if (blockers.some(run => run.status === "running" || run.status === "waiting_approval")) {
+            // Waiting for approval or another page's run: the card stays queued until that run ends.
+            fail(blockers.some(run => run.status === "waiting_approval") ? "等待审批，处理完成后再发送" : "此对话已有执行，请等待完成后再发送");
+            return;
+        }
+        if (blockers.length) {
+            // Interrupted/failed work with saved tool steps holds the thread. Only an explicit send ends it (D3).
+            if (!explicit) return;
+            await withThreadRunLock(threadId, async () => {
+                for (const run of blockers) await cancelAgentRun(run.id, store);
+            }, binding.locks, store);
+        }
+        if (entry.controller.signal.aborted) {await holdPendingInputs(store, threadId, "stopped"); return;}
+        let admitted = false;
+        try {
+            const settings = await queuedSettings(item);
+            const connector = await resolveConnector(settings.connector.id, store);
+            if (!connector) throw new Error("原连接已删除，请恢复连接后处理待发送消息");
+            const identity = connectorRunIdentity(connector);
+            if (settings.frozen && (identity.id !== settings.connector.id || identity.definitionId !== settings.connector.definitionId ||
+                identity.baseUrl !== new URL(settings.connector.baseUrl).toString().replace(/\/+$/, ""))) throw new Error("原连接已更改，请恢复连接配置或重新发送");
+            const admission: ChatAdmissionIdentity = {runId: item.runId, userMessageId: item.userMessageId, assistantMessageId: item.assistantMessageId};
+            const receipt = await readAgentAdmission({threadId, admission, connector: identity, model: settings.model,
+                content: item.content, attachments: item.attachments, projectId: item.projectId}, store);
+            if (receipt.status === "accepted") { // A positive receipt is never dispatch permission; only tidy the stale row.
+                try {await removePendingInput(item.id, undefined, store);} catch (cause) {if (!(cause instanceof PendingInputConflictError)) throw cause;}
+                return;
+            }
+            if (receipt.status !== "absent") {
+                await holdPendingInput(item.id, "uncertain", "发送记录不一致", store);
+                fail("待发送消息的发送记录不一致，请核对后处理");
+                return;
+            }
+            entry.controller.signal.throwIfAborted();
+            const checked = await executeNewChatMessage({threadId, admission, content: item.content,
+                attachments: item.attachments ? item.attachments.map(reference => ({...reference})) : [],
+                originThreadId: threadId, connector, model: settings.model, taskMode: settings.taskMode, projectId: item.projectId,
+                interactionMode: settings.interactionMode, reasoningEffort: settings.reasoningEffort, modelMetadata: settings.modelMetadata,
+                controller: entry.controller, feedback: entry.feedback,
+                isCurrent: () => state(threadId).invocation === entry && !entry.controller.signal.aborted,
+                onAdmitted: () => {admitted = true;},
+                pendingInput: {id: item.id, revision: item.revision}}, binding);
+            if (!admitted) {
+                if (entry.controller.signal.aborted || !checked.ok && checked.aborted) await holdPendingInputs(store, threadId, "stopped");
+                else {
+                    const message = !checked.ok ? checked.message : "发送已停止";
+                    await holdPendingInput(item.id, "dispatch_failed", message, store);
+                    fail(message);
+                }
+            }
+        } catch (cause) {
+            if (cause instanceof ThreadLockBusyError) throw cause; // Another page runs this thread: leave the card as it is.
+            if (cause instanceof PendingInputConflictError) {
+                // Edited or removed while being claimed: nothing was delivered. A drain simply picks the next state up.
+                fail(cause.message);
+                return;
+            }
+            if (!admitted) {
+                if (entry.controller.signal.aborted) await holdPendingInputs(store, threadId, "stopped");
+                else {
+                    const uncertain = cause instanceof StorageError && cause.certainty === "unknown";
+                    await holdPendingInput(item.id, uncertain ? "uncertain" : "dispatch_failed", uncertain ? "发送未确认" : dispatchFailure(cause), store);
+                }
+            }
+            throw cause;
+        }
+    }
+    function claimQueueItem(threadId: string, itemId: string, explicit: boolean, systemOnly = false) {
+        return claim(threadId, "queue", entry => dispatchItem(entry, threadId, itemId, explicit), undefined, undefined, systemOnly);
+    }
+    async function drain(threadId: string, systemOnly: boolean): Promise<AgentExecutionHandle | undefined> {
+        if (!admissionOpen) return undefined;
+        const owner = state(threadId);
+        if (owner.invocation) return undefined;
+        const item = await nextQueuedInput(threadId, {systemOnly}, binding.store);
+        if (!item) return undefined;
+        const runs = await binding.store.agentRuns.where("threadId").equals(threadId).toArray();
+        if (runs.some(runBlocksThread)) return undefined;
+        if (!admissionOpen || owner.invocation || currentAgentThreadWork(binding.store, threadId)) return undefined;
+        try {
+            return claimQueueItem(threadId, item.id, false, systemOnly);
+        } catch {
+            return undefined; // Another command took the thread first.
+        }
+    }
+    function scheduleDrain(threadId: string, systemOnly = false) {
+        if (!admissionOpen) return;
+        void drain(threadId, systemOnly).catch(() => undefined);
+    }
     subscribeAgentThreadWork(binding.store, () => {
         for (const [threadId, owner] of threads) publish(threadId, owner);
     });
@@ -329,6 +480,25 @@ export function createAgentExecutionService(options: ChatExecutionBinding) {
             if (!listeners) {listeners = new Set(); scopeListeners.set(scope, listeners);}
             listeners.add(listener); return () => {listeners.delete(listener);};
         },
+        /** Queue a message while a run is active (or the thread is blocked). It never interrupts the run. */
+        enqueue(input: {threadId: string; content?: string; attachments?: readonly ReferenceAttachment[]; mode?: AgentPendingInputMode;
+            admission: ChatAdmissionIdentity; submit: AgentPendingInputSubmit}) {
+            if (!admissionOpen) throw new Error("应用正在退出，暂时无法开始执行");
+            return enqueueUserInput(input, binding.store);
+        },
+        editPending: (input: {id: string; expectedRevision: number; content: string}) =>
+            editPendingInput(input.id, input.expectedRevision, {content: input.content}, binding.store),
+        removePending: (input: {id: string; expectedRevision?: number}) => removePendingInput(input.id, input.expectedRevision, binding.store),
+        setPendingMode: (input: {id: string; expectedRevision: number; mode: AgentPendingInputMode}) =>
+            setPendingMode(input.id, input.expectedRevision, input.mode, binding.store),
+        movePending: (input: {id: string; direction: "up" | "down"}) => movePendingInput(input.id, input.direction, binding.store),
+        /**
+         * "Send now" for one card (queued or held). A thread held by interrupted/failed work with saved tool calls is
+         * ended first (D3); a running or approval-waiting thread keeps the card and reports why in the snapshot error.
+         */
+        dispatchPending: (input: {threadId: string; id: string}) => claimQueueItem(input.threadId, input.id, true),
+        /** Delivers the next queued item if the thread is idle and unblocked; held items are never touched. */
+        drainQueue: (threadId: string) => drain(threadId, false),
         submit, retrySubmission,
         retry(input: {threadId: string; runId: string}) {
             return claim(input.threadId, "retry", async entry => {

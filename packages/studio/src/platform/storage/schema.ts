@@ -1460,6 +1460,47 @@ export const PRODUCT_SCHEMA = {
                 "unique": false
             }
         ]
+    },
+    "agentPendingInputs": {
+        "keyPath": "id",
+        "scope": "mixed",
+        "indexes": [
+            {
+                "name": "threadId",
+                "keyPaths": [
+                    "threadId"
+                ],
+                "unique": false
+            },
+            {
+                "name": "projectId",
+                "keyPaths": [
+                    "projectId"
+                ],
+                "unique": false
+            },
+            {
+                "name": "status",
+                "keyPaths": [
+                    "status"
+                ],
+                "unique": false
+            },
+            {
+                "name": "dedupeKey",
+                "keyPaths": [
+                    "dedupeKey"
+                ],
+                "unique": true
+            },
+            {
+                "name": "updatedAt",
+                "keyPaths": [
+                    "updatedAt"
+                ],
+                "unique": false
+            }
+        ]
     }
 } as const satisfies Record<TableName, TableDefinition>;
 
