@@ -23,6 +23,6 @@
   ],
   "parent": null,
   "relatedFiles": [],
-  "notes": "",
+  "notes": "2026-10-19 按 owner 要求归档（status 为归档命令写入，并非全部完成）。已提交：批次 1-7b。未做：批次 8（真实 UI 截图验证）、批次 9（全量检查与 spec 更新）；子任务 composer-chat-copy 未实施。",
   "meta": {}
 }

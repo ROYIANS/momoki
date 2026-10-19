@@ -21,6 +21,6 @@
   "children": [],
   "parent": null,
   "relatedFiles": [],
-  "notes": "",
+  "notes": "2026-10-19 按 owner 要求归档（status 由归档命令写为 completed，并非全部完成）。已提交：批次 1-5。未做：批次 6（E11 过渡方案：WebView 崩溃恢复、Quit/关闭流程、草稿持久化）、批次 7（台账修正）、批次 8（Rust Host）。残留问题见 10-19-product-audit-direction/research/agent-ux-bug-backlog.md。",
   "meta": {}
 }
