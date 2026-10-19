@@ -1,0 +1,11 @@
+{"file": ".trellis/tasks/10-19-agent-queue-steer-parallel/prd.md", "reason": "需求、已定决策与验收标准"}
+{"file": ".trellis/tasks/10-19-agent-queue-steer-parallel/design.md", "reason": "数据模型、注入点、批量解耦、自动续跑、UI 设计与决策点"}
+{"file": ".trellis/tasks/10-19-agent-queue-steer-parallel/implement.md", "reason": "分批实施顺序、验证命令、回滚点"}
+{"file": ".trellis/tasks/10-19-product-audit-direction/research/agent-concurrency-queue.md", "reason": "运行中并发与消息队列的现状调研，含文件:行"}
+{"file": ".trellis/spec/agent-core/library/runtime.md", "reason": "RuntimeHost 契约与线程锁规则，新增 admitPendingInput 要遵守"}
+{"file": ".trellis/spec/frontend/agent-execution.md", "reason": "执行服务、线程占用与恢复语义"}
+{"file": ".trellis/spec/frontend/agent-batch-generation.md", "reason": "批量生成运行时、锁与恢复，批量脱离线程锁要遵守"}
+{"file": ".trellis/spec/frontend/agent-context.md", "reason": "上下文前缀冻结与压缩，插队消息不得触碰 base 前缀"}
+{"file": ".trellis/spec/frontend/agent-send-recovery.md", "reason": "发送准入、幂等与恢复，队列派发要沿用"}
+{"file": ".trellis/spec/frontend/shared-product-storage.md", "reason": "新增 agentPendingInputs 表与 Dexie v28 迁移规则"}
+{"file": ".trellis/spec/frontend/agent-jobs-results.md", "reason": "线程锁规则相关段落"}

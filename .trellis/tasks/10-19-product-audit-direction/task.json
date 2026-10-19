@@ -1,0 +1,28 @@
+{
+  "id": "product-audit-direction",
+  "name": "product-audit-direction",
+  "title": "产品现状盘点与方向规划",
+  "description": "盘点业务功能、Agent 体验问题与用户卡点，产出方向文档与可独立验收的任务拆分；只做规划，不改代码。",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "package": "studio",
+  "priority": "P2",
+  "creator": "ROYIANS",
+  "assignee": "ROYIANS",
+  "createdAt": "2026-10-19",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "10-19-agent-queue-steer-parallel"
+  ],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {}
+}
