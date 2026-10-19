@@ -12,6 +12,7 @@ export function toResponseInput(messages: readonly AgentRequestMessage[]): Agent
     return messages.flatMap(message => convertMessages([message]).map(item => ({...item,
         ...((item.type === 'message' || item.type === 'function_call_output') && message.referenceInput ? {referenceInput: message.referenceInput} : {}),
         ...(item.type === 'message' && message.sourceToolCallId ? {sourceToolCallId: message.sourceToolCallId} : {}),
+        ...(item.type === 'message' && message.sourceQueueItemId ? {sourceQueueItemId: message.sourceQueueItemId} : {}),
     })));
 }
 export function streamResponses(input: StreamChatInput & {responseItems?: AgentResponseItem[]}, handlers: StreamChatHandlers = {}) {

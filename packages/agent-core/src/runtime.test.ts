@@ -311,6 +311,32 @@ describe('actual reusable execution loop', () => {
         f.expire();
         await expect(executeRun(f.run(), new AbortController(), f.host)).rejects.toThrow('lease expired');
     });
+    it('calls the optional pending-input hook after pause/limit checks, before context preparation, and feeds its run onward', async () => {
+        const f = fixture();
+        const order: string[] = [], signals: AbortSignal[] = [];
+        const controller = new AbortController();
+        const pause = f.host.pauseAtLimit, prepare = f.host.prepareContext;
+        f.host.pauseAtLimit = value => { order.push('pause'); return pause(value); };
+        f.host.admitPendingInput = (value, signal) => { order.push('admit'); signals.push(signal); return Promise.resolve({ ...value, opaque: 'steered' }); };
+        f.host.prepareContext = (value, signal) => { order.push('prepare'); expect(value.opaque).toBe('steered'); return prepare(value, signal); };
+        await executeRun(f.run(), controller, f.host);
+        expect(order).toEqual(['pause', 'admit', 'prepare']);
+        expect(signals[0]).toBe(controller.signal);
+        expect(f.run().status).toBe('completed');
+    });
+    it('runs unchanged when the host omits the pending-input hook and never calls it after a limit pause', async () => {
+        const plain = fixture();
+        expect(plain.host.admitPendingInput).toBeUndefined();
+        await executeRun(plain.run(), new AbortController(), plain.host);
+        expect(plain.run().status).toBe('completed');
+        const paused = fixture();
+        const admit = vi.fn((value: Run) => Promise.resolve(value));
+        paused.host.admitPendingInput = admit;
+        paused.host.pauseAtLimit = () => Promise.resolve(true);
+        await executeRun(paused.run(), new AbortController(), paused.host);
+        expect(admit).not.toHaveBeenCalled();
+        expect(paused.requests).toHaveLength(1);
+    });
     it('stops cleanup for a confirmed deleted run without a confirmed settlement event', async () => {
         const f = fixture();
         let deleted = false, cleanup = 0;

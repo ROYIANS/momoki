@@ -95,6 +95,18 @@ by these private workspace packages.
   never permits automatic replay; cancellation cannot claim remote cancellation.
   Recovery runs under actual ownership and makes zero network submissions.
   Explicit resume reuses confirmed calls and frozen approvals/settings.
+- Pending user input is admitted only at that loop-top seam: every tool result
+  of the previous round is already saved (or no request has been made yet).
+  Never insert a user turn between an assistant `tool_calls` message and its
+  tool results (it breaks both chat-completions and Responses envelopes), inside
+  an open round (`commitRound` before `appendResults`), while the run is not
+  `running` (approval parking, interrupted), while any call is `running` or
+  `unknown`, into the frozen base prefix or before an already persisted
+  assistant round. Studio's `injectSteerInputs` mirrors each admitted message
+  into `continuationMessages` and `responseItems` and stamps it with
+  `sourceQueueItemId`, which every provider wire conversion strips.
+  `responseRoundMatches`/`claimFingerprint` count only `function_call` items, so
+  the extra `message` item does not disturb envelope validation.
 - Core serializes/coalesces output and flushes before settlement. The host's
   sole conditional terminal writer owns run/message/ledger consistency, ignores
   late terminal attempts and preserves earlier visible output. Studio keeps
@@ -169,6 +181,11 @@ caught external error as rollback.
   forged/released/reentrant ownership, last-moment claim races and current
   main/auxiliary credentials. Register new suites in formal browser/native
   discovery rather than inferring coverage from a standalone unit invocation.
+- `runtime.test.ts` also covers the optional pending-input hook: call order
+  (pause/limit, admit, prepare), the forwarded abort signal, the returned run
+  reaching `prepareContext`, unchanged behavior when the host omits it, and no
+  call after a limit pause. `tests/agentSteerInjection.test.ts` covers the real
+  Studio binding for both protocols.
 - Actual Studio regressions retain `agentRuns`, `agentTools`, ownership,
   credential rotation, contextual recovery, tool loading, context management,
   finishing and protocol assertions through browser and real native storage.

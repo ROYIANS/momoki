@@ -1,3 +1,4 @@
+import {injectSteerInputs} from "../commands/agentSteer";
 import {prepareThreadActivityKey} from "../commands/threadActivity";
 import {createMcpRunRegistry} from "../mcp/runtime/runRegistry";
 import {createId} from '../../../platform/identity';
@@ -74,6 +75,7 @@ function createStudioRuntimeHost(db:ProductStore,ownership:ThreadOwnership,apiKe
         },
         checkpoint:(run,seq,output)=>guard(run,tx=>checkpointAgentRun(run.id,seq,output,tx,activity),[db.agentRuns,db.chatMessages,db.chatThreads,db.deviceSettings]),
         pauseAtLimit:run=>guard(run,tx=>pauseAtModelStepLimit(run.id,tx,activity)),
+        admitPendingInput:run=>guard(run,tx=>injectSteerInputs(run.id,tx)),
         async prepareContext(run,signal) {
             ownership.assertHeld();
             observe({...feedbackIdentity,type:'preparing'});

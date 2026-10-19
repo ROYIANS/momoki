@@ -28,7 +28,9 @@ export interface AgentConfig {
 
 export type AgentRequestMessage = ChatMessage & {
     referenceInput?: AgentReferenceInput;
-    sourceToolCallId?: string
+    sourceToolCallId?: string;
+    /** Provenance of a steered pending input; never sent to a provider. */
+    sourceQueueItemId?: string
 };
 
 export interface AgentPlanItem {
@@ -84,7 +86,9 @@ export type AgentProtocol = "chat-completions" | "responses";
 /** Opaque provider continuation lives only in the run, never in display messages. */
 export type AgentResponseItem = ResponseItem & {
     referenceInput?: AgentReferenceInput;
-    sourceToolCallId?: string
+    sourceToolCallId?: string;
+    /** Provenance of a steered pending input; never sent to a provider. */
+    sourceQueueItemId?: string
 };
 
 /** Provider-reported counts only; absence is unknown, never zero. */

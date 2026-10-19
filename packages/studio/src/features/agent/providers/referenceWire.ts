@@ -61,7 +61,7 @@ async function pixels(inputs: Array<AgentReferenceInput | undefined>, scope: Ref
 export async function materializeChatMessages(messages: AgentRequestMessage[], scope: ReferenceWireScope, signal?: AbortSignal): Promise<ChatRequestMessage[]> {
     const encoded = await pixels(messages.map((message) => message.referenceInput), scope, signal);
     const toolNames = new Map(messages.flatMap(message => message.role === "assistant" ? (message.tool_calls ?? []).map(call => [call.id, call.function.name] as const) : []));
-    return messages.map(({referenceInput, sourceToolCallId: _source, ...message}): ChatRequestMessage => {
+    return messages.map(({referenceInput, sourceToolCallId: _source, sourceQueueItemId: _queue, ...message}): ChatRequestMessage => {
         if (message.role === "tool") return {
             ...message,
             content: safeHistoricalLookupOutput(toolNames.get(message.tool_call_id), message.content)
@@ -84,7 +84,7 @@ export async function materializeChatMessages(messages: AgentRequestMessage[], s
 export async function materializeResponseItems(items: AgentResponseItem[], scope: ReferenceWireScope, signal?: AbortSignal): Promise<ResponseRequestItem[]> {
     const encoded = await pixels(items.map((item) => item.referenceInput), scope, signal);
     const toolNames = new Map(items.flatMap(item => item.type === "function_call" ? [[item.call_id, item.name] as const] : []));
-    return items.map(({referenceInput, sourceToolCallId: _source, ...item}): ResponseRequestItem => {
+    return items.map(({referenceInput, sourceToolCallId: _source, sourceQueueItemId: _queue, ...item}): ResponseRequestItem => {
         if (item.type === "function_call_output") return {
             ...item,
             output: safeHistoricalLookupOutput(toolNames.get(item.call_id), item.output)

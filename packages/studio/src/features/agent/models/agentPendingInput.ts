@@ -3,11 +3,9 @@ import type {ChatModelMetadata} from "../../settings/models/modelMetadata";
 import type {ReferenceAttachment} from "../../references/models/references";
 import type {AgentInteractionMode, AgentReasoningEffort} from "./agent";
 
-export type AgentPendingInputSource = "user" | "system";
 /** next-turn waits for the run to end; next-step is delivered at the next tool-call boundary. */
 export type AgentPendingInputMode = "next-turn" | "next-step";
 /** held items stay visible but are never sent automatically. */
-export type AgentPendingInputStatus = "queued" | "held";
 export type AgentPendingInputHeldReason = "stopped" | "failed" | "interrupted" | "dispatch_failed" | "uncertain";
 
 /** Submit settings frozen when a user item is queued. */
@@ -20,18 +18,11 @@ export interface AgentPendingInputSubmit {
     modelMetadata?: ChatModelMetadata;
 }
 
-export interface AgentPendingInputSystemApplied {
-    targetKey: string;
-    label: string;
-    kind: string;
-    jobId: Id;
-}
-
 export interface AgentPendingInputSystem {
     kind: "batch-adopted";
     batchId: Id;
     adoptionId: Id;
-    applied: AgentPendingInputSystemApplied[];
+    applied: {targetKey: string; label: string; kind: string; jobId: Id}[];
 }
 
 /** Durable queued message; not a chat message until it is actually delivered. */
@@ -41,9 +32,9 @@ export interface AgentPendingInput {
     projectId?: Id;
     /** Per-thread order, assigned inside the enqueue transaction. */
     position: number;
-    source: AgentPendingInputSource;
+    source: "user" | "system";
     mode: AgentPendingInputMode;
-    status: AgentPendingInputStatus;
+    status: "queued" | "held";
     heldReason?: AgentPendingInputHeldReason;
     content: string;
     /** Short faint line shown for system items in the conversation. */

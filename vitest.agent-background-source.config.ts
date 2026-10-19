@@ -12,6 +12,7 @@ export default createStudioVitestConfig({
         "tests/e11ThreadReadingUi.test.ts",
         "tests/e11ThreadActivity.test.ts",
         "tests/agentRuns.test.ts",
+        "tests/agentSteerInjection.test.ts",
         "tests/agentRunDefects.test.ts",
         "tests/agentToolsReview.test.ts",
         "tests/agentFinishingCheck.test.ts",

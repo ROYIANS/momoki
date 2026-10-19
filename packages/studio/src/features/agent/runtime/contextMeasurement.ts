@@ -47,7 +47,7 @@ function imageTokensOf(messages: readonly AgentRequestMessage[]): number {
 /** Exactly what the transport serializes, minus pixels (priced separately). */
 export function wireMessages(messages: readonly AgentRequestMessage[], protocol: WireProtocol): unknown[] {
     if (protocol === "responses") return toResponseInput(messages);
-    return messages.map(({referenceInput: _input, sourceToolCallId: _source, ...message}) => message);
+    return messages.map(({referenceInput: _input, sourceToolCallId: _source, sourceQueueItemId: _queue, ...message}) => message);
 }
 
 export function wireTools(tools: readonly AgentToolSchema[], protocol: WireProtocol): unknown[] {

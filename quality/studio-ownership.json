@@ -6793,6 +6793,39 @@
       "owner": "features/agent",
       "public": false,
       "publicTypes": []
+    },
+    {
+      "file": "packages/studio/src/features/agent/commands/agentSteer.ts",
+      "target": "packages/studio/src/features/agent/commands/agentSteer.ts",
+      "owner": "features/agent",
+      "public": false,
+      "publicTypes": []
+    },
+    {
+      "file": "packages/studio/src/features/agent/commands/agentPendingInputs.ts",
+      "target": "packages/studio/src/features/agent/commands/agentPendingInputs.ts",
+      "owner": "features/agent",
+      "public": false,
+      "publicTypes": []
+    },
+    {
+      "file": "packages/studio/src/features/agent/models/agentPendingInput.ts",
+      "target": "packages/studio/src/features/agent/models/agentPendingInput.ts",
+      "owner": "features/agent",
+      "public": false,
+      "publicTypes": [
+        "AgentPendingInput"
+      ]
+    },
+    {
+      "file": "packages/studio/src/features/agent/models/chatTurns.ts",
+      "target": "packages/studio/src/features/agent/models/chatTurns.ts",
+      "owner": "features/agent",
+      "public": true,
+      "publicTypes": [],
+      "publicSymbols": [
+        "isLaterUserTurn"
+      ]
     }
   ],
   "featureUiAppEntries": [

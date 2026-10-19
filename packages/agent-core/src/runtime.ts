@@ -38,6 +38,11 @@ export interface RuntimeHost<Run extends RuntimeRun,Call extends RuntimeCall<Pre
     readOutput:(run:Run)=>Promise<AgentRunOutput|undefined>;
     checkpoint:(run:Run,sequence:number,output:AgentRunOutput)=>Promise<boolean>;
     pauseAtLimit:(run:Run)=>Promise<boolean>;
+    /**
+     * Optional loop-top hook: the host may durably append user input (in one transaction) and return the reread run.
+     * Called only after the previous round's tool results are saved (or before the first request), never mid-round.
+     */
+    admitPendingInput?:(run:Run,signal:AbortSignal)=>Promise<Run>;
     prepareContext:(run:Run,signal:AbortSignal)=>Promise<Run>;
     admitModelStep:(run:Run,limit:number)=>Promise<Run>;
     request:(run:Run,signal:AbortSignal,onDelta:(delta:StreamDelta)=>void,offeredDefinitions:readonly ToolDefinition<unknown,Context,Preview,unknown>[])=>Promise<ModelResult<Continuation>>;
@@ -227,6 +232,7 @@ export async function executeRun<Run extends RuntimeRun,Call extends RuntimeCall
             host.ownership.assertHeld();controller.signal.throwIfAborted();
             if (await host.pauseAtLimit(run)) {const paused=await host.readRun(run.id);if (paused) emit({type:'settled',confirmed:true,status:paused.status});return;}
             if (modelStepLimitReached(run)) throw new Error('本段模型请求额度已用完，请继续下一段执行');
+            run=await host.admitPendingInput?.(run,controller.signal) ?? run;
             run=await host.prepareContext(run,controller.signal);
             run=await host.admitModelStep(run,MODEL_STEPS_PER_SEGMENT);
             controller.signal.throwIfAborted();
