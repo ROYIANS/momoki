@@ -153,13 +153,15 @@ export async function beginAgentRun(input: {
         const {enabledToolNames, toolLoading, skillInstructions, mcpSnapshot} = surface;
         const policy = normalizeContextPolicy(thread.contextPolicy);
         const selectedHistory = selectContextHistory(history, policy);
+        // A system event row is a user row for the protocol, not a turn the user wrote: keep it out of memory retrieval.
+        const systemUserIds = new Set(history.filter(m => m.origin === "system").map(m => m.id));
         const summary = findApplicableSummary(selectedHistory, summaryCandidates(await db.contextCompactions.where("threadId").equals(thread.id).toArray(), policy));
         const capacity = resolveContextCapacity(input.model, input.modelMetadata, identity.definitionId, policy);
         const memorySelection = previous?.memorySelection ?? (thread.projectId ? await getMemorySelection({
             projectId: thread.projectId,
             threadId: thread.id,
             draft: content,
-            recentUserTurns: selectedHistory.filter(m => m.role === 'user').map(m => m.content),
+            recentUserTurns: selectedHistory.filter(m => m.role === 'user' && !systemUserIds.has(m.id)).map(m => m.content),
             taskTitle: task?.title,
             taskGoal: task?.goal,
             capacity: capacity.capacity

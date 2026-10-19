@@ -23,6 +23,8 @@ export function buildChatTurns(messages: readonly ChatMessage[]): ChatTurn[] {
     const turns: ChatTurn[] = [];
     for (const message of messages) {
         if (message.role === "user") {
+            // A system event row (adoption, continuation) is not a question the reader asked.
+            if (message.origin === "system") continue;
             turns.push({id: message.id, question: turnExcerpt(message.content, 120) || "附件消息", answer: "等待答复"});
         } else if (message.role === "assistant" && turns.length) {
             // The newest retry is the current answer; never mix another turn's text into its preview.

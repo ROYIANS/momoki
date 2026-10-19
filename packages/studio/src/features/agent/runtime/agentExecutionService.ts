@@ -164,7 +164,7 @@ export function createAgentExecutionService(options: ChatExecutionBinding) {
         return initialized;
     }
     function claim(threadId: string, kind: Invocation["kind"], operation: (entry: Invocation) => Promise<void>,
-                   submitted?: ChatSubmissionAttempt, taskId?: string, systemOnly = false): AgentExecutionHandle {
+                   submitted?: ChatSubmissionAttempt, taskId?: string, systemOnly = false, quiet = false): AgentExecutionHandle {
         if (!admissionOpen) throw new Error("应用正在退出，暂时无法开始执行");
         const owner = state(threadId);
         if (owner.invocation) throw new Error("当前对话尚有执行未结束，请等待完成或先停止");
@@ -200,7 +200,10 @@ export function createAgentExecutionService(options: ChatExecutionBinding) {
                 finishedNormally = true;
             } catch (cause) {
                 // Error content is retained by the concrete operation/durable run, never by a toast callback.
-                owner.error ??= "执行未完成";
+                // A silent drain that met another page's lock is not a user-visible failure of this page.
+                if (cause instanceof ThreadLockBusyError) {
+                    if (!quiet) owner.error = cause.message;
+                } else owner.error ??= "执行未完成";
                 if (submitted && attemptFor(threadId, submitted.admission.userMessageId).phase === "preparing") {
                     patchAttempt(threadId, submitted.admission.userMessageId, {phase: "failed", error: "未发送"});
                 }
@@ -402,7 +405,8 @@ export function createAgentExecutionService(options: ChatExecutionBinding) {
         }
     }
     function claimQueueItem(threadId: string, itemId: string, explicit: boolean, systemOnly = false) {
-        return claim(threadId, "queue", entry => dispatchItem(entry, threadId, itemId, explicit), undefined, undefined, systemOnly);
+        // Only an explicit card send reports its failure; a scheduled drain gives up quietly.
+        return claim(threadId, "queue", entry => dispatchItem(entry, threadId, itemId, explicit), undefined, undefined, systemOnly, !explicit);
     }
     async function drain(threadId: string, systemOnly: boolean): Promise<AgentExecutionHandle | undefined> {
         if (!admissionOpen) return undefined;

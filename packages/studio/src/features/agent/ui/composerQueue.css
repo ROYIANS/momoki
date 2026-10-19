@@ -1,0 +1,146 @@
+/* Durable pending-send cards. Same visual slot as the decision cards, one row per card. */
+.agent-chat-root .agent-composer-queue {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    margin: 0 0 8px;
+}
+
+.agent-chat-root .agent-composer-queue-notice,
+.agent-chat-root .agent-composer-queue-error {
+    margin: 0;
+    padding: 0 4px;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    line-height: 18px;
+}
+
+.agent-chat-root .agent-composer-queue-error {
+    color: var(--foreground);
+}
+
+.agent-chat-root .agent-composer-queue-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.agent-chat-root .agent-composer-queue-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface-elevated);
+    box-shadow: 0 8px 28px rgb(0 0 0 / 22%);
+    color: var(--foreground);
+    font-size: 13px;
+    line-height: 20px;
+}
+
+.agent-chat-root .agent-composer-queue-card[data-source="system"] {
+    border-style: dashed;
+    background: transparent;
+    box-shadow: none;
+    color: var(--muted-foreground);
+}
+
+.agent-chat-root .agent-composer-queue-card[data-status="held"] {
+    border-style: dashed;
+}
+
+.agent-chat-root .agent-composer-queue-text {
+    margin: 0;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow-wrap: anywhere;
+}
+
+.agent-chat-root .agent-composer-queue-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.agent-chat-root .agent-composer-queue-steered {
+    color: var(--foreground);
+}
+
+.agent-chat-root .agent-composer-queue-last-error {
+    overflow: hidden;
+    max-width: 260px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.agent-chat-root .agent-composer-queue-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.agent-chat-root .agent-composer-queue-actions button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 26px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--surface-selected);
+    color: var(--muted-foreground);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.agent-chat-root .agent-composer-queue-actions button.is-primary {
+    background: var(--foreground);
+    color: var(--background);
+}
+
+.agent-chat-root .agent-composer-queue-actions button:disabled {
+    cursor: not-allowed;
+    opacity: .5;
+}
+
+.agent-chat-root .agent-composer-queue-actions button:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+}
+
+.agent-chat-root .agent-composer-queue-edit {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.agent-chat-root .agent-composer-queue-edit textarea {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--background);
+    color: var(--foreground);
+    font: inherit;
+    resize: vertical;
+}
+
+.agent-chat-root .agent-composer-queue-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-top: 2px;
+}

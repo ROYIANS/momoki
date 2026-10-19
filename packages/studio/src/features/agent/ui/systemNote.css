@@ -1,0 +1,20 @@
+/* A system event (adoption, continuation) reads as one faint line, not as a message bubble. */
+.agent-chat-root .agent-system-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-block: 10px 4px;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    line-height: 18px;
+    opacity: .85;
+}
+
+.agent-chat-root .agent-system-note::before {
+    content: "";
+    flex: none;
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: currentColor;
+}

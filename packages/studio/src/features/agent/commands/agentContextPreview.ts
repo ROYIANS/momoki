@@ -95,7 +95,7 @@ async function selectPreviewMaterials(input: ContextPreviewInput, rows: Awaited<
     const capacity = resolveContextCapacity(input.model, input.metadata, input.providerId, previewPolicy).capacity;
     const memorySelection = taskContext.projectContext ? await getMemorySelection({
         projectId: taskContext.projectContext.projectId, threadId: input.threadId, draft: input.draft,
-        recentUserTurns: selectContextHistory(rows.messages, previewPolicy).filter(message => message.role === "user").map(message => message.content),
+        recentUserTurns: selectContextHistory(rows.messages.filter(message => message.origin !== "system"), previewPolicy).filter(message => message.role === "user").map(message => message.content),
         taskTitle: taskContext.task?.title, taskGoal: taskContext.task?.goal, capacity,
     }, db) : undefined;
     const selectedReferences = await selectReferenceContext(projectId, input.attachments, referenceSelectionCharacterBudget(capacity), db);

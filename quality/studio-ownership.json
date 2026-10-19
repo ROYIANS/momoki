@@ -102,6 +102,13 @@
       "publicTypes": []
     },
     {
+      "file": "packages/studio/src/features/agent/ui/ComposerQueue.tsx",
+      "target": "packages/studio/src/features/agent/ui/ComposerQueue.tsx",
+      "owner": "features/agent",
+      "public": false,
+      "publicTypes": []
+    },
+    {
       "original": "packages/studio/src/components/agent/ContextCompactionDetails.tsx",
       "file": "packages/studio/src/features/agent/ui/ContextCompactionDetails.tsx",
       "target": "packages/studio/src/features/agent/ui/ContextCompactionDetails.tsx",
@@ -280,6 +287,13 @@
       "publicTypes": []
     },
     {
+      "file": "packages/studio/src/features/agent/ui/SystemNoteLine.tsx",
+      "target": "packages/studio/src/features/agent/ui/SystemNoteLine.tsx",
+      "owner": "features/agent",
+      "public": false,
+      "publicTypes": []
+    },
+    {
       "original": "packages/studio/src/components/agent/TaskBoard.tsx",
       "file": "packages/studio/src/features/agent/ui/TaskBoard.tsx",
       "target": "packages/studio/src/features/agent/ui/TaskBoard.tsx",
@@ -388,6 +402,13 @@
       "public": false
     },
     {
+      "file": "packages/studio/src/features/agent/ui/composerQueue.css",
+      "target": "packages/studio/src/features/agent/ui/composerQueue.css",
+      "owner": "features/agent",
+      "public": false,
+      "publicTypes": []
+    },
+    {
       "original": "packages/studio/src/components/agent/composerTypes.ts",
       "file": "packages/studio/src/features/agent/ui/composerTypes.ts",
       "target": "packages/studio/src/features/agent/ui/composerTypes.ts",
@@ -447,6 +468,13 @@
       "publicTypes": []
     },
     {
+      "file": "packages/studio/src/features/agent/ui/systemNote.css",
+      "target": "packages/studio/src/features/agent/ui/systemNote.css",
+      "owner": "features/agent",
+      "public": false,
+      "publicTypes": []
+    },
+    {
       "original": "packages/studio/src/components/agent/taskWorkspace.css",
       "file": "packages/studio/src/features/agent/ui/taskWorkspace.css",
       "target": "packages/studio/src/features/agent/ui/taskWorkspace.css",
@@ -495,6 +523,13 @@
       "original": "packages/studio/src/components/agent/useChatSelection.ts",
       "file": "packages/studio/src/features/agent/ui/useChatSelection.ts",
       "target": "packages/studio/src/features/agent/ui/useChatSelection.ts",
+      "owner": "features/agent",
+      "public": false,
+      "publicTypes": []
+    },
+    {
+      "file": "packages/studio/src/features/agent/ui/useComposerQueue.ts",
+      "target": "packages/studio/src/features/agent/ui/useComposerQueue.ts",
       "owner": "features/agent",
       "public": false,
       "publicTypes": []

@@ -113,7 +113,7 @@ export const TASK_TOOLS = [
         const db = _context.store ?? productDb;
         if (args.source?.resultKey !== undefined && args.source.type !== "generation") throw new Error("结果键只能用于声音生成来源");
         const offset = args.offset ?? 0, limit = args.limit ?? 5;
-        const messages = (await db.chatMessages.where("threadId").equals(thread.id).sortBy("createdAt")).filter((m) => m.role === "user" && !!m.content.trim()).reverse();
+        const messages = (await db.chatMessages.where("threadId").equals(thread.id).sortBy("createdAt")).filter((m) => m.role === "user" && m.origin !== "system" && !!m.content.trim()).reverse();
         const taskRunIds = new Set(task ? (await db.agentRuns.where("taskId").equals(task.id).toArray()).map((run) => run.id) : []);
         const calls = (await db.agentToolCalls.where("threadId").equals(thread.id).toArray()).filter((c) => c.status === "completed" && c.effect !== "bookkeeping" && !!c.result && taskRunIds.has(c.runId)).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
         if (args.source?.type === "generation") {

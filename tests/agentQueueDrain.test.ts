@@ -146,6 +146,8 @@ it("abandons a drain quietly while another page owns the thread lock, and delive
         const handle = await owner.drainQueue(thread.id);
         await expect(handle?.done).rejects.toBeInstanceOf(ThreadLockBusyError);
     });
+    // Another page owning the thread is not a failure of this page: no user-visible execution error.
+    expect(owner.snapshot(thread.id).error).toBeUndefined();
     expect(fetcher).not.toHaveBeenCalled();
     expect((await listPendingInputs(thread.id))[0]).toMatchObject({id: card.id, status: "queued", revision: 1});
     await (await owner.drainQueue(thread.id))?.done;

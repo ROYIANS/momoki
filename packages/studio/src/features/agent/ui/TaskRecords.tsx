@@ -95,7 +95,7 @@ export function TaskRecords({task, messages, editable, onDraftStateChange, reque
             label: item.label,
             body: item.body
         })),
-        ...messages.filter((message) => message.threadId === task.threadId && message.role === "user" && (message.content.trim() || message.attachments?.length)).map((message) => ({
+        ...messages.filter((message) => message.threadId === task.threadId && message.role === "user" && message.origin !== "system" && (message.content.trim() || message.attachments?.length)).map((message) => ({
             type: "message" as const,
             id: message.id,
             label: `用户 · ${message.content.slice(0, 70) || "参考资料"}`,

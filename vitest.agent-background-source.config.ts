@@ -9,6 +9,7 @@ export default createStudioVitestConfig({
         "tests/contextPreviewSnapshot.test.ts",
         "tests/mcpAgentExecution.test.ts",
         "tests/agentJobsUi.test.ts",
+        "tests/agentQueueUi.test.ts",
         "tests/e11ThreadReadingUi.test.ts",
         "tests/e11ThreadActivity.test.ts",
         "tests/agentRuns.test.ts",

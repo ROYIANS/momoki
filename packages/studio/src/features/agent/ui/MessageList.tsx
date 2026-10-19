@@ -20,6 +20,7 @@ import {TurnNavigation} from "./TurnNavigation";
 import {SubmissionMessage} from "./SubmissionMessage";
 import {submissionTranscript, type ChatSubmissionAttempt} from "../models/chatSubmissionAttempt";
 import {PublicOutputCommit} from "./ExecutionFeedback";
+import {SystemNoteLine} from "./SystemNoteLine";
 
 /**
  * Failed/interrupted turns are told once, by the bubble above the composer. The stream keeps only a deliberate
@@ -76,7 +77,8 @@ export function MessageList({threadId, messages, runs, calls = EMPTY_CALLS, obse
         if (listRef.current) snapChatToBottom(listRef.current);
     }, [setFollowing]);
     const list = messages ?? [];
-    const userMessages = list.filter((message) => message.role === "user");
+    // A system event row is a user row for protocol/retry purposes, but not a turn the reader wrote.
+    const userMessages = list.filter((message) => message.role === "user" && message.origin !== "system");
     const entries = submissionTranscript(messages, submissions);
     const lastUser = entries.filter(entry => entry.kind === "attempt" || entry.message.role === "user").at(-1);
     const lastUserId = lastUser?.kind === "attempt" ? lastUser.attempt.admission.userMessageId : lastUser?.message.id;
@@ -152,6 +154,9 @@ export function MessageList({threadId, messages, runs, calls = EMPTY_CALLS, obse
                                 attempt={entry.attempt}/>;
                             const message = entry.message;
                             if (message.role === "system") return null;
+                            if (message.role === "user" && message.origin === "system") {
+                                return <Fragment key={message.id}><SystemNoteLine message={message}/></Fragment>;
+                            }
                             return (
                                 <Fragment key={message.id}><div ref={message.role === "assistant" && message.publicRevision === observedRevision && observedRevision > 0 ? observedSurface : undefined}
                                     data-public-revision={message.publicRevision}><AgentChatMessageItem message={message}
@@ -221,6 +226,7 @@ const AgentChatMessageItem = memo(
                     <div className="agent-user-bubble">
                         <ReferenceMessageSources context={message.referenceContext} content={message.content}/>
                         <Markdown {...MARKDOWN_PROPS}>{message.content}</Markdown>
+                        {message.steeredIntoRunId ? <span className="agent-steered-mark" role="note">引导</span> : null}
                     </div>
                 </div>
             );
@@ -280,6 +286,8 @@ const AgentChatMessageItem = memo(
         prev.message.content === next.message.content &&
         prev.message.status === next.message.status &&
         prev.message.role === next.message.role &&
+        prev.message.origin === next.message.origin &&
+        prev.message.steeredIntoRunId === next.message.steeredIntoRunId &&
         prev.message.createdAt === next.message.createdAt &&
         prev.message.reasoning === next.message.reasoning &&
         prev.message.reasoningDurationMs === next.message.reasoningDurationMs,

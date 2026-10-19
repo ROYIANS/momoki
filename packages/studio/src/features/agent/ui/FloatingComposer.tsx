@@ -22,6 +22,7 @@ import {toast} from "sonner";
 import type {ChatSurfaceMode, ComposerProps} from "./composerTypes";
 import {ModelSelectTrigger, SendCircleButton} from "./ModelSelectTrigger";
 import {ComposerCardHost, ComposerSurface} from "./ComposerCards";
+import {ComposerQueue} from "./ComposerQueue";
 import "./composerControls.css";
 
 function popupRoot(): HTMLElement {
@@ -138,6 +139,7 @@ export function FloatingComposer({
                                      contextUsage,
                                      notice,
                                      attention,
+                                     queue,
                                      surface = "home",
                                      expanded = false,
                                      onExpandedChange,
@@ -146,7 +148,8 @@ export function FloatingComposer({
     expanded?: boolean;
     onExpandedChange?: (expanded: boolean) => void
 }) {
-    const canSend = (Boolean(value.trim()) || attachments.length > 0) && referenceImports.length === 0 && !blocked && !sending && !projectRequired && !modelPolicy.incompatibleModels.includes(model.trim());
+    // While a turn runs the draft is still sendable: it becomes the next queued card instead of interrupting.
+    const canSend = (Boolean(value.trim()) || attachments.length > 0) && referenceImports.length === 0 && !blocked && !projectRequired && !modelPolicy.incompatibleModels.includes(model.trim());
     const [libraryOpen, setLibraryOpen] = useState(false);
     const [plusOpen, setPlusOpen] = useState(false);
     const sheetHost = useRef<HTMLDivElement>(null);
@@ -168,7 +171,7 @@ export function FloatingComposer({
     }, [threadId]);
 
     function filesSelected(files: File[]) {
-        if (!files.length || blocked || sending) return;
+        if (!files.length || blocked) return;
         if (!projectId) {
             setProjectAction(files);
             return;
@@ -177,7 +180,7 @@ export function FloatingComposer({
     }
 
     function openReferenceAction(action: "import" | "library") {
-        if (sending || blocked) return;
+        if (blocked) return;
         if (!projectId) {
             setProjectAction(action);
             return;
@@ -283,7 +286,7 @@ export function FloatingComposer({
     return (
         <ComposerSurface
             stackClassName={[expanded ? "is-expanded" : "", plusOpen ? "is-plus-open" : ""].filter(Boolean).join(" ") || undefined}
-            above={<><div ref={sheetHost} className="agent-composer-sheets"/><ComposerCardHost notice={notice} attention={attention}/></>}
+            above={<><div ref={sheetHost} className="agent-composer-sheets"/>{queue ? <ComposerQueue threadId={queue.threadId} active={sending}/> : null}<ComposerCardHost notice={notice} attention={attention}/></>}
             frameClassName={`agent-composer agent-composer-refined${dragging ? " reference-dragging" : ""}${inline ? " is-inline" : ""}`}
             frameProps={{
                  onDragOver: (event) => {
@@ -346,7 +349,7 @@ export function FloatingComposer({
                     readOnly={listening}
                     value={value}
                     variant="borderless"
-                    placeholder={blocked ? blockedReason ?? "重新打开任务后可继续对话" : "提问、创建内容或启动任务"}
+                    placeholder={blocked ? blockedReason ?? "重新打开任务后可继续对话" : sending ? "回车排队，本轮结束后发送" : "提问、创建内容或启动任务"}
                     autoSize={expanded ? false : {minRows: inline ? 1 : large ? 3 : 2, maxRows: 10}}
                     className="agent-composer-input"
                     aria-label="消息内容"
@@ -418,7 +421,7 @@ export function FloatingComposer({
                                           className={`agent-chip agent-control agent-control-icon agent-voice-button${listening ? " is-active" : ""}`}
                                           aria-label={listening ? "停止语音输入" : "语音输入"}
                                           aria-pressed={listening}
-                                          onClick={toggleVoiceInput} disabled={sending}
+                                          onClick={toggleVoiceInput}
                                           title={listening ? "停止语音输入" : "语音输入"}><Mic size={17} aria-hidden/>
                         </button> : null}
                         <div className="agent-composer-send-group">

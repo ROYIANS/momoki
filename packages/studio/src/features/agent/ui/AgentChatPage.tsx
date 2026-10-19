@@ -18,6 +18,7 @@ import {AgentActivityNavigationProvider} from "./AgentActivityNavigation";
 import {createAgentTaskForThread} from "../commands/agentTasks";
 import {getTaskDisplayState, TASK_STATE_LABELS} from "../runtime/taskState";
 import type {AgentRun} from "../models/agent";
+import {runBlocksThread} from "../models/agentToolSelection";
 import {ContextUsageTrigger} from "./ContextUsagePanel";
 import type {RunAction} from "../models/chatRunAction";
 import {Link, useNavigate} from "@tanstack/react-router";
@@ -356,9 +357,38 @@ function AgentChatInner({threadId, view}: { threadId?: Id; view?: "tasks" }) {
 
     const handleSend = () => {
         const submitted = references.capture();
-        if (!mounted.current || (!submitted.text.trim() && !submitted.attachments.length) || submitted.imports.length || sendLocked()) return;
+        if (!mounted.current || (!submitted.text.trim() && !submitted.attachments.length) || submitted.imports.length) return;
         if (projectRequired || projectUnavailable) {toast.error(projectRequired ? "任务模式请先选择项目" : "项目已不可用，请选择其他项目开启新对话"); return;}
         if (!selectedConnector) {toast.error("请先配置连接"); return;}
+        // A running turn (here or in another page) or saved work that still holds the thread: the message
+        // becomes a durable card above the composer instead of interrupting anything.
+        if (activeThreadId && (sendLocked() || runs.some(runBlocksThread))) {
+            let recovery: ReturnType<typeof references.consume> | undefined;
+            try {
+                recovery = references.consume(submitted);
+                // Admission identities are frozen now, but no local attempt is registered: the card lives
+                // in the queue, not in the stream.
+                const attempt = createSubmissionAttempt({originThreadId: activeThreadId, projectId, submitted,
+                    recovery, connector: {id: selectedConnector.id, definitionId: selectedConnector.definitionId, baseUrl: selectedConnector.baseUrl},
+                    model: modelValue, taskMode: chatMode === "task", interactionMode, reasoningEffort});
+                void agentExecution.enqueue({
+                    threadId: activeThreadId, content: submitted.text, attachments: submitted.attachments,
+                    admission: attempt.admission,
+                    submit: {connector: attempt.connector, model: attempt.model,
+                        reasoningEffort: attempt.reasoningEffort, interactionMode: attempt.interactionMode,
+                        taskMode: attempt.taskMode,
+                        modelMetadata: catalogMatches ? modelCatalog?.metadata?.[modelValue] : undefined},
+                }).catch((cause: unknown) => {
+                    references.restore(submitted, recovery!);
+                    showError({title: "暂时无法加入待发送消息", cause, actionName: "queue-message"});
+                });
+            } catch (cause) {
+                if (recovery) references.restore(submitted, recovery);
+                showError({title: "暂时无法加入待发送消息", cause, actionName: "queue-message"});
+            }
+            return;
+        }
+        if (sendLocked()) return;
         let recovery: ReturnType<typeof references.consume> | undefined;
         // Sending back exactly what a failed send returned is its retry: the original admission is re-read first.
         const unchanged = submissionAttempts.find(item => item.phase === "failed" && returned.has(item.admission.userMessageId) &&
@@ -529,20 +559,21 @@ function AgentChatInner({threadId, view}: { threadId?: Id; view?: "tasks" }) {
     const composerProps: ComposerProps = {
         attachments: references.attachments,
         referenceImports: references.imports,
+        // The draft stays editable while a turn runs: it becomes the next queued card.
         onAttachReference: (attachment) => {
-            if (!sendLocked()) references.attach(attachment);
+            references.attach(attachment);
         },
         onRemoveReference: (attachment) => {
-            if (!sendLocked()) references.remove(attachment);
+            references.remove(attachment);
         },
         onImportReferences: (files) => {
-            if (!sendLocked()) void references.importFiles(files).catch((cause: unknown) => showError({title: "导入资料失败", cause, actionName: "import-reference"}));
+            void references.importFiles(files).catch((cause: unknown) => showError({title: "导入资料失败", cause, actionName: "import-reference"}));
         },
         onCancelReferenceImport: (id) => {
-            if (!sendLocked()) references.cancel(id);
+            references.cancel(id);
         },
         onRetryReferenceImport: (job) => {
-            if (!sendLocked()) void references.retry(job).catch((cause: unknown) => showError({title: "导入资料失败", cause, actionName: "import-reference"}));
+            void references.retry(job).catch((cause: unknown) => showError({title: "导入资料失败", cause, actionName: "import-reference"}));
         },
         threadId: activeThreadId,
         projects: projects ?? [],
@@ -561,6 +592,7 @@ function AgentChatInner({threadId, view}: { threadId?: Id; view?: "tasks" }) {
             projectUnavailable,
             onOpenTask: () => setTaskInspectorOpen(true),
         } : undefined,
+        queue: activeThreadId ? {threadId: activeThreadId} : undefined,
         contextUsage: <ContextUsageTrigger attachments={references.attachments} projectId={projectId}
                                            threadId={activeThreadId} interactionMode={interactionMode}
                                            draft={draft}

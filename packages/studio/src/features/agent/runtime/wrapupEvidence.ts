@@ -37,7 +37,7 @@ export async function collectWrapupSnapshot(task: AgentTask, includeAllEvidence 
     const db = store ?? productDb;
     const runs = (await db.agentRuns.where("threadId").equals(task.threadId).toArray()).filter(r => r.taskId === task.id);
     const runIds = new Set(runs.map(r => r.id));
-    const messages = (await db.chatMessages.where("threadId").equals(task.threadId).sortBy("createdAt")).filter(m => m.role === "user" || !!m.runId && runIds.has(m.runId));
+    const messages = (await db.chatMessages.where("threadId").equals(task.threadId).sortBy("createdAt")).filter(m => m.role === "user" ? m.origin !== "system" : !!m.runId && runIds.has(m.runId));
     const calls = (await db.agentToolCalls.where("threadId").equals(task.threadId).toArray()).filter(c => runIds.has(c.runId));
     const records = await db.agentTaskRecords.where("taskId").equals(task.id).sortBy("updatedAt");
     const jobs = (await db.agentGenerationJobs.where("threadId").equals(task.threadId).toArray()).filter(j => runIds.has(j.runId));

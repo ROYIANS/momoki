@@ -1031,6 +1031,18 @@
     overflow-wrap: anywhere;
 }
 
+/* A message steered into a running turn is marked, not re-bubbled. */
+.agent-chat-root .agent-steered-mark {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--surface-elevated);
+    color: var(--muted-foreground);
+    font-size: 11px;
+    line-height: 16px;
+}
+
 .agent-chat-root .agent-assistant-transcript {
     margin-block: 8px 4px;
 }

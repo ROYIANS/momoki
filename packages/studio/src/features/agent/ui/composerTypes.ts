@@ -61,4 +61,6 @@ export type ComposerProps = {
         projectUnavailable: boolean;
         onOpenTask: () => void;
     };
+    /** Durable pending-send queue for this thread, drawn above the draft frame. */
+    queue?: {threadId: string};
 };
