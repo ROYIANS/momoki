@@ -46,4 +46,10 @@ export interface ChatMessage {
     reasoning?: string;
     /** Wall time from first reasoning delta to first answer content delta. */
     reasoningDurationMs?: number;
+    /** Set on queue-injected system rows (not user input). */
+    origin?: "system";
+    /** Run into which this user row was steered mid-run. */
+    steeredIntoRunId?: Id;
+    /** Short text shown for system rows. */
+    display?: string;
 }

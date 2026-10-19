@@ -8,6 +8,7 @@ import {targetRevision} from "../../../platform/data/revision";
 import {toolNamesForCall} from "../models/agentToolSelection";
 import {buildFinishingCheckPrompt} from "../runtime/finishingCheck";
 import {nowIso} from "../../../platform/identity";
+import {isLaterUserTurn} from "../models/chatTurns";
 
 function parsePlan(raw: unknown): AgentPlanItem[] | undefined {
     try {
@@ -59,7 +60,7 @@ export async function saveAgentFinishingCheck(
         }
         const siblings = await db.agentRuns.where("threadId").equals(thread.id).toArray();
         const history = await db.chatMessages.where("threadId").equals(thread.id).toArray();
-        if (siblings.some(row => row.id !== runId && row.createdAt >= run.createdAt) || history.some(row => row.role === "user" && row.createdAt > run.createdAt)) return false;
+        if (siblings.some(row => row.id !== runId && row.createdAt >= run.createdAt) || history.some(row => isLaterUserTurn(row, run))) return false;
         const plan = run.plan === undefined ? undefined : parsePlan(run.plan);
         if (run.plan !== undefined && !plan) return false;
         const calls = (await db.agentToolCalls.where("runId").equals(runId).toArray()).sort((a, b) => a.step - b.step || a.order - b.order);

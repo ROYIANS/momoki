@@ -15,6 +15,7 @@ import {assertAudioBatchSnapshot, prepareAudioBatchSnapshot} from "../generation
 import {createId, nowIso} from "../../../platform/identity";
 import {targetRevision} from "../../../platform/data/revision";
 import {inspectAudioGenerationOutputs} from "../generation/outputEvidence";
+import {isLaterUserTurn} from "../../agent/models/chatTurns";
 
 export async function ownedAudioGenerationBatch(projectId: string, id: string, mutate = false, store?: ProductStore): Promise<AudioGenerationBatch> {
     const db = store ?? productDb;
@@ -35,7 +36,7 @@ export async function ownedAudioGenerationBatch(projectId: string, id: string, m
             if (run.interactionMode === "conversation" || !run.enabledToolNames?.includes("prepare_audio_generation_batch") || call.status !== "completed" || run.status === "cancelled") throw new Error("批次来源未完成准备、已结束或未启用音频制作技能");
             const siblings = await db.agentRuns.where("threadId").equals(owner.threadId).toArray();
             const history = await db.chatMessages.where("threadId").equals(owner.threadId).toArray();
-            if (siblings.some(other => other.id !== run.id && other.createdAt >= run.createdAt) || history.some(message => message.role === "user" && message.createdAt > run.createdAt)) throw new Error("此批次属于较早执行，请在当前执行重新准备需要发送的段落");
+            if (siblings.some(other => other.id !== run.id && other.createdAt >= run.createdAt) || history.some(message => isLaterUserTurn(message, run))) throw new Error("此批次属于较早执行，请在当前执行重新准备需要发送的段落");
         }
     }
     return batch;

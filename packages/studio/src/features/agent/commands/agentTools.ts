@@ -27,6 +27,7 @@ import type {
 import {MODEL_STEPS_PER_SEGMENT} from "../models/agent";
 import {toResponseInput} from "../providers/responsesStream";
 import {createId, nowIso} from "../../../platform/identity";
+import {isLaterUserTurn} from "../models/chatTurns";
 
 export function canResumeAgentRun(run: AgentRun): boolean {
     return !!run.hasToolCalls && ["waiting_approval", "interrupted", "failed"].includes(run.status);
@@ -53,7 +54,7 @@ async function requireLatestRun(run: AgentRun, store?: ProductStore): Promise<vo
     const db = store ?? productDb;
     const siblings = await db.agentRuns.where("threadId").equals(run.threadId).toArray();
     const history = await db.chatMessages.where("threadId").equals(run.threadId).toArray();
-    if (siblings.some((other) => other.id !== run.id && other.createdAt >= run.createdAt) || history.some((message) => message.role === "user" && message.createdAt > run.createdAt)) throw new Error("只能继续当前最后一次执行");
+    if (siblings.some((other) => other.id !== run.id && other.createdAt >= run.createdAt) || history.some((message) => isLaterUserTurn(message, run))) throw new Error("只能继续当前最后一次执行");
 }
 
 /** Park at a model boundary, before context preparation can issue another request. */

@@ -5,6 +5,7 @@ import type {AgentToolCall} from "../../agent/models/agent";
 import {targetRevision} from "../../../platform/data/revision";
 import {musicGenerateTool} from "../../audio/agent/audioGenerationTools";
 import {parseMusicGenerationReview} from "./musicGenerationReviewSnapshot";
+import {isLaterUserTurn} from "../../agent/models/chatTurns";
 
 export {parseMusicGenerationReview} from "./musicGenerationReviewSnapshot";
 
@@ -36,7 +37,7 @@ async function inspect(expected: AgentToolCall, store?: ProductStore): Promise<M
     if (!thread || thread.projectId !== run.projectId || run.projectId !== snapshot.projectId || !message || message.threadId !== run.threadId || message.runId !== run.id) return unavailable();
     const siblings = await db.agentRuns.where("threadId").equals(run.threadId).toArray();
     const history = await db.chatMessages.where("threadId").equals(run.threadId).toArray();
-    if (siblings.some(row => row.id !== run.id && row.createdAt >= run.createdAt) || history.some(row => row.role === "user" && row.createdAt > run.createdAt)) return unavailable("只能确认当前最后一次执行，请在最新对话中重新准备请求。");
+    if (siblings.some(row => row.id !== run.id && row.createdAt >= run.createdAt) || history.some(row => isLaterUserTurn(row, run))) return unavailable("只能确认当前最后一次执行，请在最新对话中重新准备请求。");
     const calls = await db.agentToolCalls.where("runId").equals(run.id).toArray();
     if (calls.some(row => row.status === "unknown" || row.status === "running")) return unavailable("有操作结果尚不确定，请先核实，暂不能确认新的音乐生成。");
     if (await db.audioGenerationJobs.where("intentId").equals(`agent-audio:${call.id}`).first()) return unavailable("此请求已有生成任务记录，不能重复确认；请查询已有任务。");

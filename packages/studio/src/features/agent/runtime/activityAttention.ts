@@ -2,6 +2,7 @@ import type {AgentRun, AgentTask, AgentToolCall} from "../models/agent";
 import type {AgentGenerationJob} from "../models/agentGeneration";
 import type {GenerationBatch, GenerationBatchItem} from "../models/agentGenerationBatch";
 import type {ChatMessage} from "../models/chat";
+import {isLaterUserTurn} from "../models/chatTurns";
 
 export interface ActivityAttention {
     id: string;
@@ -83,7 +84,7 @@ export function selectActivityAttention(input: AttentionInput): ActivityAttentio
     }
     for (const run of runs) {
         if (input.projectUnavailable || taskClosed(run.taskId) || !run.hasToolCalls || !["waiting_approval", "interrupted", "failed"].includes(run.status)) continue;
-        if (runs.some(other => other.id !== run.id && other.createdAt >= run.createdAt) || input.messages.some(message => message.threadId === threadId && message.role === "user" && message.createdAt > run.createdAt)) continue;
+        if (runs.some(other => other.id !== run.id && other.createdAt >= run.createdAt) || input.messages.some(message => message.threadId === threadId && isLaterUserTurn(message, run))) continue;
         const runCalls = calls.filter(call => call.runId === run.id);
         // Approval cannot proceed while an existing operation is unresolved.
         if (runCalls.some(call => unknownCalls.has(call.id) || call.status === "running")) continue;

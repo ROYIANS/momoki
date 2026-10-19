@@ -4,6 +4,7 @@ import {nowIso} from "../../../platform/identity";
 import {MAX_LOADED_TOOLS, toolNamesForCall} from "../models/agentToolSelection";
 import type {AgentToolContext} from "../runtime/tools";
 import {getProjectKind} from "../../projects/models/project";
+import {isLaterUserTurn} from "../models/chatTurns";
 
 /** Narrow exception for a project created by this run; never changes an existing binding. Caller owns transaction. */
 export async function assertAgentProjectCreation(context: AgentToolContext, continuing: boolean, executing = false, store?: ProductStore) {
@@ -21,7 +22,7 @@ export async function assertAgentProjectCreation(context: AgentToolContext, cont
     if (!message || message.threadId !== thread.id || message.runId !== run.id) throw new Error("执行消息归属不匹配");
     const history = await db.chatMessages.where("threadId").equals(thread.id).toArray();
     const runs = await db.agentRuns.where("threadId").equals(thread.id).toArray();
-    if (runs.some(row => row.id !== run.id && row.createdAt >= run.createdAt) || history.some(row => row.role === "user" && row.createdAt > run.createdAt)) throw new Error("只能在当前最后一次执行创建项目");
+    if (runs.some(row => row.id !== run.id && row.createdAt >= run.createdAt) || history.some(row => isLaterUserTurn(row, run))) throw new Error("只能在当前最后一次执行创建项目");
     if (continuing) {
         const inputs = [...run.requestMessages, ...(run.continuationMessages ?? []), ...(run.responseItems ?? []), ...(run.context?.baseMessages ?? [])];
         if (inputs.some(row => row.referenceInput !== undefined) || run.context?.selectedReferences || run.referenceAudit?.some(row => row.inputs.length)) {
