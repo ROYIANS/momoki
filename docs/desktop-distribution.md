@@ -25,7 +25,7 @@ application icons are reused. The internal bundle identifier remains
 `design.tulai.momoki`; the executable remains `momoki`.
 Changing visible branding must not create a new data profile.
 
-The current source version is `0.1.6`. Root package, desktop package, Cargo and
+The current source version is `0.1.7`. Root package, desktop package, Cargo and
 Tauri versions must agree. Distribution tags use `desktop-vMAJOR.MINOR.PATCH`
 with that exact source version. The separate container workflow retains its
 existing `v*` tags.
