@@ -61,13 +61,16 @@ function PanelSheet({open, onOpenChange, title, description, footer, children}: 
  */
 export function SidePanel(props: SidePanelProps) {
     const nested = useInsidePanel();
+    const host = useContextPanelHost();
+    // The top bar already names a docked panel; keep the heading for screen readers and for the overlay.
+    const titleInTopbar = Boolean(host?.headerZone && host.docked);
     if (nested) return <PanelSheet {...props}/>;
     const {open, onOpenChange, onRequestDeparture, kind, title, description, width = 440, footer, children} = props;
     return <ContextPanel open={open} onOpenChange={onOpenChange} onRequestDeparture={onRequestDeparture} kind={kind}
                          title={title} width={width}>
         <ContextPanelContent className="side-panel agent-chat-root css-var-agent-chat">
             <ContextPanelHeader className="side-panel-header">
-                <ContextPanelTitle>{title}</ContextPanelTitle>
+                <ContextPanelTitle className={titleInTopbar ? "sr-only" : undefined}>{title}</ContextPanelTitle>
                 {description ? <ContextPanelDescription>{description}</ContextPanelDescription> :
                     <ContextPanelDescription className="sr-only">{title}</ContextPanelDescription>}
             </ContextPanelHeader>
