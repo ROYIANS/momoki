@@ -59,4 +59,17 @@ describe("finishing check evidence", () => {
     expect(facts(prompt).historicalDirectWrites.receipts).toHaveLength(20);
     expect(prompt.length).toBeLessThan(10000);
   });
+
+  it("lists which fields each write asked to change, without their values, so a claim can be checked", () => {
+    const note = call({ id: "note", name: "shot_update", arguments: JSON.stringify({ id: "shot-11", expectedRevision: 3, patch: { notes: "SECRET 衔接设计：共用交接帧" } }) });
+    const frame = call({ id: "frame", name: "slot_update", arguments: JSON.stringify({ ownerId: "project", slot: "lastFrame", result: "media-1" }) });
+    const prompt = buildFinishingCheckPrompt(run, [note, frame, call({ id: "bad", name: "shot_update", arguments: "not json" })]);
+    expect(facts(prompt).writeCalls).toEqual([
+      { tool: "shot_update", fields: ["notes"] },
+      { tool: "slot_update", fields: ["slot", "result"] },
+      { tool: "shot_update", fields: [] },
+    ]);
+    expect(prompt).not.toContain("SECRET");
+    expect(prompt).toContain("只把设计写进备注");
+  });
 });
