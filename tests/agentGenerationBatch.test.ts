@@ -14,7 +14,7 @@ import {createChatThread} from "@/features/agent/commands/chat";
 import {deleteChatThread} from "@/features/agent/commands/lifecycle";
 import {deleteProject} from "@/features/projects/commands/lifecycle";
 import {deleteMediaIfOrphan, putMedia} from "@/features/library/commands/media";
-import { prepareGenerationBatch, readGenerationBatch, saveGenerationBatchDraft, changeGenerationBatchItems, confirmGenerationBatch, applyBatchSelections, selectBatchCandidate, retryFailedBatch, controlGenerationBatch, recoverAbandonedGenerationBatches } from '@/features/agent/commands/agentGenerationBatches';
+import { prepareGenerationBatch, readGenerationBatch, saveGenerationBatchDraft, changeGenerationBatchItems, confirmGenerationBatch, applyBatchSelections, selectBatchCandidate, retryFailedBatch, controlGenerationBatch, recoverAbandonedGenerationBatch } from '@/features/agent/commands/agentGenerationBatches';
 import { startGenerationBatch, stopGenerationBatch, batchUserAction } from '@/features/video/agent/generationBatchRuntime';
 import { applyAgentGeneration } from '@/features/video/agent/generationRuntime';
 import { generationSubmitSchema, type GenerationSubmitArgs } from '@/features/video/agent/generationProfiles';
@@ -153,12 +153,12 @@ describe('bounded paid queue and explicit recovery', () => {
     const delayed: ThreadLockManager = { async request(_name, _options, callback) { await new Promise<void>(resolve => { release = resolve; }); return callback(null); } };
     const starting = startGenerationBatch(f.id, f.thread.id, { locks: delayed }).catch(() => undefined);
     const action = vi.fn(async () => 'written');
-    const editing = batchUserAction(f.thread.id, action, { async request(_n, _o, callback) { return callback(null); } }).catch(() => undefined);
+    const editing = batchUserAction(f.id, action, { async request(_n, _o, callback) { return callback(null); } }).catch(() => undefined);
     await Promise.resolve(); expect(action).not.toHaveBeenCalled(); release!(); await starting; await editing; expect(action).not.toHaveBeenCalled();
     const item = (await readGenerationBatch(f.id, f.thread.id)).items[0];
     await db.agentGenerationJobs.add({ ...item.snapshot!, version: 1, id: 'abandoned', batchId: f.id, batchItemId: item.id, projectId: f.project.id, threadId: f.thread.id, runId: f.run.id, status: 'submitting', createdAt: 'now', updatedAt: 'now' });
     await db.agentGenerationBatchItems.update(item.id, { state: 'claimed', jobId: 'abandoned' }); await db.agentGenerationBatches.update(f.id, { status: 'running' });
-    await recoverAbandonedGenerationBatches(f.thread.id); expect((await db.agentGenerationJobs.get('abandoned'))?.status).toBe('unknown');
+    await recoverAbandonedGenerationBatch(f.id); expect((await db.agentGenerationJobs.get('abandoned'))?.status).toBe('unknown');
   });
   it('AIHubMix synchronous media uses the shared adapter and retains exact one-result mapping', async () => {
     const f = await fixture(2, 'aihubmix'); await confirm(f);

@@ -29,7 +29,7 @@ guidance. Never silently rewrite the original tool arguments.
 
 `recoverBatchPreparationCalls(runId)` repairs only unknown, atomic,
 non-high-risk `prepare_generation_batch` bookkeeping records without a saved
-result or recovery/confirmation flags, under the thread Web Lock. A matching,
+result or recovery/confirmation flags, under the thread Web Lock (this repair is about a tool call, not a batch worker). A matching,
 complete owned batch restores the preparation result without creating anything.
 An absent batch becomes a failed local preparation result with
 `BATCH_PREPARATION_NOT_COMMITTED` and `submitted:false`; the original lost error
@@ -45,7 +45,7 @@ historical recovery, existing-batch reuse, idempotency, foreign evidence,
 network uncertainty, held locks and cancelled history.
 
 ### Queue and recovery
-Hold the existing thread Web Lock throughout dispatch, settling and pending UI actions. A local worker is eligible to host a UI action only after `ownsLock` is true. Merely registering a worker does not grant ownership. Claim item/job atomically and recheck immediately before paid POST. Reuse the shared single-generation transport; intentionally identical candidates may bypass equivalence blocking only within their confirmed batch.
+Hold the batch's own Web Lock (`cuepoint.generation-batch.<batchId>` for video/image, `cuepoint.audio-batch.<batchId>` for audio; `withGenerationBatchLock`) throughout dispatch, settling and pending UI actions. A batch never takes the conversation lock, so the conversation stays free to chat and its stop/pause/edit controls cannot be refused by a chat run. `batchUserAction(batchId, …)` and `stopGenerationBatch` are keyed by batch id. A local worker is eligible to host a UI action only after `ownsLock` is true. Merely registering a worker does not grant ownership. Claim item/job atomically and recheck immediately before paid POST. Reuse the shared single-generation transport; intentionally identical candidates may bypass equivalence blocking only within their confirmed batch.
 
 Known failure may release a worker for independent work. Unknown acceptance pauses new dispatch. Set an in-memory pause latch before persisting the pause, so storage failure cannot permit further sends. Drain both workers with `Promise.allSettled` before releasing the lock; a rejected worker cannot abandon a sibling request. Once shared transport has been entered, a missing persisted provider ID is not proof of no POST. Never convert storage/transport ambiguity into a safe paid retry.
 
@@ -110,6 +110,9 @@ Audio voice batches use [their separate v24 contract](./audio-batch-arrangement.
 
 ## E11 retained Agent batch lifecycle (2026-10-16)
 
-Use the finite thread-work reservation from [execution ownership](./agent-execution.md) for actual video/audio Agent workers. It is a synchronous local admission guard in addition to the runtime's existing real Web Lock; it is not a second lock or authority reconstructed from a batch ID. Bind Stop and completion to the existing original worker/drain. Removing a subscriber, switching topics, unmounting Agent review and project-audio teardown cannot pause Agent-owned work. Project-owned audio keeps its existing separate teardown behavior.
+Use the finite batch-work reservation `reserveAgentBatchWork` from [execution ownership](./agent-execution.md) for actual video/audio Agent workers. It is keyed by batch id and never occupies the conversation's single execution slot (a conversation may chat while its batch dispatches; only one dispatching image/video batch per conversation is allowed). It is a synchronous local admission guard in addition to the batch's real Web Lock; it is not a second lock or authority reconstructed from a batch ID. Bind Stop and completion to the existing original worker/drain. Removing a subscriber, switching topics, unmounting Agent review and project-audio teardown cannot pause Agent-owned work. Project-owned audio keeps its existing separate teardown behavior.
 
-Keep explicit confirmation/start/pause/cancel and existing original approval identity. Reattaching only reads current rows/owner state. Model, task-wrapup and Agent batch operations compete within one thread while independent threads can proceed. The exposed completion cannot settle before siblings, pending review actions and final writes are finished and the exact reservation is removed. Actual generation/source and routed browser cases must prove these boundaries; native hidden-window scheduling remains a separate Stage 3 gate.
+Keep explicit confirmation/start/pause/cancel and existing original approval identity. Reattaching only reads current rows/owner state. Model and task-wrapup operations compete within one thread; batch operations do not compete with them, and independent threads proceed. The exposed completion cannot settle before siblings, pending review actions and final writes are finished and the exact reservation is removed. Actual generation/source and routed browser cases must prove these boundaries; native hidden-window scheduling remains a separate Stage 3 gate.
+
+### Recovery under batch locks (queue task B5)
+A batch still marked `running` is recovered (`recoverAbandonedGenerationBatch(batchId)`) only after probing its own lock with `ifAvailable`: a free lock proves no live worker anywhere, a held lock means the batch is alive and is left alone. This runs at startup (`recoverAbandonedRuns`) and when a conversation turn begins (`withThreadRunLock`); starting a turn never interrupts a live batch. An audio batch that is already confirmed stays dispatchable after the conversation moves on; only a draft must come from the newest turn.

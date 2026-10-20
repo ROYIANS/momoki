@@ -87,9 +87,9 @@ function BatchRow({card, onReveal}: {card: BatchCardData; onReveal: (target: Age
     const resume = () => {setMenu(false); setError(undefined); void startGenerationBatch(batch.id, threadId).catch(cause =>
         setError(cause instanceof Error ? cause.message : "操作失败，请重试"));};
     const cancelRest = () => void run(() => stopGenerationBatch(batch.id, threadId, "cancel"));
-    const retryFailed = () => void run(async () => {await batchUserAction(threadId, () => retryFailedBatch(batch.id, threadId));});
+    const retryFailed = () => void run(async () => {await batchUserAction(batch.id, () => retryFailedBatch(batch.id, threadId));});
     const write = () => void run(async () => {
-        const result = await batchUserAction(threadId, () => applyBatchSelections(batch.id, threadId));
+        const result = await batchUserAction(batch.id, () => applyBatchSelections(batch.id, threadId));
         const missed = result.filter(item => !item.applied);
         if (missed.length) setError(`${missed.length} 个目标未写入：${missed[0].error ?? "目标已被修改"}`);
     });

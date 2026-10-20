@@ -1,4 +1,4 @@
-import {reserveAgentThreadWork} from "../../agent/runtime/threadWork";
+import {reserveAgentBatchWork} from "../../agent/runtime/threadWork";
 import type {ProductStore} from "../../../platform/storage/types";
 import {db as productDb} from "../../../platform/product/store";
 import {
@@ -11,7 +11,7 @@ import {
 } from "../commands/batches";
 import {AUDIO_BATCH_CONCURRENCY, type AudioGenerationBatch} from "../models/audioGenerationBatch";
 import {type AudioGenerationOptions, refreshAudioGeneration, submitAudioGeneration} from "./runtime";
-import {type ThreadLockManager, withThreadRunLock} from "../../agent/runtime/runOwnership";
+import type {ThreadLockManager} from "../../agent/runtime/runOwnership";
 
 interface AudioBatchWorker {
     batch: AudioGenerationBatch;
@@ -30,12 +30,12 @@ function browserLocks(): ThreadLockManager {
     return navigator.locks;
 }
 
-async function ownership<T>(batch: AudioGenerationBatch, action: () => Promise<T>, locks: ThreadLockManager = browserLocks(), store: ProductStore = productDb): Promise<T> {
-    const lockBatch = () => locks.request(`cuepoint.audio-batch.${batch.id}`, {ifAvailable: true}, async lock => {
+/** Every audio batch, agent-owned or not, is excluded by its own lock: the conversation stays free to chat. */
+async function ownership<T>(batch: AudioGenerationBatch, action: () => Promise<T>, locks: ThreadLockManager = browserLocks()): Promise<T> {
+    return locks.request(`cuepoint.audio-batch.${batch.id}`, {ifAvailable: true}, async lock => {
         if (!lock) throw new Error("此批次正在另一个页面执行");
         return action();
     });
-    return batch.owner.kind === "agent" ? withThreadRunLock(batch.owner.threadId, lockBatch, locks, store) : lockBatch();
 }
 
 /** Review/control mutations share live dispatch ownership until every write settles. */
@@ -52,7 +52,7 @@ export async function audioBatchUserAction<T>(projectId: string, id: string, act
         }
     }
     if (worker) await worker.done;
-    return ownership(await ownedAudioGenerationBatch(projectId, id, undefined, db), action, locks, db);
+    return ownership(await ownedAudioGenerationBatch(projectId, id, undefined, db), action, locks);
 }
 
 /** Explicit continuation only. Mount/reload never invokes this dispatcher. */
@@ -63,7 +63,7 @@ export async function startAudioGenerationBatch(projectId: string, id: string, o
     const db = store ?? productDb;
     if (workers.has(id)) throw new Error("此批次已在当前页面执行");
     const controller = new AbortController();
-    let reservation = options.agentThreadId ? reserveAgentThreadWork(db,
+    let reservation = options.agentThreadId ? reserveAgentBatchWork(db,
         {kind: "audioBatch", threadId: options.agentThreadId, batchId: id, projectId}, controller) : undefined;
     const preparation = (async () => {
         const batch = await ownedAudioGenerationBatch(projectId, id, true, db);
@@ -80,7 +80,7 @@ export async function startAudioGenerationBatch(projectId: string, id: string, o
         };
         // Reserve before awaiting ownership so simultaneous starts cannot both dispatch.
         if (workers.has(id)) throw new Error("此批次已在当前页面执行");
-        if (!reservation && batch.owner.kind === "agent") reservation = reserveAgentThreadWork(db,
+        if (!reservation && batch.owner.kind === "agent") reservation = reserveAgentBatchWork(db,
             {kind: "audioBatch", threadId: batch.owner.threadId, batchId: id, projectId}, controller);
         workers.set(id, worker);
         const abort = () => {
@@ -148,7 +148,7 @@ export async function startAudioGenerationBatch(projectId: string, id: string, o
                 await Promise.allSettled([...worker.actions]);
                 await settleAudioGenerationBatch(projectId, id, db);
             }
-        }, options.locks, db).finally(() => {
+        }, options.locks).finally(() => {
             if (workers.get(id) === worker) workers.delete(id);
             options.signal?.removeEventListener("abort", abort);
         });

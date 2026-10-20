@@ -1,6 +1,6 @@
 import type {ProductStore} from "../../../platform/storage/types";
 import {isLegacyAtomicPlanCall, isUnknownBatchPreparation} from "../commands/agentToolRecovery";
-import {recoverAbandonedGenerationBatches} from "../commands/agentGenerationBatches";
+import {recoverAbandonedGenerationBatch, runningGenerationBatchIds} from "../commands/agentGenerationBatches";
 import {db as productDb} from "../../../platform/product/store";
 import {interruptThreadRuns} from "../commands/agentRuns";
 
@@ -23,6 +23,25 @@ function browserLocks(): ThreadLockManager {
         throw new Error("此浏览器无法安全协调执行，请使用支持 Web Locks 的浏览器并通过 HTTPS 或 localhost 打开");
     }
     return navigator.locks;
+}
+
+/** A generation batch is excluded by its own lock, never by the conversation's. */
+export const generationBatchLockName = (batchId: string) => `cuepoint.generation-batch.${batchId}`;
+
+export function withGenerationBatchLock<T>(batchId: string, execute: () => Promise<T>, locks: ThreadLockManager = browserLocks()): Promise<T> {
+    return locks.request(generationBatchLockName(batchId), {ifAvailable: true}, async lock => {
+        if (!lock) throw new Error("此批次正在另一个页面执行");
+        return execute();
+    });
+}
+
+/** A running batch whose lock is free has no live worker anywhere: mark it paused. A held lock means it is alive. */
+async function recoverIdleGenerationBatches(batchIds: readonly string[], locks: ThreadLockManager, store: ProductStore) {
+    for (const batchId of batchIds) {
+        await locks.request(generationBatchLockName(batchId), {ifAvailable: true}, async lock => {
+            if (lock) await recoverAbandonedGenerationBatch(batchId, store);
+        });
+    }
 }
 
 const ownershipBrand:unique symbol=Symbol('ThreadOwnership');
@@ -75,7 +94,8 @@ export async function withExecutionOwnership<T>(threadId:string,execute:(ownersh
 export async function withThreadRunLock<T>(threadId:string,execute:(ownership:ThreadOwnership)=>Promise<T>,locks:ThreadLockManager=browserLocks(),store:ProductStore=productDb):Promise<T> {
     return withExecutionOwnership(threadId,async ownership=>{
         await (await import("../commands/agentJobs")).recoverAgentJobs(threadId, ownership, store);
-        await recoverAbandonedGenerationBatches(threadId, store);
+        // Starting a turn must not touch a batch that is still dispatching: only idle ones are recovered.
+        await recoverIdleGenerationBatches(await runningGenerationBatchIds(threadId, store), locks, store);
         await interruptThreadRuns(threadId, store);
         return execute(ownership);
     },locks);
@@ -84,11 +104,11 @@ export async function withThreadRunLock<T>(threadId:string,execute:(ownership:Th
 export async function recoverAbandonedRuns(locks: ThreadLockManager = browserLocks(), store?: ProductStore): Promise<void> {
     const db = store ?? productDb;
     const active = await db.agentRuns.where("status").equals("running").toArray();
-    const batches = await db.agentGenerationBatches.where("status").equals("running").toArray();
+    const batchIds = await runningGenerationBatchIds(undefined, db);
     // Repair known local-only history under the same lock, without running tools.
     const repairableCalls = await db.agentToolCalls.filter(call => isLegacyAtomicPlanCall(call) || isUnknownBatchPreparation(call)).toArray();
     const jobs = await db.agentJobs.filter(job => ['accepted', 'running', 'stopping'].includes(job.status)).toArray();
-    for (const threadId of new Set([...active, ...batches, ...repairableCalls, ...jobs].map((run) => run.threadId))) {
+    for (const threadId of new Set([...active, ...repairableCalls, ...jobs].map((run) => run.threadId))) {
         await locks.request(`cuepoint:agent:${threadId}`, {ifAvailable: true}, async (lock) => {
             if (lock) {
                 const state: CapabilityState = {held: true, executing: false, accepting: true, threadId};
@@ -96,10 +116,11 @@ export async function recoverAbandonedRuns(locks: ThreadLockManager = browserLoc
                 capabilities.set(ownership, state);
                 try {
                     await (await import("../commands/agentJobs")).recoverAgentJobs(threadId, ownership, db);
-                    await recoverAbandonedGenerationBatches(threadId, db);
                     await interruptThreadRuns(threadId, db);
                 } finally {state.held = false;}
             }
         });
     }
+    // Batches no longer ride on the conversation lock, so each is recovered under its own.
+    await recoverIdleGenerationBatches(batchIds, locks, db);
 }

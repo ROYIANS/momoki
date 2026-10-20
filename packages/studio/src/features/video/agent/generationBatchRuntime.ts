@@ -1,4 +1,4 @@
-import {reserveAgentThreadWork} from "../../agent/runtime/threadWork";
+import {reserveAgentBatchWork} from "../../agent/runtime/threadWork";
 import type {ProductStore} from "../../../platform/storage/types";
 import {resolveConnector} from "../../settings/commands/connectors";
 import {db as productDb} from '../../../platform/product/store';
@@ -13,10 +13,11 @@ import {
 import {updateGenerationJob} from '../../agent/commands/agentGeneration';
 import {BATCH_CONCURRENCY} from '../../agent/models/agentGenerationBatch';
 import {type GenerationRuntimeOptions, monitorAgentGeneration, submitClaimedGeneration} from './generationRuntime';
-import {type ThreadLockManager, withThreadRunLock} from '../../agent/runtime/runOwnership';
+import {type ThreadLockManager, withGenerationBatchLock} from '../../agent/runtime/runOwnership';
 
 interface LocalWorker {
     batchId: string;
+    threadId: string;
     controller: AbortController;
     done: Promise<void>;
     actions: Set<Promise<unknown>>;
@@ -24,11 +25,12 @@ interface LocalWorker {
     ownsLock: boolean
 }
 
+/** Keyed by batch id: a batch is excluded by its own lock, so the conversation stays free to chat. */
 const workers = new Map<string, LocalWorker>();
 
-export async function batchUserAction<T>(threadId: string, action: () => Promise<T>, locks?: ThreadLockManager): Promise<T> {
-    const worker = workers.get(threadId);
-    // The current local worker already owns the Web Lock. Keep it held until UI writes settle.
+export async function batchUserAction<T>(batchId: string, action: () => Promise<T>, locks?: ThreadLockManager): Promise<T> {
+    const worker = workers.get(batchId);
+    // The current local worker already owns the batch lock. Keep it held until UI writes settle.
     if (worker && worker.ownsLock && !worker.closing) {
         const pending = Promise.resolve().then(action);
         worker.actions.add(pending);
@@ -39,7 +41,7 @@ export async function batchUserAction<T>(threadId: string, action: () => Promise
         }
     }
     if (worker) await worker.done;
-    return withThreadRunLock(threadId, action, locks);
+    return withGenerationBatchLock(batchId, action, locks);
 }
 
 
@@ -47,22 +49,25 @@ export async function startGenerationBatch(id: string, threadId: string, options
     locks?: ThreadLockManager;
     signal?: AbortSignal
 } = {}) {
-    if (workers.has(threadId)) throw new Error('此对话已有批次正在执行');
+    if (workers.has(id)) throw new Error('此批次已在当前页面执行');
+    // One dispatching batch per conversation keeps cost predictable; this is not a lock on chatting.
+    if ([...workers.values()].some(worker => worker.threadId === threadId)) throw new Error('此对话已有批次正在执行');
     const controller = new AbortController();
-    const reservation = reserveAgentThreadWork(productDb, {kind: "videoBatch", threadId, batchId: id}, controller);
+    const reservation = reserveAgentBatchWork(productDb, {kind: "videoBatch", threadId, batchId: id}, controller);
     const abort = () => controller.abort();
     options.signal?.addEventListener('abort', abort, {once: true});
     if (options.signal?.aborted) controller.abort();
     const worker: LocalWorker = {
         batchId: id,
+        threadId,
         controller,
         done: Promise.resolve(),
         actions: new Set(),
         closing: false,
         ownsLock: false
     };
-    workers.set(threadId, worker);
-    worker.done = withThreadRunLock(threadId, async () => {
+    workers.set(id, worker);
+    worker.done = withGenerationBatchLock(id, async () => {
         worker.ownsLock = true;
         const context = {threadId, signal: controller.signal};
         controller.signal.throwIfAborted();
@@ -146,7 +151,7 @@ export async function startGenerationBatch(id: string, threadId: string, options
             await settleGenerationBatch(id, threadId);
         }
     }, options.locks).finally(() => {
-        workers.delete(threadId);
+        workers.delete(id);
         options.signal?.removeEventListener('abort', abort);
     });
     reservation.follow(worker.done);
@@ -154,11 +159,10 @@ export async function startGenerationBatch(id: string, threadId: string, options
 }
 
 export async function stopGenerationBatch(id: string, threadId: string, action: 'pause' | 'cancel', locks?: ThreadLockManager) {
-    const worker = workers.get(threadId);
+    const worker = workers.get(id);
     if (worker) {
-        if (worker.batchId !== id) throw new Error('正在执行另一个批次');
         worker.controller.abort();
         await worker.done.catch(() => undefined);
     }
-    await batchUserAction(threadId, () => controlGenerationBatch(id, threadId, action), locks);
+    await batchUserAction(id, () => controlGenerationBatch(id, threadId, action), locks);
 }

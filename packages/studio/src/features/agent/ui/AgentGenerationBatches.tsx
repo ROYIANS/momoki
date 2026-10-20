@@ -348,7 +348,7 @@ function BatchSurface({batch, parentReadError}: { batch: GenerationBatch; parent
     }
 
     async function confirm() {
-        await batchUserAction(current.threadId, async () => {
+        await batchUserAction(current.id, async () => {
             const revision = await persist();
             await confirmGenerationBatch(current.id, current.threadId, revision, new AbortController().signal);
         });
@@ -356,7 +356,7 @@ function BatchSurface({batch, parentReadError}: { batch: GenerationBatch; parent
     }
 
     async function change(itemId: string, operation: "clone" | "remove") {
-        await batchUserAction(current.threadId, async () => {
+        await batchUserAction(current.id, async () => {
             const revision = await persist();
             await changeGenerationBatchItems(current.id, current.threadId, revision, itemId, operation);
         });
@@ -578,7 +578,7 @@ function BatchSurface({batch, parentReadError}: { batch: GenerationBatch; parent
                                         {job?.result && <Button size="sm" variant={selected ? "secondary" : "outline"}
                                                                 disabled={blocked || selected}
                                                                 aria-label={`选择候选 ${letter}：${targetLabel(item)}`}
-                                                                onClick={() => void action(() => batchUserAction(current.threadId, () => selectBatchCandidate(current.id, current.threadId, item.id)))}>{selected &&
+                                                                onClick={() => void action(() => batchUserAction(current.id, () => selectBatchCandidate(current.id, current.threadId, item.id)))}>{selected &&
                                             <Check size={14} aria-hidden/>}{selected ? "已选中" : "选择候选"}</Button>}
                                     </article>;
                                 })}
@@ -608,7 +608,7 @@ function BatchSurface({batch, parentReadError}: { batch: GenerationBatch; parent
                                                       setError(undefined);
                                                   }}>放弃本地编辑</button>}
                                 <Button size="sm" variant="secondary" disabled={blocked || !local}
-                                        onClick={() => void action(() => batchUserAction(current.threadId, persist))}>{pending ? "保存中…" : local ? "保存草稿" : "草稿已保存"}</Button>
+                                        onClick={() => void action(() => batchUserAction(current.id, persist))}>{pending ? "保存中…" : local ? "保存草稿" : "草稿已保存"}</Button>
                                 <Button size="sm"
                                         disabled={blocked || included.length === 0 || included.length > BATCH_REQUEST_LIMIT}
                                         onClick={() => void action(confirm)}>确认生成 {included.length} 份</Button>
@@ -627,12 +627,12 @@ function BatchSurface({batch, parentReadError}: { batch: GenerationBatch; parent
                                                        onClick={() => void action(() => stopGenerationBatch(current.id, current.threadId, "cancel"))}>取消剩余 {queued} 份</Button>}
                                 {failed > 0 && <Button size="sm" variant="ghost" disabled={blocked}
                                                        onClick={() => void action(async () => {
-                                                           await batchUserAction(current.threadId, () => retryFailedBatch(current.id, current.threadId));
+                                                           await batchUserAction(current.id, () => retryFailedBatch(current.id, current.threadId));
                                                            setNotice("已创建失败项目的新草稿，请关闭后打开重试批次，检查并重新确认费用。");
                                                        })}>为失败项新建草稿</Button>}
                                 <Button size="sm" disabled={blocked || selectedCount === 0}
                                         onClick={() => void action(async () => {
-                                            const result = await batchUserAction(current.threadId, () => applyBatchSelections(current.id, current.threadId));
+                                            const result = await batchUserAction(current.id, () => applyBatchSelections(current.id, current.threadId));
                                             setOutcomes(result);
                                         })}>写入选中的 {selectedCount} 个目标</Button>
                             </div>
@@ -659,7 +659,7 @@ function BatchSurface({batch, parentReadError}: { batch: GenerationBatch; parent
                         blocker.proceed?.();
                     }}>放弃编辑并离开</Button>
                     <Button disabled={blocked} onClick={() => void action(async () => {
-                        await batchUserAction(current.threadId, persist);
+                        await batchUserAction(current.id, persist);
                         blocker.proceed?.();
                     })}>保存草稿并离开</Button>
                 </AlertDialogFooter>

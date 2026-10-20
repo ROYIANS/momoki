@@ -34,9 +34,13 @@ export async function ownedAudioGenerationBatch(projectId: string, id: string, m
         }
         if (mutate) {
             if (run.interactionMode === "conversation" || !run.enabledToolNames?.includes("prepare_audio_generation_batch") || call.status !== "completed" || run.status === "cancelled") throw new Error("批次来源未完成准备、已结束或未启用音频制作技能");
-            const siblings = await db.agentRuns.where("threadId").equals(owner.threadId).toArray();
-            const history = await db.chatMessages.where("threadId").equals(owner.threadId).toArray();
-            if (siblings.some(other => other.id !== run.id && other.createdAt >= run.createdAt) || history.some(message => isLaterUserTurn(message, run))) throw new Error("此批次属于较早执行，请在当前执行重新准备需要发送的段落");
+            // Only a draft must come from the newest turn. A confirmed batch is a paid request the user already
+            // authorised: the conversation moving on (a new message or run) must not void it mid-flight.
+            if (!batch.confirmedAt) {
+                const siblings = await db.agentRuns.where("threadId").equals(owner.threadId).toArray();
+                const history = await db.chatMessages.where("threadId").equals(owner.threadId).toArray();
+                if (siblings.some(other => other.id !== run.id && other.createdAt >= run.createdAt) || history.some(message => isLaterUserTurn(message, run))) throw new Error("此批次属于较早执行，请在当前执行重新准备需要发送的段落");
+            }
         }
     }
     return batch;

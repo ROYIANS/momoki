@@ -14,6 +14,7 @@ import {audioBatchUserAction, pauseAudioGenerationBatches, reconcileAudioBatchHi
 import {collectMediaIds, deleteMediaIfOrphan} from "@/features/library/commands/media";
 import {exportProjectZip, importProjectZip} from "@/app/workflows/packages/projectPackage";
 import {createAgentExecutionService} from "@/features/agent/runtime/agentExecutionService";
+import {currentAgentBatchWorks} from "@/features/agent/runtime/threadWork";
 import {createChatThread} from "@/features/agent/commands/chat";
 import {beginAgentRun, finishAgentRun} from "@/features/agent/commands/agentRuns";
 import {transitionToolCall} from "@/features/agent/commands/agentTools";
@@ -333,13 +334,15 @@ describe("Agent batch preparation, evidence and completion", () => {
         const fetchImpl = vi.fn<typeof fetch>(async (_url, init) => {signal = init!.signal!; enter(); await held; return binary();});
         const running = startAudioGenerationBatch(f.project.id, f.id, {agentThreadId: f.thread.id, locks: f.locks, fetchImpl, decode});
         const owner = createAgentExecutionService({store: db});
-        expect(owner.snapshot(f.thread.id)).toMatchObject({active: true, kind: "audioBatch"});
+        // The batch runs under its own lock: the conversation is not busy, only the batch is a live worker.
+        expect(owner.snapshot(f.thread.id).active).toBe(false);
+        expect(currentAgentBatchWorks(db, f.thread.id)).toEqual([expect.objectContaining({identity: expect.objectContaining({kind: "audioBatch", batchId: f.id})})]);
         await entered;
         pauseAudioGenerationBatches({projectId: f.project.id, projectOnly: true});
         expect(signal.aborted).toBe(false);
         release(); await running;
         expect((await readAudioGenerationBatch(f.project.id, f.id)).counts.saved).toBe(1);
-        expect(owner.snapshot(f.thread.id).active).toBe(false); expect(fetchImpl).toHaveBeenCalledOnce();
+        expect(owner.snapshot(f.thread.id).active).toBe(false); expect(currentAgentBatchWorks(db, f.thread.id)).toEqual([]); expect(fetchImpl).toHaveBeenCalledOnce();
     });
     it("writes preparation and its real ledger result atomically, without granting paid approval", async () => {
         const f = await agentFixture(); const call = await db.agentToolCalls.get(f.call.id);

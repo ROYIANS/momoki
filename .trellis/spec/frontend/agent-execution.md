@@ -88,7 +88,7 @@ Agent thread/page/history navigation and model, video batch, audio batch or AI t
 
 ### 2. Signatures
 
-`runtime/threadWork.ts` defines the finite `AgentWorkIdentity` union (`model`, `videoBatch`, `audioBatch`, `taskWrapup`) and `reserveAgentThreadWork(store, identity, controller)`, `currentAgentThreadWork(store, threadId)`, `subscribeAgentThreadWork(store, listener)` and `shutdownAgentThreadWork(store)`. A reservation follows the actual operation completion and exposes its exact owner, controller and `done`; it grants no durable execution capability.
+`runtime/threadWork.ts` defines the finite `AgentWorkIdentity` union (`model`, `videoBatch`, `audioBatch`, `taskWrapup`) and `reserveAgentThreadWork(store, identity, controller)`, `currentAgentThreadWork(store, threadId)`, `subscribeAgentThreadWork(store, listener)` and `shutdownAgentThreadWork(store)`. Batches use `reserveAgentBatchWork(store, identity, controller)` and `currentAgentBatchWorks(store, threadId)`, a separate registry keyed by batch id: a live batch does not make the thread `active`, does not block a model/wrapup reservation, and is stopped on conversation deletion via `stopBatchWork(threadId)` and on shutdown. A reservation follows the actual operation completion and exposes its exact owner, controller and `done`; it grants no durable execution capability.
 
 `useChatExecutionSession(threadId, scope)` is a view adapter over the singleton's snapshots/attempt subscriptions. Named model/decision/recovery actions go through the application service. Existing generation runtimes retain their actual Web Lock and dispatch algorithms; do not acquire a second same-thread lock around them.
 

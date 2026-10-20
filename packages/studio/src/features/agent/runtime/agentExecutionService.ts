@@ -1,4 +1,4 @@
-import {currentAgentThreadWork, reserveAgentThreadWork, subscribeAgentThreadWork, shutdownAgentThreadWork, type AgentThreadWork} from "./threadWork";
+import {currentAgentBatchWorks, currentAgentThreadWork, reserveAgentThreadWork, subscribeAgentThreadWork, shutdownAgentThreadWork, type AgentThreadWork} from "./threadWork";
 import {recoverTaskWrapups, prepareTaskWrapup} from "./taskWrapup";
 import {compactThreadNow, ManualCompactionError, recoverManualCompactions} from "./manualCompaction";
 import type {AgentReasoningEffort} from "../models/agent";
@@ -562,6 +562,12 @@ export function createAgentExecutionService(options: ChatExecutionBinding) {
             publish(input.threadId, owner);
             entry.controller.abort();
             return true;
+        },
+        /** Batches no longer count as the conversation's work, so deleting a conversation stops them explicitly. */
+        async stopBatchWork(threadId: string): Promise<void> {
+            const works = currentAgentBatchWorks(binding.store, threadId);
+            for (const work of works) work.controller.abort();
+            await Promise.allSettled(works.map(work => work.done));
         },
         requestWorkStop(input: {threadId: string; work: AgentThreadWork}): boolean {
             if (currentAgentThreadWork(binding.store, input.threadId) !== input.work || input.work.controller.signal.aborted) return false;

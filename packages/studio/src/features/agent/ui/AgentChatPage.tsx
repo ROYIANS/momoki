@@ -327,6 +327,7 @@ function AgentChatInner({threadId, view}: { threadId?: Id; view?: "tasks" }) {
                     if (owner.token) agentExecution.requestStop({threadId: target.id, token: owner.token});
                     if (owner.work) agentExecution.requestWorkStop({threadId: target.id, work: owner.work});
                     await owner.work?.done.catch(() => undefined);
+                    await agentExecution.stopBatchWork(target.id);
                     await deleteChatThread(target.id);
                     if (!mounted.current) return;
                     if (currentThread.current === target.id) {

@@ -518,21 +518,29 @@ export async function retryFailedBatch(id: string, threadId: string, store?: Pro
     });
 }
 
-/** Call only while the caller holds this thread's Web Lock. Local reads/writes, no HTTP. */
-export async function recoverAbandonedGenerationBatches(threadId: string, store?: ProductStore) {
+/**
+ * Call only while the caller holds this batch's own Web Lock, which proves no live worker dispatches it.
+ * Local reads/writes, no HTTP. A batch is never recovered under the conversation lock any more.
+ */
+export async function recoverAbandonedGenerationBatch(batchId: string, store?: ProductStore) {
     const db = store ?? productDb;
     await db.transaction('rw', db.tables, async (db) => {
-        const batches = await db.agentGenerationBatches.where('threadId').equals(threadId).toArray();
-        for (const batch of batches) {
-            if (batch.status !== 'running') continue;
-            for (const job of await db.agentGenerationJobs.where('batchId').equals(batch.id).toArray()) {
-                if (job.status === 'submitting' && !job.providerTaskId) await db.agentGenerationJobs.update(job.id, {
-                    status: 'unknown',
-                    error: '上次提交结果未知，请核实供应商记录；不会自动重发',
-                    updatedAt: nowIso()
-                });
-            }
-            await writeBatch(batch, {status: 'paused', pauseReason: '上次本地执行已中断，继续前请检查各候选状态'}, db);
+        const batch = await db.agentGenerationBatches.get(batchId);
+        if (!batch || batch.status !== 'running') return;
+        for (const job of await db.agentGenerationJobs.where('batchId').equals(batch.id).toArray()) {
+            if (job.status === 'submitting' && !job.providerTaskId) await db.agentGenerationJobs.update(job.id, {
+                status: 'unknown',
+                error: '上次提交结果未知，请核实供应商记录；不会自动重发',
+                updatedAt: nowIso()
+            });
         }
+        await writeBatch(batch, {status: 'paused', pauseReason: '上次本地执行已中断，继续前请检查各候选状态'}, db);
     });
+}
+
+/** Ids of batches still marked running; the caller probes each one's lock before recovering it. */
+export async function runningGenerationBatchIds(threadId?: string, store?: ProductStore): Promise<string[]> {
+    const db = store ?? productDb;
+    const batches = await db.agentGenerationBatches.where('status').equals('running').toArray();
+    return batches.filter(batch => !threadId || batch.threadId === threadId).map(batch => batch.id);
 }

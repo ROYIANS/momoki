@@ -3326,6 +3326,7 @@
         "ThreadLockManager"
       ],
       "publicSymbols": [
+        "withGenerationBatchLock",
         "withThreadRunLock"
       ]
     },
@@ -6689,6 +6690,7 @@
       "public": false,
       "publicTypes": [],
       "publicSymbols": [
+        "reserveAgentBatchWork",
         "reserveAgentThreadWork"
       ]
     },
