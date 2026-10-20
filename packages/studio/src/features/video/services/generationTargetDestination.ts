@@ -7,6 +7,7 @@ export function generationTargetDestination(target: ProductionTarget) {
         params: {projectId: target.projectId, episodeId: target.episodeId},
         search: {shot: target.entityId},
     };
+    if (target.kind === "library") return {to: "/assets" as const, search: {project: target.projectId}};
     const project = encodeURIComponent(target.projectId);
     const section = {character: "characters", scene: "scenes", prop: "props", style: "styles"}[target.kind];
     return {

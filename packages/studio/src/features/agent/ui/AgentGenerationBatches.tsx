@@ -166,6 +166,7 @@ function message(cause: unknown) {
 
 function targetLabel(item: GenerationBatchItem) {
     const target = item.draft.target;
+    if (target.kind === "library") return `${item.label} · 素材库 · ${target.slot === "video" ? "视频" : "图片"}`;
     const slots = target.kind === "shot" ? [{id: "firstFrame", label: "首帧"}, {
         id: "lastFrame",
         label: "尾帧"

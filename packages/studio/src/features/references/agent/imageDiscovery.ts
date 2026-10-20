@@ -98,10 +98,13 @@ async function sourceState(projectId: string, locator: ImageSourceLocator, store
     } else {
         const job = await db.agentGenerationJobs.get(locator.jobId);
         if (!job || job.projectId !== projectId || job.kind !== 'image' || !['downloaded', 'applied', 'conflict'].includes(job.status)) throw new Error('候选图片已不可用');
-        const owner = await (db.table(tables[job.target.kind]) as unknown as StoreTable<Entity>).get(job.target.entityId);
-        if (!owner || owner.projectId !== projectId || job.target.kind === 'shot' && owner.episodeId !== job.target.episodeId) throw new Error('候选目标已不存在');
         mediaId = job.result?.mediaId;
-        currentlyApplied = !!mediaId && slots(job.target.kind, owner)[job.target.slot ?? 'firstFrame']?.result?.mediaId === mediaId;
+        if (job.target.kind === 'library') currentlyApplied = job.status === 'applied';
+        else {
+            const owner = await (db.table(tables[job.target.kind]) as unknown as StoreTable<Entity>).get(job.target.entityId);
+            if (!owner || owner.projectId !== projectId || job.target.kind === 'shot' && owner.episodeId !== job.target.episodeId) throw new Error('候选目标已不存在');
+            currentlyApplied = !!mediaId && slots(job.target.kind, owner)[job.target.slot ?? 'firstFrame']?.result?.mediaId === mediaId;
+        }
         identity = {id: job.id, result: job.result, target: job.target, currentlyApplied};
     }
     const media = mediaId ? await db.media.get(mediaId) : undefined;

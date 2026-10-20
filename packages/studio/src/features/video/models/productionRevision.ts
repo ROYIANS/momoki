@@ -17,6 +17,11 @@ export function validateProductionTarget(raw: unknown): ProductionTarget {
             episodeId: value.episodeId, ...(value.slot === undefined ? {} : {slot: value.slot as "firstFrame" | "lastFrame" | "clip"})
         };
     }
+    if (value.kind === "library") {
+        if (value.slot !== "image" && value.slot !== "video") throw new Error("素材库生成需要指明图片或视频");
+        if (typeof value.label === "string" && value.label.length > 120) throw new Error("素材名称过长");
+        return {kind: "library", ...common, slot: value.slot, ...(typeof value.label === "string" && value.label.trim() ? {label: value.label.trim()} : {})};
+    }
     const slots = {character: CHARACTER_SLOTS, scene: SCENE_SLOTS, prop: PROP_SLOTS, style: STYLE_SLOTS};
     if (typeof value.kind !== "string" || !Object.hasOwn(slots, value.kind)) throw new Error("生成目标类型无效");
     const kind = value.kind as keyof typeof slots;

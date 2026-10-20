@@ -171,13 +171,14 @@ export async function collectWrapupSnapshot(task: AgentTask, includeAllEvidence 
     }
     for (const job of jobs) {
         const target = job.target;
-        await Promise.resolve(entity(target.kind, target.entityId, target.projectId, 'episodeId' in target ? target.episodeId : undefined, undefined, db));
+        if (target.kind !== 'library') await Promise.resolve(entity(target.kind, target.entityId, target.projectId, 'episodeId' in target ? target.episodeId : undefined, undefined, db));
         const owned = await Promise.resolve(ownedTaskGenerationJob(task, job, db));
         const output = await Promise.resolve(inspectTaskGenerationOutput(job, db));
         const {media} = output;
         const available = owned && output.available, applied = available && output.applied;
         let href: string | undefined;
-        try {
+        if (target.kind === 'library') href = `/assets?project=${encodeURIComponent(target.projectId)}`;
+        else try {
             const row = await getRow(target.kind, target.entityId, target.projectId, 'episodeId' in target ? target.episodeId : undefined, db);
             href = navigation(target.kind, row).href;
         } catch {/* Missing targets remain historical evidence. */

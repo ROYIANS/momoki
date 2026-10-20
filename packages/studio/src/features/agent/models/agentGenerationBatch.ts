@@ -73,6 +73,7 @@ export function generationEntityKey(target: ProductionTarget) {
 }
 
 export function generationKind(target: GenerationSubmitArgs['target']): MediaKind {
+    if (target.kind === 'library') return target.slot === 'video' ? 'video' : 'image';
     return target.kind === 'shot' && target.slot === 'clip' ? 'video' : 'image';
 }
 

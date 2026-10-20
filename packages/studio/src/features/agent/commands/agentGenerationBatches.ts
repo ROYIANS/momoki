@@ -19,7 +19,8 @@ import {
 } from '../models/agentGenerationBatch';
 import {type GenerationSubmitArgs, generationSubmitSchema} from '../../video/agent/generationProfiles';
 import {loadGenerationInputs, prepareGenerationSnapshot} from '../../video/agent/generationPreparation';
-import {readGenerationTarget} from './agentGenerationTarget';
+import {libraryMaterialName, readGenerationTarget} from './agentGenerationTarget';
+import {adoptGeneratedMedia} from '../../library/commands/materials';
 import {assertProjectToolScope} from '../runtime/projectScope';
 import type {AgentToolContext} from '../runtime/tools';
 import {createId, nowIso} from '../../../platform/identity';
@@ -84,7 +85,10 @@ export async function readGenerationBatch(id: string, threadId: string, store?: 
         const currentMedia: Record<string, string | undefined> = {};
         for (const item of items) {
             try {
-                currentMedia[item.targetKey] = (await readGenerationTarget(item.baseline.target, db)).slot.result?.mediaId;
+                // A library target has no slot to read back: what it holds is the candidate it adopted.
+                currentMedia[item.targetKey] = item.baseline.target.kind === 'library'
+                    ? jobs.find(job => job.batchItemId === item.id && job.status === 'applied')?.result?.mediaId ?? currentMedia[item.targetKey]
+                    : (await readGenerationTarget(item.baseline.target, db)).slot.result?.mediaId;
             } catch {
                 currentMedia[item.targetKey] = undefined;
             }
@@ -432,6 +436,9 @@ export async function applyBatchSelections(id: string, threadId: string, store?:
                     if (target.slot.result?.mediaId === job.result.mediaId) continue;
                     const slot = {...target.slot, result: job.result};
                     switch (job.target.kind) {
+                        case 'library':
+                            await adoptGeneratedMedia(job.projectId, job.result.mediaId, libraryMaterialName(job), db);
+                            break;
                         case 'shot':
                             await setShotSlot(job.target.entityId, job.target.slot!, slot, undefined, db);
                             break;

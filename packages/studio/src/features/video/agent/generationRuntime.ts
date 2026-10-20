@@ -18,6 +18,7 @@ import {
 import {AtomicToolRollbackError, executeAtomicTool} from "../../agent/commands/agentTools";
 import {resolveConnector} from "../../settings/commands/connectors";
 import {setCharacterSlot, setPropSlot, setSceneSlot, setStyleSlot} from "../../library/commands/assets";
+import {adoptGeneratedMedia} from "../../library/commands/materials";
 import {setShotSlot} from "../commands/shots";
 import type {AgentGenerationJob} from "../../agent/models/agentGeneration";
 import type {AgentToolPreview} from "../../agent/models/agent";
@@ -45,7 +46,7 @@ import type {AgentToolContext} from "../../agent/runtime/tools";
 import {ToolPendingError} from "../../agent/runtime/toolErrors";
 import type {GenerationSubmitArgs} from "./generationProfiles";
 import {loadGenerationInputs, prepareGenerationSnapshot, resolveGenerationConnector} from "./generationPreparation";
-import {readGenerationTarget} from "../../agent/commands/agentGenerationTarget";
+import {libraryMaterialName, readGenerationTarget} from "../../agent/commands/agentGenerationTarget";
 import {runtimeResultFetch} from "../../../platform/runtime/runtimeFetch";
 
 export interface GenerationRuntimeOptions {
@@ -62,6 +63,7 @@ export class GenerationPendingError extends ToolPendingError {
 }
 
 function generationTargetHref(target: ProductionTarget): string {
+    if (target.kind === "library") return `/assets?project=${encodeURIComponent(target.projectId)}`;
     const id = encodeURIComponent(target.entityId);
     if (target.kind === "shot") return `/p/${encodeURIComponent(target.projectId)}/e/${encodeURIComponent(target.episodeId)}/shots?shot=${id}`;
     const plural = target.kind === "character" ? "characters" : target.kind === "scene" ? "scenes" : target.kind === "prop" ? "props" : "styles";
@@ -479,6 +481,12 @@ export async function prepareGenerationApply(jobId: string, context: AgentToolCo
         label = (await readGenerationTarget(job.target, db)).label;
     } catch { /* Apply records a visible conflict while preserving output. */
     }
+    if (job.target.kind === "library") return {
+        summary: `将生成${job.kind === "image" ? "图片" : "视频"}保存到项目素材库`,
+        changes: [`素材名称：${libraryMaterialName(job)}`, `结果素材：${job.result.mediaId}`, "不会改变任何槽位、镜头或封面。"],
+        revision: job.baseRevision,
+        target: {label, href: generationTargetHref(job.target)}
+    };
     return {
         summary: `将生成${job.kind === "image" ? "图片" : "视频"}写入「${label}」`,
         changes: [`目标槽位：${job.target.slot}`, `结果素材：${job.result.mediaId}`, "不会改变镜头文字、时长或人工状态。"],
@@ -542,6 +550,9 @@ export async function applyAgentGeneration(jobId: string, context: AgentToolCont
         if (!result || result.projectId !== job.projectId || !binaryByteLength(result.blob) || !result.mimeType.startsWith(`${job.kind}/`)) throw new Error("生成结果素材已删除或类型不匹配");
         const slot = {...current.slot, result: job.result};
         switch (job.target.kind) {
+            case "library":
+                await adoptGeneratedMedia(job.projectId, job.result.mediaId, libraryMaterialName(job), db);
+                break;
             case "shot":
                 await setShotSlot(job.target.entityId, job.target.slot!, slot, undefined, db);
                 break;

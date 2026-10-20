@@ -46,7 +46,7 @@ export const GENERATION_TOOLS = [
     }, {
         name: "prepare_generation_batch",
         title: "准备批量生成",
-        description: "准备多个目标槽位的图片/视频候选草稿，每个槽位默认1份、最多4份，每批最多20份。每份独立配置。只保存草稿，不上传或付费提交；用户在批量面板编辑并一次确认。结果必须由用户比较选用，禁止自动写入。",
+        description: "准备多个目标槽位的图片/视频候选草稿，每个槽位默认1份、最多4份，每批最多20份。不想绑定槽位时用 target.kind=\"library\"（slot 填 image 或 video，entityId 填你给这组备选起的稳定名字），结果选用后保存到项目素材库。每份独立配置。只保存草稿，不上传或付费提交；用户在批量面板编辑并一次确认。结果必须由用户比较选用，禁止自动写入。",
         effect: "bookkeeping",
         atomic: true,
         highRisk: () => false,
@@ -139,7 +139,7 @@ export const GENERATION_TOOLS = [
     defineTool(generationSubmitSpec, {
         name: "submit_generation",
         title: "生成图片或视频",
-        description: "为合法目标槽位提交一次付费生成并等待查询/下载。先查 generation_capabilities。必须使用稳定目标ID和本地素材ID。返回 downloaded 才表示本地素材可用；还需 apply_generation 写入目标。失败/未知提交不可当作成功，也不可盲目重发。",
+        description: "为合法目标槽位提交一次付费生成并等待查询/下载。不绑定槽位时用 target.kind=\"library\"（slot 填 image 或 video，entityId 填稳定名字，可选 label 作素材名），apply_generation 会把结果保存到项目素材库。先查 generation_capabilities。必须使用稳定目标ID和本地素材ID。返回 downloaded 才表示本地素材可用；还需 apply_generation 写入目标。失败/未知提交不可当作成功，也不可盲目重发。",
         effect: "network",
         recovery: "generation",
         requiresConfirmation: true,

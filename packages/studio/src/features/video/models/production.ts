@@ -7,7 +7,9 @@ export type ProductionTarget =
     | { kind: "character"; projectId: Id; entityId: Id; slot: CharacterImageSlot }
     | { kind: "scene"; projectId: Id; entityId: Id; slot: SceneImageSlot }
     | { kind: "prop"; projectId: Id; entityId: Id; slot: PropImageSlot }
-    | { kind: "style"; projectId: Id; entityId: Id; slot: StyleImageSlot };
+    | { kind: "style"; projectId: Id; entityId: Id; slot: StyleImageSlot }
+    /** No slot: the result is kept in the project's material library. `entityId` names a group of alternatives; `slot` is the media type. */
+    | { kind: "library"; projectId: Id; entityId: Id; slot: "image" | "video"; label?: string };
 
 export interface SourceRevision {
     kind: string;

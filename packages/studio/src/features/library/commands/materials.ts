@@ -223,6 +223,27 @@ export async function promoteLegacyMaterial(kind: MaterialKind | 'media', entity
     });
 }
 
+/**
+ * Keeps a generated image/video as a project material. The same media is kept once: asking again returns the
+ * material already made from it. The media is marked retained so it outlives the generation history.
+ */
+export async function adoptGeneratedMedia(projectId: string, mediaId: string, name: string | undefined, store?: ProductStore): Promise<LibraryMaterial> {
+    const db = store ?? productDb;
+    return db.transaction('rw', tables(db), async (db) => {
+        const media = await db.media.get(mediaId);
+        if (!media || media.projectId !== projectId) throw new Error('生成结果素材不存在或不属于该项目');
+        if (!media.mimeType.startsWith('image/') && !media.mimeType.startsWith('video/')) throw new Error('只能把图片或视频保存为生成素材');
+        const existing = (await db.libraryMaterials.toArray()).find(item => !item.archived && item.scope.kind === 'project' && item.scope.id === projectId
+            && item.source?.projectId === projectId && item.source.entityId === mediaId);
+        if (existing) return existing;
+        const material = await promoteLegacyMaterial('media', mediaId, {kind: 'project', id: projectId}, db);
+        const label = name?.trim();
+        if (label && label !== material.name) await db.libraryMaterials.put({...material, name: validName(label.slice(0, 120))});
+        await db.media.update(mediaId, {libraryRetained: true});
+        return (await db.libraryMaterials.get(material.id))!;
+    });
+}
+
 export async function promoteMaterial(id: string, scope: MaterialScope, store?: ProductStore): Promise<LibraryMaterial> {
     const db = store ?? productDb;
     return db.transaction('rw', tables(db), async (db) => {

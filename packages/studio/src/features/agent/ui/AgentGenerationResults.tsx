@@ -13,7 +13,7 @@ const LABELS: Record<AgentGenerationStatus, string> = {
     remote_completed: "生成完成，准备保存", downloading: "正在保存素材", downloaded: "素材已保存，等待写回",
     applied: "已写入目标", conflict: "目标已变化，素材已保留", failed: "生成失败",
 };
-const TARGETS = {character: "角色", scene: "场景", prop: "道具", style: "风格", shot: "分镜"};
+const TARGETS = {character: "角色", scene: "场景", prop: "道具", style: "风格", shot: "分镜", library: "素材库"};
 
 /** Persistent job status stays visible even while the model waits or the run is paused. */
 export function AgentGenerationResults({runId}: { runId: string }) {

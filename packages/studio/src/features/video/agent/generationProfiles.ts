@@ -17,8 +17,9 @@ const modelSpec = s.choice(["gpt-image-2", "gpt-image-2.5-flare", "gpt-image-2.5
 const promptSpec = s.trimmedText(32000);
 const boundedParameter = (max: number): s.Spec<string> => ({schema: z.string().max(max), json: {type: "string"}});
 const targetSpec = s.object({
-    kind: s.choice(["shot", "character", "scene", "prop", "style"]), projectId: idSpec, entityId: idSpec,
-    episodeId: s.optional(idSpec), slot: {schema: z.string().min(1).max(30), json: {type: "string"}},
+    kind: s.choice(["shot", "character", "scene", "prop", "style", "library"]), projectId: idSpec, entityId: idSpec,
+    episodeId: s.optional(idSpec), slot: {schema: z.string().min(1).max(30), json: {type: "string", description: "素材槽位；kind 为 library 时填 image 或 video。"}},
+    label: s.optional(s.trimmedText(120)),
 });
 const parameterSpec = s.object({
     size: s.optional({
@@ -91,7 +92,7 @@ export const generationJobSchema = generationJobSpec.schema;
 export function profileRequest(args: GenerationSubmitArgs, provider: "apimart" | "aihubmix") {
     const target: ProductionTarget = validateProductionTarget(args.target);
     if (!target.slot) throw new Error("生成目标必须指定素材槽位");
-    const kind: "image" | "video" = target.kind === "shot" && target.slot === "clip" ? "video" : "image";
+    const kind: "image" | "video" = target.kind === "library" ? target.slot : target.kind === "shot" && target.slot === "clip" ? "video" : "image";
     const p = args.parameters;
     const inputs = args.inputs;
     if (new Set(inputs.map((input) => `${input.role}:${input.mediaId}`)).size !== inputs.length) throw new Error("输入素材用途重复");
