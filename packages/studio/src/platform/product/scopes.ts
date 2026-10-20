@@ -8,5 +8,5 @@ export const AUDIO_TRANSACTION_TABLES = [db.projects, db.media, ...AUDIO_TABLES]
 export const PRODUCTION_TABLES = [
     ...AUDIO_TABLES,
     db.projects, db.episodes, db.characters, db.scenes,
-    db.props, db.styles, db.shots, db.media, db.materialUses, db.productionProposals, db.agentGenerationJobs, db.agentGenerationBatches, db.agentGenerationBatchItems, db.projectReferences, db.referenceChunks,
+    db.props, db.styles, db.shots, db.media, db.ipProfiles, db.materialUses, db.productionProposals, db.agentGenerationJobs, db.agentGenerationBatches, db.agentGenerationBatchItems, db.projectReferences, db.referenceChunks,
 ];

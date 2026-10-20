@@ -530,3 +530,28 @@
 .side-panel .ip-editor-fields {
     grid-template-columns: 1fr;
 }
+
+.ip-avatar {
+    width: 72px;
+    height: 72px;
+    flex: none;
+    overflow: hidden;
+    border-radius: 50%;
+}
+
+.ip-editor-avatar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 4px;
+}
+
+.ip-editor-avatar-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.ip-monogram-image {
+    padding: 0;
+    overflow: hidden;
+}

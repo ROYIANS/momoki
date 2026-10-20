@@ -1,6 +1,6 @@
 import type {ProductStore} from "../../../platform/storage/types";
 import {db as productDb} from '../../../platform/product/store';
-import {bindProjectIp, createIpProfile, setIpArchived, updateIpProfile} from '../commands/ipProfiles';
+import {bindProjectIp, createIpProfile, setIpArchived, setIpAvatar, updateIpProfile} from '../commands/ipProfiles';
 import type {IpProfile, IpProfileInput} from '../models/materials';
 import type {AgentToolContext} from '../../agent/runtime/tools';
 import * as s from '../../agent/runtime/businessSchemas';
@@ -25,6 +25,16 @@ const optionalFields = {
     visual: s.optional(s.text(8000)),
     voice: s.optional(s.text(8000))
 };
+/** The portrait must be an image from this conversation's project, or already in the studio library. */
+async function avatarImage(mediaId: string, context: AgentToolContext, store?: ProductStore) {
+    const db = store ?? context.store ?? productDb;
+    const media = await db.media.get(mediaId);
+    if (!media) throw new Error('头像图片不存在，请使用真实的媒体 ID');
+    if (!media.mimeType.startsWith('image/')) throw new Error('头像只能是图片');
+    const bound = await frozenProjectScope(context, db);
+    if (bound && media.projectId !== bound && media.projectId !== 'studio') throw new Error('头像图片需要来自当前项目或工作室素材');
+    return media;
+}
 const revision = s.number(1, Number.MAX_SAFE_INTEGER, true);
 const target = (ip: IpProfile) => ({label: ip.name, href: `/ips/${encodeURIComponent(ip.id)}`});
 const brief = (ip: IpProfile) => ({
@@ -153,7 +163,8 @@ export const IP_TOOLS = [
         spec: s.object({
             id: s.id,
             expectedRevision: revision,
-            patch: s.nonempty(s.object({name: s.optional(s.text(300, 1)), ...optionalFields}))
+            patch: s.nonempty(s.object({name: s.optional(s.text(300, 1)), ...optionalFields,
+                avatarMediaId: s.optional(s.id)}))
         }),
         requiresConfirmation: true,
         async prepare(args, context) {
@@ -161,15 +172,25 @@ export const IP_TOOLS = [
             const ip = await editableIp(args, context, db);
             if (ip.archived) throw new Error('请先恢复已归档的 IP');
             const state = await affectedState(ip, db);
+            const avatar = args.patch.avatarMediaId ? await avatarImage(args.patch.avatarMediaId, context, db) : undefined;
             return {
                 state,
                 target: target(ip),
-                changes: [...fieldChanges(args.patch, ip), `共享档案，关联 ${state.links.length} 个项目；影响后续创作背景，已有作品内容不会自动修改。`]
+                changes: [...fieldChanges(args.patch, ip), ...(avatar ? [`头像：使用图片「${avatar.filename}」（会保存一份到工作室素材，不影响原图）`] : []), `共享档案，关联 ${state.links.length} 个项目；影响后续创作背景，已有作品内容不会自动修改。`]
             };
         },
         async execute(args, context) {
             const db = context.store ?? productDb;
-            await updateIpProfile(args.id, args.patch, args.expectedRevision, db);
+            const {avatarMediaId, ...text} = args.patch;
+            let expected = args.expectedRevision;
+            if (Object.keys(text).length) {
+                await updateIpProfile(args.id, text, expected, db);
+                expected += 1;
+            }
+            if (avatarMediaId) {
+                await avatarImage(avatarMediaId, context, db);
+                await setIpAvatar(args.id, expected, {mediaId: avatarMediaId}, db);
+            }
             return brief((await db.ipProfiles.get(args.id))!);
         },
     }),

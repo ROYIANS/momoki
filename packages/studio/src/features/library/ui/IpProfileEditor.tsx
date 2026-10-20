@@ -2,7 +2,11 @@ import {useId, useRef, useState} from "react";
 import {useBlocker} from "@tanstack/react-router";
 import {LoaderCircle} from "../../../ui/icons";
 import type {IpProfile, IpProfileInput} from "../models/materials";
-import {createIpProfile, updateIpProfile} from "../commands/ipProfiles";
+import {createIpProfile, setIpAvatar, updateIpProfile} from "../commands/ipProfiles";
+import {db} from "../../../platform/product/store";
+import {pickMediaFile, uploadMediaFile} from "../services/media";
+import {MediaPreview} from "./MediaThumb";
+import {STUDIO_LIBRARY_ID} from "../models/ownership";
 import {Button} from "../../../ui/button";
 import {Input} from "../../../ui/input";
 import {Textarea} from "../../../ui/textarea";
@@ -84,6 +88,9 @@ export function IpProfileEditor({profile, onClose, onSaved}: {
     const [error, setError] = useState<string>();
     const [discardOpen, setDiscardOpen] = useState(false);
     const saved = useRef(false);
+    // The portrait is saved on its own (it bumps the revision), so the text save follows the latest revision.
+    const revision = useRef(profile?.revision ?? 0);
+    const [avatarId, setAvatarId] = useState(profile?.avatarMediaId);
     const dirty = (Object.keys(baseline) as Array<keyof Draft>).some(key => baseline[key] !== draft[key]);
     const blocker = useBlocker({
         shouldBlockFn: () => !saved.current && (dirty || pendingRef.current),
@@ -97,6 +104,30 @@ export function IpProfileEditor({profile, onClose, onSaved}: {
         else onClose();
     }
 
+    async function changeAvatar(clear: boolean) {
+        if (!profile || pendingRef.current) return;
+        pendingRef.current = true;
+        setPending(true);
+        setError(undefined);
+        try {
+            let mediaId: string | undefined;
+            if (!clear) {
+                const file = await pickMediaFile("image/png,image/jpeg,image/webp,image/gif");
+                if (!file) return;
+                mediaId = (await uploadMediaFile(STUDIO_LIBRARY_ID, file)).id;
+            }
+            await setIpAvatar(profile.id, revision.current, mediaId ? {mediaId} : null);
+            const latest = await db.ipProfiles.get(profile.id);
+            revision.current = latest?.revision ?? revision.current + 1;
+            setAvatarId(latest?.avatarMediaId);
+        } catch (cause) {
+            setError(cause instanceof Error ? cause.message : "头像保存失败，请重试。");
+        } finally {
+            pendingRef.current = false;
+            setPending(false);
+        }
+    }
+
     async function save() {
         if (pendingRef.current) return;
         if (!draft.name.trim()) {
@@ -107,7 +138,7 @@ export function IpProfileEditor({profile, onClose, onSaved}: {
         setPending(true);
         setError(undefined);
         try {
-            if (profile) await updateIpProfile(profile.id, draft, profile.revision);
+            if (profile) await updateIpProfile(profile.id, draft, revision.current);
             const profileId = profile?.id ?? (await createIpProfile(draft)).id;
             saved.current = true;
             onSaved(profileId);
@@ -136,6 +167,15 @@ export function IpProfileEditor({profile, onClose, onSaved}: {
                     event.preventDefault();
                     void save();
                 }} className="ip-editor-form" id={`${id}-form`}>
+                    {profile && <div className="ip-editor-avatar">
+                        <MediaPreview mediaId={avatarId} empty="头像" className="ip-avatar" label="IP 头像"/>
+                        <div className="ip-editor-avatar-actions">
+                            <Button type="button" variant="outline" size="sm" disabled={pending}
+                                    onClick={() => void changeAvatar(false)}>{avatarId ? "更换头像" : "上传头像"}</Button>
+                            {avatarId && <Button type="button" variant="ghost" size="sm" disabled={pending}
+                                                 onClick={() => void changeAvatar(true)}>清除头像</Button>}
+                        </div>
+                    </div>}
                     <div className="ip-editor-fields">
                         <div className="ip-editor-field ip-editor-name"><label htmlFor={`${id}-name`}>IP
                             名称 <span>必填</span></label><Input id={`${id}-name`} autoFocus value={draft.name}

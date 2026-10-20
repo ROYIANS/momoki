@@ -18,6 +18,7 @@ import {
 } from "../../../ui/icons";
 import {setIpArchived} from "../commands/ipProfiles";
 import type {IpProfile} from "../models/materials";
+import {MediaPreview} from "./MediaThumb";
 import {Button} from "../../../ui/button";
 import {Input} from "../../../ui/input";
 import {PageContent, PageHeader, PageState, PageToolbar} from "../../../app/layout/PageLayout";
@@ -96,8 +97,8 @@ export function IpProfilesPage() {
                     const materialCount = view.materials?.filter(material => material.scope.kind === "ip" && material.scope.id === profile.id && !material.archived).length ?? 0;
                     return <Link key={profile.id} to="/ips/$ipId" params={{ipId: profile.id}}
                                  className="ip-profile-card">
-                        <div className="ip-profile-card-top"><span className="ip-monogram"
-                                                                   aria-hidden>{initials(profile.name)}</span><ArrowUpRight
+                        <div className="ip-profile-card-top">{profile.avatarMediaId ? <MediaPreview mediaId={profile.avatarMediaId} className="ip-monogram ip-monogram-image" label=""/> : <span className="ip-monogram"
+                                                                   aria-hidden>{initials(profile.name)}</span>}<ArrowUpRight
                             size={17} aria-hidden/></div>
                         <h2>{profile.name}</h2><p
                         className="ip-profile-positioning">{profile.positioning || "定位尚未填写，打开档案继续完善。"}</p>{profile.topics &&
@@ -176,6 +177,7 @@ export function IpProfilePage({ipId}: { ipId: string }) {
                     actions={<div className="ip-detail-actions">{!profile.archived &&
                         <Button variant="outline" onClick={() => setEditing(profile)}><Pencil
                             aria-hidden/>编辑档案</Button>}<IpArchiveAction profile={profile}/></div>}/>
+        {profile.avatarMediaId && <MediaPreview mediaId={profile.avatarMediaId} className="ip-avatar" label={`${profile.name} 头像`}/>}
         {profile.archived && <p className="ip-archive-note"><Archive size={15} aria-hidden/>档案已归档，原有项目和素材仍保留。恢复后可继续编辑和关联新项目。
         </p>}
         {tab === "profile" && <>

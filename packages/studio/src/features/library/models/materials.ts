@@ -10,6 +10,8 @@ export interface IpProfile {
     expression: string;
     visual: string;
     voice: string;
+    /** An image owned by the studio library, shown as the IP's portrait. */
+    avatarMediaId?: string;
     revision: number;
     archived: boolean;
     createdAt: string;

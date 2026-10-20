@@ -7,6 +7,7 @@ import { resolveAgentToolApproval } from '@/features/agent/commands/agentTools';
 import {createChatThread} from "@/features/agent/commands/chat";
 import {createProject} from "@/features/projects/commands/projects";
 import { bindProjectIp, createIpProfile, setIpArchived, updateIpProfile } from '@/features/library/commands/ipProfiles';
+import {putMedia} from '@/features/library/commands/media';
 import { IP_TOOLS as IP_TOOLS_DEFINITIONS } from '@/features/library/agent/ipTools';
 import { IP_TOOL_NAMES } from '@/features/library/agent/ipToolNames';
 import { getProjectContext, refreshRunProjectContext } from '@/features/agent/runtime/projectContext';
@@ -125,5 +126,33 @@ describe('IP tools with approval, scope and current facts', () => {
     const spy = interceptStoreTable(db, "agentToolCalls", 'update', async (_tx,args,next)=> {const params=args; if ((params[1] as { status?: string }).status === 'completed') throw new Error('ledger persistence failed'); return next(); });
     try { await expect(def.execute(args, ctx)).rejects.toThrow('ledger persistence failed'); } finally { spy.mockRestore(); }
     expect(await db.ipProfiles.count()).toBe(0); expect((await db.agentToolCalls.get(ctx.callId))?.status).toBe('running');
+  });
+});
+
+describe('IP portrait through ip_update', () => {
+  const png = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jFZkAAAAASUVORK5CYII='), c => c.charCodeAt(0));
+  const image = async (projectId: string) => {
+    const id = createId('med');
+    await putMedia({ id, projectId, mimeType: 'image/png', filename: 'portrait.png', blob: new Blob([png], { type: 'image/png' }) });
+    return id;
+  };
+  it('previews and applies a portrait with text fields, keeping a studio copy', async () => {
+    const project = await createProject('头像项目'), ip = await createIpProfile({ name: '带头像' });
+    await bindProjectIp(project.id, ip.id);
+    const mediaId = await image(project.id), run = await begin(project.id);
+    const call = await paused(run, 'ip_update', { id: ip.id, expectedRevision: 1, patch: { positioning: '山里的信', avatarMediaId: mediaId } });
+    expect(call.preview?.changes.join('\n')).toContain('头像');
+    await resolveAgentToolApproval(run.id, call.id, 'approve');
+    await resumeChatRun(run.id, connector.apiKey, new AbortController(), vi.fn(async () => answer()), IP_TOOLS);
+    const saved = (await db.ipProfiles.get(ip.id))!;
+    expect(saved.positioning).toBe('山里的信');
+    expect((await db.media.get(saved.avatarMediaId!))?.projectId).toBe('studio');
+    expect(saved.revision).toBe(3);
+  });
+  it('refuses an image from a project the conversation is not bound to', async () => {
+    const project = await createProject('绑定项目'), other = await createProject('别的项目'), ip = await createIpProfile({ name: '越界' });
+    await bindProjectIp(project.id, ip.id);
+    const run = await begin(project.id), foreign = await image(other.id);
+    await expect(tool('ip_update').prepare!({ id: ip.id, expectedRevision: 1, patch: { avatarMediaId: foreign } }, context(run))).rejects.toThrow('当前项目');
   });
 });
