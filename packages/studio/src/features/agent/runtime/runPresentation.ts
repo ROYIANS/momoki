@@ -1,9 +1,12 @@
 import type {AgentActivityStep, AgentRun, AgentRunOutput, AgentToolCall} from "../models/agent";
+import type {ChatMessage} from "../models/chat";
 
 export type RunActivityItem =
     | { kind: "text"; id: string; content: string }
     | { kind: "reasoning"; id: string; content: string; durationMs?: number }
-    | { kind: "tools"; id: string; calls: AgentToolCall[] };
+    | { kind: "tools"; id: string; calls: AgentToolCall[] }
+    /** A message the user sent mid-run and the run took in at a tool-round boundary. */
+    | { kind: "user"; id: string; message: ChatMessage };
 
 function ownedCalls(run: AgentRun, calls: readonly AgentToolCall[]) {
     return calls.filter((call) => call.runId === run.id && call.threadId === run.threadId)
@@ -35,7 +38,7 @@ function publicSteps(run: AgentRun, calls: readonly AgentToolCall[]): Map<number
 }
 
 /** A stable chronological view of public output and this run's tool ledger. */
-export function buildRunActivity(run: AgentRun, calls: readonly AgentToolCall[]): RunActivityItem[] {
+export function buildRunActivity(run: AgentRun, calls: readonly AgentToolCall[], steered: readonly ChatMessage[] = []): RunActivityItem[] {
     const scopedCalls = ownedCalls(run, calls);
     const steps = publicSteps(run, scopedCalls);
     const callsByStep = new Map<number, AgentToolCall[]>();
@@ -46,7 +49,16 @@ export function buildRunActivity(run: AgentRun, calls: readonly AgentToolCall[])
     }
     const result: RunActivityItem[] = [];
     const stepNumbers = [...new Set([...steps.keys(), ...callsByStep.keys()])].sort((a, b) => a - b);
+    // A steered message was taken in after step N finished and before step N+1 began: it sits between them.
+    const pendingSteered = [...steered].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    const flushSteeredBefore = (step: number) => {
+        while (pendingSteered.length && (pendingSteered[0].steeredAfterStep ?? 0) < step) {
+            const message = pendingSteered.shift()!;
+            result.push({kind: "user", id: `${run.id}-steered-${message.id}`, message});
+        }
+    };
     for (const number of stepNumbers) {
+        flushSteeredBefore(number);
         const step = steps.get(number);
         const prefix = `${run.id}-step-${number}`;
         if (step?.reasoning?.trim()) result.push({
@@ -65,6 +77,7 @@ export function buildRunActivity(run: AgentRun, calls: readonly AgentToolCall[])
         if (previous?.kind === "tools") previous.calls.push(...group);
         else result.push({kind: "tools", id: `${prefix}-tools`, calls: [...group]});
     }
+    flushSteeredBefore(Number.POSITIVE_INFINITY);
     return result;
 }
 

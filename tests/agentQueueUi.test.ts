@@ -223,13 +223,23 @@ describe("system rows in the transcript", () => {
         expect(container.querySelector(".agent-message-navigation-shell")!.className).toContain("has-turn-navigation");
     });
 
-    it("marks a message steered into a running turn without turning it into a system line", async () => {
-        await drawMessages([message("u1", "user"), message("a1", "assistant"),
-            message("u2", "user", {steeredIntoRunId: "run-1", content: "顺便看看 IP 列表"})]);
-        const mark = container.querySelector(".agent-steered-mark")!;
-        expect(mark.textContent).toBe("引导");
-        expect(mark.closest(".agent-user-bubble")?.textContent).toContain("顺便看看 IP 列表");
-        expect(container.querySelector(".agent-system-note")).toBeNull();
+    it("does not stack a steered message at the bottom: the run that took it in owns it, and no badge is drawn", async () => {
+        // AgentRunDetails is stubbed in this file, so a hosted row is simply absent from the list itself.
+        const run = {id: "run-1", threadId, status: "completed", hasToolCalls: true, createdAt: at, updatedAt: at, model: "model"} as unknown as AgentRun;
+        await act(async () => root.render(h("div", {className: "agent-chat-column"},
+            h(MessageList, {threadId, messages: [message("u1", "user"), message("a1", "assistant", {runId: "run-1"}),
+                message("u2", "user", {steeredIntoRunId: "run-1", steeredAfterStep: 1, content: "顺便看看 IP 列表"})],
+                runs: [run], calls: [], busy: false, onRunAction: vi.fn()}))));
+        expect(container.querySelector(".agent-steered-mark")).toBeNull();
+        expect(container.textContent).not.toContain("顺便看看 IP 列表");
+        expect(container.querySelectorAll(".agent-user-bubble")).toHaveLength(1);
+    });
+
+    it("draws a steered row as a normal bubble when its run is not loaded, so it never disappears", async () => {
+        await drawMessages([message("u1", "user"), message("a1", "assistant", {runId: "run-9"}),
+            message("u2", "user", {steeredIntoRunId: "run-9", content: "顺便看看 IP 列表"})]);
+        expect(container.textContent).toContain("顺便看看 IP 列表");
+        expect(container.querySelector(".agent-steered-mark")).toBeNull();
     });
 
     it("falls back to the queue text when a system row has no display line", async () => {

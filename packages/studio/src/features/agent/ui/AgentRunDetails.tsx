@@ -24,6 +24,7 @@ import {useAgentActivityNavigation} from "./AgentActivityNavigation";
 import "./executionActivity.css";
 
 const MARKDOWN_PROPS = {variant: "chat"} as const;
+const NO_STEERED: ChatMessage[] = [];
 
 import type {RunAction} from "../models/chatRunAction";
 // Success is shown by its icon only; every other state gets a short word.
@@ -204,8 +205,19 @@ function ToolGroup({calls, ...props}: RowProps & { calls: AgentToolCall[] }) {
 // A run waiting for approval keeps its process open so the decision is never folded away.
 const opensProcess = (status: AgentRun["status"]) => status === "running" || status === "waiting_approval";
 
-export function AgentRunDetails({run, message, calls, busy, readOnly, onAction}: {
+/** A message the user sent while the run was working, shown where the run took it in. */
+function SteeredMessage({message}: {message: ChatMessage}) {
+    const time = new Date(message.createdAt);
+    return <div className="agent-transcript-item agent-transcript-user agent-steered-message"
+                title={Number.isNaN(time.getTime()) ? undefined : time.toLocaleString()}>
+        <div className="agent-user-bubble"><Markdown {...MARKDOWN_PROPS}>{message.content}</Markdown></div>
+    </div>;
+}
+
+export function AgentRunDetails({run, message, calls, steered = NO_STEERED, busy, readOnly, onAction}: {
     run: AgentRun; message: ChatMessage; calls: AgentToolCall[];
+    /** Messages the user sent mid-run that this run took in. */
+    steered?: ChatMessage[];
     busy: boolean; readOnly?: boolean;
     onAction: (runId: string, action: RunAction, callId?: string) => void;
 }) {
@@ -217,7 +229,7 @@ export function AgentRunDetails({run, message, calls, busy, readOnly, onAction}:
     const positionedRequest = useRef<number | undefined>(undefined);
     const panelId = useId();
     const ownedCalls = useMemo(() => calls.filter((call) => call.runId === run.id && call.threadId === run.threadId), [run.id, run.threadId, calls]);
-    const activity = useMemo(() => buildRunActivity(run, ownedCalls), [run, ownedCalls]);
+    const activity = useMemo(() => buildRunActivity(run, ownedCalls, steered), [run, ownedCalls, steered]);
     const actions = useMemo(() => runActionState(run, ownedCalls), [run, ownedCalls]);
     const {recoverable, pendingApproval, budgetPaused} = actions;
     const echo = liveRoundEcho(run, message, ownedCalls);
@@ -271,9 +283,12 @@ export function AgentRunDetails({run, message, calls, busy, readOnly, onAction}:
             <ChevronDown size={14} className={expanded ? "rotate-180" : ""} aria-hidden/>
         </button>}
         <AgentWriteOutcomes run={run} calls={ownedCalls}/>
+        {hasProcess && !expanded && steered.map(item => <SteeredMessage key={item.id} message={item}/>)}
         <div id={panelId} className="agent-execution-timeline" hidden={hasProcess && !expanded}>
             {(expanded || hasExpanded) && <>
-                {activity.map((item) => item.kind === "text"
+                {activity.map((item) => item.kind === "user"
+                    ? <SteeredMessage key={item.id} message={item.message}/>
+                    : item.kind === "text"
                     ? <div key={item.id} data-agent-public="true"><Markdown {...MARKDOWN_PROPS}
                                 className="agent-activity-narrative">{item.content}</Markdown></div>
                     : item.kind === "reasoning"

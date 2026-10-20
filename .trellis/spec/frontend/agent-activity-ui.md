@@ -115,3 +115,6 @@ Good: a successful write turn reads as body + "本次已保存：镜头 3 项" +
 
 ### 7. Wrong vs Correct
 Wrong: surface every state as text in the header, strip, card and footer; put approve buttons only inside a folded panel or twice. Correct: one full statement per event; approval beside its call; the card only reveals it.
+
+### Steered messages sit in the run's timeline (queue task)
+A message steered into a running turn is delivered at a tool-round boundary and records `steeredAfterStep` (the model step the run had completed). It is not drawn as its own row after the answer: `buildRunActivity(run, calls, steered)` places it between step `steeredAfterStep` and the next, and `AgentRunDetails` draws it as an ordinary user bubble inside the timeline. A collapsed (finished) run still lists what the user said, once, above the collapsed panel. There is no "steered" badge. A steered row whose run is not loaded stays a normal bubble, so it never disappears. Steered rows are excluded from turn navigation and the last-turn retry anchor, since they are not turns of their own.

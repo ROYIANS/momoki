@@ -78,8 +78,15 @@ export function MessageList({threadId, messages, runs, calls = EMPTY_CALLS, obse
     }, [setFollowing]);
     const list = messages ?? [];
     // A system event row is a user row for protocol/retry purposes, but not a turn the reader wrote.
-    const userMessages = list.filter((message) => message.role === "user" && message.origin !== "system");
-    const entries = submissionTranscript(messages, submissions);
+    // A message steered into a run is shown inside that run's timeline, where the run took it in, not as its own row.
+    // Only a run that is loaded can host it; otherwise the row stays a normal bubble rather than vanishing.
+    const loadedRuns = new Set((runs ?? []).map(run => run.id));
+    const hostedRuns = new Set(list.filter(message => message.role === "assistant" && message.runId && loadedRuns.has(message.runId)).map(message => message.runId));
+    const isHostedSteer = (message: ChatMessage) => message.role === "user" && Boolean(message.steeredIntoRunId) && hostedRuns.has(message.steeredIntoRunId);
+    const steeredByRun = new Map<string, ChatMessage[]>();
+    for (const message of list) if (isHostedSteer(message)) steeredByRun.set(message.steeredIntoRunId!, [...steeredByRun.get(message.steeredIntoRunId!) ?? [], message]);
+    const userMessages = list.filter((message) => message.role === "user" && message.origin !== "system" && !isHostedSteer(message));
+    const entries = submissionTranscript(messages, submissions).filter(entry => entry.kind === "attempt" || !isHostedSteer(entry.message));
     const lastUser = entries.filter(entry => entry.kind === "attempt" || entry.message.role === "user").at(-1);
     const lastUserId = lastUser?.kind === "attempt" ? lastUser.attempt.admission.userMessageId : lastUser?.message.id;
     useLayoutEffect(() => {
@@ -160,7 +167,8 @@ export function MessageList({threadId, messages, runs, calls = EMPTY_CALLS, obse
                             return (
                                 <Fragment key={message.id}><div ref={message.role === "assistant" && message.publicRevision === observedRevision && observedRevision > 0 ? observedSurface : undefined}
                                     data-public-revision={message.publicRevision}><AgentChatMessageItem message={message}
-                                                      run={runs?.find((run) => run.id === message.runId)} calls={calls.filter(call => call.runId === message.runId)} busy={busy}
+                                                      run={runs?.find((run) => run.id === message.runId)} calls={calls.filter(call => call.runId === message.runId)}
+                                                      steered={message.runId ? steeredByRun.get(message.runId) : undefined} busy={busy}
                                                       readOnly={readOnly} onRunAction={onRunAction}/></div></Fragment>
                             );
                         })
@@ -177,11 +185,18 @@ export function MessageList({threadId, messages, runs, calls = EMPTY_CALLS, obse
     );
 }
 
+function sameSteered(a: ChatMessage[] | undefined, b: ChatMessage[] | undefined) {
+    if (a === b) return true;
+    if ((a?.length ?? 0) !== (b?.length ?? 0)) return false;
+    return (a ?? []).every((item, index) => item.id === b![index].id && item.content === b![index].content && item.steeredAfterStep === b![index].steeredAfterStep);
+}
+
 const AgentChatMessageItem = memo(
     function AgentChatMessageItem({
                                       message,
                                       run,
                                       calls,
+                                      steered,
                                       busy,
                                       readOnly,
                                       onRunAction,
@@ -189,6 +204,7 @@ const AgentChatMessageItem = memo(
         message: ChatMessage;
         run?: AgentRun;
         calls: AgentToolCall[];
+        steered?: ChatMessage[];
         busy: boolean;
         readOnly?: boolean;
         onRunAction: (runId: string, action: RunAction, callId?: string) => void;
@@ -226,14 +242,13 @@ const AgentChatMessageItem = memo(
                     <div className="agent-user-bubble">
                         <ReferenceMessageSources context={message.referenceContext} content={message.content}/>
                         <Markdown {...MARKDOWN_PROPS}>{message.content}</Markdown>
-                        {message.steeredIntoRunId ? <span className="agent-steered-mark" role="note">引导</span> : null}
                     </div>
                 </div>
             );
         }
         return (
             <div className="agent-transcript-item agent-assistant-transcript">
-                {run && <AgentRunDetails run={run} message={message} calls={calls} busy={busy} readOnly={readOnly}
+                {run && <AgentRunDetails run={run} message={message} calls={calls} steered={steered} busy={busy} readOnly={readOnly}
                                          onAction={onRunAction}/>}
                 {!run && hasReasoning && <ThinkingPanel reasoning={message.reasoning ?? ""} active={reasoningActive}
                                                         durationMs={message.reasoningDurationMs}/>}
@@ -288,6 +303,7 @@ const AgentChatMessageItem = memo(
         prev.message.role === next.message.role &&
         prev.message.origin === next.message.origin &&
         prev.message.steeredIntoRunId === next.message.steeredIntoRunId &&
+        sameSteered(prev.steered, next.steered) &&
         prev.message.createdAt === next.message.createdAt &&
         prev.message.reasoning === next.message.reasoning &&
         prev.message.reasoningDurationMs === next.message.reasoningDurationMs,

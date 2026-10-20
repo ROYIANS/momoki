@@ -43,7 +43,8 @@ export async function injectSteerInputs(runId: string, store: ProductStore): Pro
             if (!await db.chatMessages.get(item.userMessageId)) {
                 await db.chatMessages.add({
                     id: item.userMessageId, threadId: run.threadId, role: "user", content: item.content,
-                    status: "complete", steeredIntoRunId: run.id, createdAt: new Date(clock++).toISOString(),
+                    status: "complete", steeredIntoRunId: run.id, steeredAfterStep: run.modelStep ?? 0,
+                    createdAt: new Date(clock++).toISOString(),
                 });
             }
             await db.agentPendingInputs.delete(item.id);

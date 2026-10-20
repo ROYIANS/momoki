@@ -159,4 +159,22 @@ describe("message area and navigation no longer duplicate the cards", () => {
         await db.agentToolCalls.update("c1", {name: "submit_generation"});
         await vi.waitFor(() => expect(container.textContent).toContain("待批准"));
     });
+
+    it("AgentRunDetails shows a steered message where the run took it in, expanded or collapsed", async () => {
+        const run = makeRun({status: "completed", hasToolCalls: true});
+        const call = makeCall("c1", {status: "completed", step: 1, order: 0});
+        const steered = {id: "u2", threadId, role: "user", content: "顺便看看 IP 列表", createdAt: at, status: "complete",
+            steeredIntoRunId: "run-1", steeredAfterStep: 1} as import("@/features/agent/models/chat").ChatMessage;
+        const message = {id: "a", threadId, role: "assistant", content: "", createdAt: at, status: "complete", runId: "run-1"} as import("@/features/agent/models/chat").ChatMessage;
+        await act(async () => root.render(h(AgentActivityNavigationProvider, {threadId},
+            h(AgentRunDetails, {run, message, calls: [call], steered: [steered], busy: false, onAction: onRunAction}))));
+        // Finished runs are collapsed: what the user said must still be visible, once, with no badge.
+        expect(container.querySelectorAll(".agent-steered-message")).toHaveLength(1);
+        expect(container.textContent).toContain("顺便看看 IP 列表");
+        expect(container.querySelector(".agent-steered-mark")).toBeNull();
+        await act(async () => container.querySelector<HTMLButtonElement>(".agent-execution-summary")!.click());
+        // Expanded, it moves into the timeline instead of being drawn twice.
+        expect(container.querySelectorAll(".agent-steered-message")).toHaveLength(1);
+        expect(container.querySelector(".agent-execution-timeline .agent-steered-message")).toBeTruthy();
+    });
 });

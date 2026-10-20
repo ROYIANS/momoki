@@ -50,6 +50,8 @@ export interface ChatMessage {
     origin?: "system";
     /** Run into which this user row was steered mid-run. */
     steeredIntoRunId?: Id;
+    /** Model step the run had completed when the row was delivered; the row sits after that step's output. */
+    steeredAfterStep?: number;
     /** Short text shown for system rows. */
     display?: string;
 }
