@@ -4806,7 +4806,7 @@
   {
     "name": "generation_capabilities",
     "title": "查看生成能力",
-    "description": "列出已配置供应商、代码已验证的模型参数，以及项目/全局生成推荐。传 projectId 获取项目默认；用户明确选择优先于项目、全局和自动建议。有问题的推荐不得静默降级。能力列表不是账户授权或余额保证。",
+    "description": "列出已配置供应商、代码已验证的模型参数，以及项目/全局生成推荐。传 projectId 获取项目默认；再传 shotId 会返回上一镜已有的尾帧/首帧/视频结果的媒体 ID（continuity），用于镜头衔接；用户明确选择优先于项目、全局和自动建议。有问题的推荐不得静默降级。能力列表不是账户授权或余额保证。",
     "parameters": {
       "type": "object",
       "properties": {
@@ -4814,6 +4814,12 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 160
+        },
+        "shotId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160,
+          "description": "要生成的镜头；返回上一镜的衔接素材"
         }
       },
       "additionalProperties": false

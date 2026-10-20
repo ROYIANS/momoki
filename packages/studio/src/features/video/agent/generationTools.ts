@@ -5,6 +5,7 @@ import {assertProjectToolScope, frozenProjectScope} from "../../agent/runtime/pr
 import {z} from "zod";
 import {getGenerationPreferenceState} from "../../settings/commands/generationPreferences";
 import {recommendGenerationSelection} from "./generationSelection";
+import {parseShotPictureSlots} from "../../library/models/slot";
 import {db as productDb} from "../../../platform/product/store";
 import {generationJobSummary} from "../../agent/commands/agentGeneration";
 import {
@@ -95,12 +96,12 @@ export const GENERATION_TOOLS = [
         }
     }),
     defineTool({
-        schema: z.object({projectId: z.string().trim().min(1).max(160).optional()}).strict(),
-        json: {type: "object", properties: {projectId: id}, additionalProperties: false}
+        schema: z.object({projectId: z.string().trim().min(1).max(160).optional(), shotId: z.string().trim().min(1).max(160).optional()}).strict(),
+        json: {type: "object", properties: {projectId: id, shotId: {...id, description: "要生成的镜头；返回上一镜的衔接素材"}}, additionalProperties: false}
     }, {
         name: "generation_capabilities",
         title: "查看生成能力",
-        description: "列出已配置供应商、代码已验证的模型参数，以及项目/全局生成推荐。传 projectId 获取项目默认；用户明确选择优先于项目、全局和自动建议。有问题的推荐不得静默降级。能力列表不是账户授权或余额保证。",
+        description: "列出已配置供应商、代码已验证的模型参数，以及项目/全局生成推荐。传 projectId 获取项目默认；再传 shotId 会返回上一镜已有的尾帧/首帧/视频结果的媒体 ID（continuity），用于镜头衔接；用户明确选择优先于项目、全局和自动建议。有问题的推荐不得静默降级。能力列表不是账户授权或余额保证。",
         effect: "read",
         highRisk: () => false,
         async execute(args, context) {
@@ -122,7 +123,24 @@ export const GENERATION_TOOLS = [
                 preferenceIssues: state.issues
             })]));
             signal.throwIfAborted();
+            let continuity: Record<string, unknown> | undefined;
+            if (args.shotId) {
+                const shot = await db.shots.get(args.shotId);
+                if (!shot || (projectId && shot.projectId !== projectId)) throw new Error("镜头不存在或不属于该项目");
+                const before = (await db.shots.where("episodeId").equals(shot.episodeId).toArray())
+                    .filter(item => item.projectId === shot.projectId && item.order < shot.order).sort((a, b) => b.order - a.order)[0];
+                if (!before) continuity = {previousShot: null, note: "这是本集第一个镜头，没有上一镜可衔接。"};
+                else {
+                    const slots = parseShotPictureSlots(before as unknown as Record<string, unknown>);
+                    const media = (slot: {result?: {mediaId: string}}) => slot.result?.mediaId ?? null;
+                    continuity = {
+                        previousShot: {id: before.id, shotNumber: before.shotNumber, lastFrameMediaId: media(slots.lastFrame), firstFrameMediaId: media(slots.firstFrame), clipMediaId: media(slots.clip)},
+                        note: "需要衔接时，把 lastFrameMediaId（没有则 firstFrameMediaId）作为本镜 reference-image 或 first-frame 输入；没有素材就如实说明，不要编造 ID，也不要把衔接写进备注就说成已衔接。"
+                    };
+                }
+            }
             return {
+                ...(continuity ? {continuity} : {}),
                 connectors: connectors.map((item) => ({
                     id: item.id,
                     provider: item.definitionId,

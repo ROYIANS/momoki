@@ -143,6 +143,23 @@ describe("reviewed generation submission",()=>{
     expect((await db.agentToolCalls.get(f.call.id))?.arguments).toBe(f.original);
     await expect(tool.execute(tool.parseArguments({projectId:"missing"}),context)).rejects.toThrow("不存在");
   });
+  it("tells the agent which media the previous shot ended on, and says so when there is none",async()=>{
+    const f=await pending();
+    const target=f.args.target as {projectId:string;episodeId:string;entityId:string};
+    const tool=GENERATION_TOOLS.find((item)=>item.name==="generation_capabilities")!;
+    const context={runId:f.run.id,threadId:f.thread.id,callId:f.call.id,signal:new AbortController().signal};
+    const second=await addShot(target.projectId,target.episodeId);
+    const first=(await db.shots.get(target.entityId))!;
+    expect(first.order).toBeLessThan(second.order);
+    const empty=await tool.execute(tool.parseArguments({projectId:target.projectId,shotId:second.id}),context) as {continuity:{previousShot:{id:string;lastFrameMediaId:string|null}}};
+    expect(empty.continuity.previousShot).toMatchObject({id:first.id,lastFrameMediaId:null});
+    const slot={referenceImageIds:[],referenceVideoIds:[],prompt:"",result:{mediaId:"media-tail",kind:"image"}};
+    await db.shots.update(first.id,{lastFrame:slot} as never);
+    const filled=await tool.execute(tool.parseArguments({projectId:target.projectId,shotId:second.id}),context) as {continuity:{previousShot:{lastFrameMediaId:string|null}}};
+    expect(filled.continuity.previousShot.lastFrameMediaId).toBe("media-tail");
+    const head=await tool.execute(tool.parseArguments({projectId:target.projectId,shotId:first.id}),context) as {continuity:{previousShot:unknown}};
+    expect(head.continuity.previousShot).toBeNull();
+  });
   it("blocks stale permission snapshots instead of bypassing confirmation",async()=>{
     const paid=paidFixture();vi.stubGlobal("fetch",paid);
     const f=await pending();await db.agentToolCalls.update(f.call.id,{requiresConfirmation:undefined});

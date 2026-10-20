@@ -23,7 +23,8 @@
     "10-20-sidebar-panels",
     "10-20-generation-slot-decoupling",
     "10-20-generation-message-display",
-    "10-20-finishing-check-evidence"
+    "10-20-finishing-check-evidence",
+    "10-20-previous-shot-tail-reference"
   ],
   "parent": null,
   "relatedFiles": [],
