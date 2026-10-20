@@ -50,7 +50,8 @@ export function useComposerAttention({threadId, task, projectUnavailable, onOpen
     if (!threadId) return {status: "ready", items: []};
     if (!state || state.threadId !== threadId || "idle" in state) return {status: "loading", items: []};
     if ("error" in state) return {status: "error", items: []};
-    const attention = selectActivityAttention({...state, projectUnavailable});
+    // A batch waiting on the user already has its own row above the composer; a second pill for it would repeat it.
+    const attention = selectActivityAttention({...state, projectUnavailable}).filter(item => !item.target.batchId);
     // A plain approval is decided on its own action card; the navigation item would only repeat it.
     const coveredByCard = (item: (typeof attention)[number]) => {
         if (item.kind !== "approval" || !item.target.callId) return false;

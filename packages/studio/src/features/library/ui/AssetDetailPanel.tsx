@@ -62,7 +62,7 @@ export function AssetDetailPanel({request, onRequestOutcome, onClosed, closeRequ
         if (closeRequest.requestId !== active.id) {current.current.onCloseRefused?.(closeRequest.id); return;}
         close("return", closeRequest.id);
     }, [closeRequest, active.id, close]);
-    return <><ContextPanel open onOpenChange={(open, reason) => {
+    return <><ContextPanel kind="asset" open onOpenChange={(open, reason) => {
         if (open) return;
         if (reason === "guard-refused" || reason === "busy") {
             onRequestOutcome({requestId: active.id, status: "refused", reason: reason === "busy" ? "busy" : "guard"});

@@ -38,7 +38,7 @@ export function McpConnectionsPanel({open, onOpenChange, returnFocus, returnLabe
     const content = <div className="mcp-scroll app-scroll">{owner ? <McpManagementBody owner={owner} state={state} onBack={back}/>
         : <p className="mcp-hint" role="alert">当前运行环境未提供 MCP 服务。请使用桌面端，或重新打开支持远程连接的浏览器工作区。</p>}</div>;
     if (inline) return <><div className="mcp-panel mcp-inline" data-mcp-management>{content}</div>{departure.confirmation}</>;
-    return <><ContextPanel open={open} width={520} onOpenChange={(next, reason) => {
+    return <><ContextPanel kind="mcp" open={open} width={520} onOpenChange={(next, reason) => {
         if (!next && reason !== "guard-refused" && reason !== "busy") owner?.discardDraft();
         onOpenChange(next);
     }} onRequestDeparture={(proceed, cancel) => departure.requestDeparture(proceed, discard, cancel)}>

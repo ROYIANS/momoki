@@ -193,7 +193,7 @@ function MusicWorkspace({projectId}: { projectId: string }) {
                     </div>)}
             </main>
         </ModuleLayout>
-        <ContextPanel open={Boolean(selected)} width={300} onOpenChange={(open) => {
+        <ContextPanel kind="music-detail" open={Boolean(selected)} width={300} onOpenChange={(open) => {
             if (!open && !actionPending.current && !submissionPending.current) setSelectedId("");
         }} onRequestDeparture={(proceed, cancel) => {
             if (!actionPending.current && !submissionPending.current) proceed(); else cancel?.();

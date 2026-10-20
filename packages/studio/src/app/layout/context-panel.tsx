@@ -36,10 +36,12 @@ function usePanel() {
 }
 
 /** Feature-owned open/draft state; the frame arbitrates presentation only. */
-export function ContextPanel({open, onOpenChange, width = 400, title, onRequestDeparture, children}: {
+export function ContextPanel({open, onOpenChange, width = 400, title, kind, onRequestDeparture, children}: {
     open: boolean; onOpenChange: (open: boolean, reason?: ContextPanelHostCloseReason) => void; width?: number; children: ReactNode;
     /** Shown in the top bar's panel zone while this panel is active. */
     title?: string;
+    /** Names this panel type so a dragged width is remembered for it. */
+    kind?: string;
     onRequestDeparture?: (proceed: () => void, cancel?: () => void) => void;
 }) {
     const id = useId();
@@ -56,7 +58,7 @@ export function ContextPanel({open, onOpenChange, width = 400, title, onRequestD
         const lifetimeState = registrationLifetime.current;
         const lifetime = ++lifetimeState.generation;
         const unregister = register?.({
-            id, width, title, reopen: () => current.current.onOpenChange(true), depart: (proceed, cancel) => {
+            id, width, title, kind, reopen: () => current.current.onOpenChange(true), depart: (proceed, cancel) => {
                 if (current.current.onRequestDeparture) current.current.onRequestDeparture(proceed, cancel); else proceed();
             }, close: reason => current.current.onOpenChange(false, reason)
         });
@@ -65,7 +67,7 @@ export function ContextPanel({open, onOpenChange, width = 400, title, onRequestD
             // Preserve the host's pending guard rather than request it twice.
             queueMicrotask(() => {if (lifetimeState.generation === lifetime) unregister?.();});
         };
-    }, [register, id, width, title]);
+    }, [register, id, width, title, kind]);
     useEffect(() => {
         if (open) request?.(id); else release?.(id);
     }, [open, request, release, id]);
@@ -176,4 +178,9 @@ export function ContextPanelDescription({className, ...props}: ComponentProps<"p
     const panel = usePanel();
     return <p {...props} id={panel.descriptionId} data-slot="context-panel-description"
               className={cn("text-muted-foreground text-sm", className)}/>;
+}
+
+/** Fixed at the bottom of a panel while its body scrolls: where a form's confirm, save and cancel live. */
+export function ContextPanelFooter({className, ...props}: ComponentProps<"div">) {
+    return <div data-slot="context-panel-footer" className={cn("context-panel-footer", className)} {...props}/>;
 }

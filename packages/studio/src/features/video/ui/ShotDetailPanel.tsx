@@ -112,7 +112,7 @@ export function ShotDetailPanel({request, onRequestOutcome, onClosed, closeReque
         }
         close(closeRequest.reason, closeRequest.id);
     }, [closeRequest, active.id, close]);
-    return <><ContextPanel open onOpenChange={(open, reason) => {
+    return <><ContextPanel kind="shot" open onOpenChange={(open, reason) => {
         if (open) return;
         if (reason === "guard-refused" || reason === "busy") {
             callbacks.current.onRequestOutcome({requestId: active.id, status: "refused", reason: reason === "busy" ? "busy" : "guard"});

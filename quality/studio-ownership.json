@@ -6905,6 +6905,20 @@
       "owner": "app",
       "public": false,
       "publicTypes": []
+    },
+    {
+      "file": "packages/studio/src/app/layout/panelWidth.ts",
+      "target": "packages/studio/src/app/layout/panelWidth.ts",
+      "owner": "app",
+      "public": false,
+      "publicTypes": []
+    },
+    {
+      "file": "packages/studio/src/app/layout/autoOpen.ts",
+      "target": "packages/studio/src/app/layout/autoOpen.ts",
+      "owner": "app",
+      "public": false,
+      "publicTypes": []
     }
   ],
   "featureUiAppEntries": [
@@ -6973,6 +6987,7 @@
         "ContextPanel",
         "ContextPanelContent",
         "ContextPanelDescription",
+        "ContextPanelFooter",
         "ContextPanelHeader",
         "ContextPanelHeaderActions",
         "ContextPanelTitle"
@@ -7033,6 +7048,12 @@
         "BusinessDetailTarget",
         "readBusinessDetailTarget",
         "DetailReturnOrigin"
+      ]
+    },
+    {
+      "file": "app/layout/autoOpen.ts",
+      "symbols": [
+        "useAutoOpenPanel"
       ]
     }
   ],

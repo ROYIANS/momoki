@@ -27,6 +27,7 @@ import {LOGO_SRC, PRODUCT_NAME_ZH} from "@cuepoint/distribution/brand";
 import {cn} from "../../ui/cn";
 import {getWindowChromeKind} from "../../platform/runtime/windowChrome";
 import {topbarZones} from "./topbarZones";
+import {PANEL_KEYBOARD_STEP, PANEL_MAX_WIDTH, PANEL_MIN_WIDTH} from "./panelWidth";
 
 function matchesPath(pathname: string, target: string) {
     return pathname === target || pathname.startsWith(`${target}/`);
@@ -256,6 +257,30 @@ function AppTopbar({isolated, chromeKind, narrow, navigationWidth, label, setHea
     </header>;
 }
 
+/** A thin handle on the panel's left edge; drag it, or focus it and use the arrow keys. */
+function PanelResizer({width, onResize}: {width: number; onResize: (width: number) => void}) {
+    const drag = useRef<{startX: number; startWidth: number} | null>(null);
+    return <div role="separator" aria-orientation="vertical" aria-label="调整右侧栏宽度" tabIndex={0}
+                aria-valuemin={PANEL_MIN_WIDTH} aria-valuemax={PANEL_MAX_WIDTH} aria-valuenow={width}
+                className="app-panel-resizer" style={{right: `${width}px`}}
+                onPointerDown={event => {
+                    event.currentTarget.setPointerCapture(event.pointerId);
+                    drag.current = {startX: event.clientX, startWidth: width};
+                }}
+                onPointerMove={event => {
+                    if (drag.current) onResize(drag.current.startWidth + (drag.current.startX - event.clientX));
+                }}
+                onPointerUp={event => {
+                    drag.current = null;
+                    event.currentTarget.releasePointerCapture(event.pointerId);
+                }}
+                onKeyDown={event => {
+                    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+                    event.preventDefault();
+                    onResize(width + (event.key === "ArrowLeft" ? PANEL_KEYBOARD_STEP : -PANEL_KEYBOARD_STEP));
+                }}/>;
+}
+
 function WorkingSurface({setSurface, setPanelHost, contentScroll, children}: {
     setSurface: (node: HTMLDivElement | null) => void; setPanelHost: (node: HTMLDivElement | null) => void;
     contentScroll: "auto" | "hidden"; children: ReactNode;
@@ -275,5 +300,6 @@ function WorkingSurface({setSurface, setPanelHost, contentScroll, children}: {
              className={cn("app-frame-content app-scroll", contentScroll === "auto" ? "overflow-auto" : "flex flex-col overflow-hidden")}>{children}</div>
         <div ref={setPanelHost} className="app-context-panel-host"
              data-mode={detailMode} style={{width: detailWidth}}/>
+        {detailMode === "docked" && host && <PanelResizer width={host.width} onResize={host.setPanelWidth}/>}
     </div>;
 }

@@ -2,6 +2,15 @@ import {type MouseEvent, useCallback, useEffect, useId, useLayoutEffect, useRef,
 import {readBusinessDetailTarget, useBusinessDetails, type BusinessDetailTarget, type DetailReturnOrigin} from "../../../app/details/BusinessDetails";
 import {useProductQuery} from "../../../platform/product/queries";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import {
+    ContextPanel,
+    ContextPanelContent,
+    ContextPanelDescription,
+    ContextPanelFooter,
+    ContextPanelHeader,
+    ContextPanelTitle
+} from "../../../app/layout/context-panel";
+import {useAutoOpenPanel} from "../../../app/layout/autoOpen";
 import {Link, useBlocker} from "@tanstack/react-router";
 import {
     ArrowUpRight,
@@ -74,12 +83,10 @@ type ReviewHandoff = {
     token: string;
     target: BusinessDetailTarget;
     bookmark: ReviewBookmark;
-    phase: "releasing" | "opening" | "opened";
+    phase: "opening" | "opened";
     requestId?: string;
     returnRequested?: boolean;
 };
-/** Bound for the modal to release focus before the detail opens, if `onCloseAutoFocus` never fires. */
-const HANDOFF_RELEASE_FALLBACK_MS = 400;
 const REVIEW_CONTROLS = "button, a[href], input, textarea, select, summary, [tabindex]";
 
 function reviewControlKey(control: HTMLElement) {
@@ -208,21 +215,18 @@ function BatchSurface({batch, parentReadError}: { batch: GenerationBatch; parent
     const handoffRef = useRef<ReviewHandoff | null>(null);
     const restoreBookmark = useRef<ReviewBookmark | null>(null);
     const bodyRef = useRef<HTMLDivElement>(null);
-    const [handoff, setHandoff] = useState(false);
     const last = useRef<BatchDetail | undefined>(undefined);
     const [readAttempt, setReadAttempt] = useState(0);
     const [open, setOpen] = useState(false);
     const [retainedNotice, setRetainedNotice] = useState<string>();
     const localRef = useRef<{ revision: number; edits: DraftEdit[] } | null>(null);
-    const releaseRef = useRef<() => void>(() => undefined);
     const finishHandoff = useCallback((token: string, restore: boolean) => {
         const current = handoffRef.current;
         if (!alive.current || current?.token !== token) return;
         restoreBookmark.current = restore ? current.bookmark : null;
         handoffRef.current = null;
-        // Replacement retires the old origin without opening its modal over the new detail.
+        // Replacement retires the old origin without reopening the review over the new detail.
         setOpen(restore);
-        setHandoff(false);
         // The retained local draft stays reachable and is announced, never silently hidden.
         if (!restore && localRef.current) setRetainedNotice("批量审阅已收起，未保存的编辑仍保留。点击「打开」继续审阅。");
     }, []);
@@ -247,12 +251,7 @@ function BatchSurface({batch, parentReadError}: { batch: GenerationBatch; parent
     }, []);
     const [inspecting, setInspecting] = useState(false);
     const [local, setLocal] = useState<{ revision: number; edits: DraftEdit[] } | null>(null);
-    useLayoutEffect(() => {localRef.current = local; releaseRef.current = openAfterModalRelease;});
-    useEffect(() => {
-        if (!handoff) return;
-        const timer = setTimeout(() => releaseRef.current(), HANDOFF_RELEASE_FALLBACK_MS);
-        return () => clearTimeout(timer);
-    }, [handoff]);
+    useLayoutEffect(() => {localRef.current = local;});
     const [expanded, setExpanded] = useState<string>();
     const [targetKey, setTargetKey] = useState<string>();
     const [pending, setPending] = useState(false);
@@ -297,6 +296,11 @@ function BatchSurface({batch, parentReadError}: { batch: GenerationBatch; parent
         return job?.result && detail?.currentMedia[item.targetKey] === job.result.mediaId;
     }).length;
     const portalRoot = typeof document !== "undefined" ? document.querySelector<HTMLElement>(".agent-chat-root") ?? document.body : undefined;
+
+    // Something needs the user: a draft to confirm, or results nobody has looked at. Offered once, without taking focus.
+    const autoKey = draft ? `batch:${current.id}:draft`
+        : current.status === "settled" && downloaded > 0 && selectedCount === 0 ? `batch:${current.id}:results` : undefined;
+    const panelOpenChange = useAutoOpenPanel({key: autoKey, ready: Boolean(autoKey && detail && !view?.readOnly), open, width: 520, setOpen});
 
     const blocker = useBlocker({
         shouldBlockFn: () => Boolean(local) || pendingRef.current,
@@ -363,12 +367,16 @@ function BatchSurface({batch, parentReadError}: { batch: GenerationBatch; parent
         });
     }
 
-    function onOpenChange(next: boolean) {
-        if (!next && (local || pending)) {
+    /** A departure (close, or another panel taking over) is refused while the review holds unsaved or in-flight work. */
+    function requestDeparture(proceed: () => void, cancel?: () => void) {
+        // Opening a target's detail from here keeps the edits, so it is always allowed.
+        if (handoffRef.current) {proceed(); return;}
+        if (local || pending) {
             setError(local ? "还有未保存的编辑，请先保存草稿，或放弃本地编辑后关闭。" : "正在保存，请稍候再关闭。");
+            cancel?.();
             return;
         }
-        setOpen(next);
+        proceed();
     }
 
     const endOrigin: DetailReturnOrigin["onEnd"] = event => {
@@ -384,22 +392,17 @@ function BatchSurface({batch, parentReadError}: { batch: GenerationBatch; parent
         if (!parsed || !matchesProductionTarget(parsed, target) || !bodyRef.current) return;
         event.preventDefault();
         if (handoffRef.current) return;
-        handoffRef.current = {
+        const source: ReviewHandoff = {
             token: `${session}-review-${++sequence.current}`,
             target: parsed,
             bookmark: captureReviewBookmark(bodyRef.current, event.currentTarget),
-            phase: "releasing",
+            phase: "opening",
         };
-        setHandoff(true);
-    }
-
-    function openAfterModalRelease() {
-        const source = handoffRef.current;
-        if (!alive.current || !source || source.phase !== "releasing" || !openDetail) return;
-        source.phase = "opening";
-        void openDetail(source.target, {origin: {token: source.token, label: "返回批量审阅", onEnd: endOrigin}}).then(result => {
+        handoffRef.current = source;
+        // The detail is a panel too: it takes this panel's place, and ending it brings the review back.
+        void openDetail(parsed, {origin: {token: source.token, label: "返回批量审阅", onEnd: endOrigin}}).then(result => {
             if (!alive.current || handoffRef.current !== source) return;
-            if (result.status === "refused") {finishHandoff(source.token, true); return;}
+            if (result.status === "refused") {handoffRef.current = null; return;}
             source.phase = "opened";
             source.requestId = result.requestId;
             if (source.returnRequested && returnToOrigin) void returnToOrigin(source.token).then(outcome => {
@@ -408,7 +411,7 @@ function BatchSurface({batch, parentReadError}: { batch: GenerationBatch; parent
         }, () => {
             if (alive.current && handoffRef.current === source) {
                 setError("无法打开目标详情，批次编辑已保留。");
-                finishHandoff(source.token, true);
+                handoffRef.current = null;
             }
         });
     }
@@ -431,34 +434,25 @@ function BatchSurface({batch, parentReadError}: { batch: GenerationBatch; parent
         {view?.error && !parentReadError && !open && <p className="agent-batch-error" role="alert">读取失败，当前内容已保留
             <button type="button" title={view.error} onClick={() => setReadAttempt(value => value + 1)}>重试</button>
         </p>}
-        <DialogPrimitive.Root open={open && !handoff} onOpenChange={onOpenChange}>
-            <DialogPrimitive.Portal container={portalRoot}>
-                <DialogPrimitive.Overlay className="agent-batch-overlay"/>
-                <DialogPrimitive.Content className="agent-batch-dialog" onEscapeKeyDown={event => {
-                    if (inspecting) event.preventDefault();
-                }} onOpenAutoFocus={event => {
-                    const bookmark = restoreBookmark.current;
-                    if (bookmark && bodyRef.current) {
-                        event.preventDefault();
-                        restoreBookmark.current = null;
-                        restoreReviewBookmark(bodyRef.current, bookmark);
-                    }
-                }} onCloseAutoFocus={event => {
+        <ContextPanel kind="batch-review" title="批量生成" open={open} width={520} onOpenChange={panelOpenChange}
+                      onRequestDeparture={requestDeparture}>
+            <ContextPanelContent className="agent-batch-dialog" onOpenAutoFocus={event => {
+                const bookmark = restoreBookmark.current;
+                if (bookmark && bodyRef.current) {
                     event.preventDefault();
-                    if (handoffRef.current) {
-                        // Radix removes its focus scope after this event returns. Do not
-                        // open an external detail while the departing modal owns focus.
-                        queueMicrotask(openAfterModalRelease);
-                    } else if (alive.current) triggerRef.current?.focus({preventScroll: true});
-                }}>
-                    <header className="agent-batch-header">
+                    restoreBookmark.current = null;
+                    restoreReviewBookmark(bodyRef.current, bookmark);
+                }
+            }} onCloseAutoFocus={event => {
+                event.preventDefault();
+                if (!handoffRef.current && alive.current) triggerRef.current?.focus({preventScroll: true});
+            }}>
+                    <ContextPanelHeader className="agent-batch-header">
                         <div><span
-                            className="agent-batch-eyebrow">批量生成 · {BATCH_LABELS[current.status]}</span><DialogPrimitive.Title>{current.title}</DialogPrimitive.Title>
-                            <DialogPrimitive.Description>{draft ? `逐项检查配置，每个目标最多 ${BATCH_TARGET_LIMIT} 份候选，每批最多 ${BATCH_REQUEST_LIMIT} 份。` : "按目标比较候选。选择后点击写入，其他结果仍会保留。"}</DialogPrimitive.Description>
+                            className="agent-batch-eyebrow">批量生成 · {BATCH_LABELS[current.status]}</span><ContextPanelTitle>{current.title}</ContextPanelTitle>
+                            <ContextPanelDescription>{draft ? `逐项检查配置，每个目标最多 ${BATCH_TARGET_LIMIT} 份候选，每批最多 ${BATCH_REQUEST_LIMIT} 份。` : "按目标比较候选。选择后点击写入，其他结果仍会保留。"}</ContextPanelDescription>
                         </div>
-                        <button type="button" className="agent-batch-icon" aria-label="关闭批量生成" disabled={pending}
-                                onClick={() => onOpenChange(false)}><X size={20} aria-hidden/></button>
-                    </header>
+                    </ContextPanelHeader>
                     <div ref={bodyRef} className="agent-batch-body">
                         {(view?.error || parentReadError) &&
                             <p role="alert" className="agent-batch-error">读取失败，当前内容已保留
@@ -592,7 +586,7 @@ function BatchSurface({batch, parentReadError}: { batch: GenerationBatch; parent
                         {error && blocker.status !== "blocked" && <p className="agent-batch-error" role="alert">{error}</p>}
                         {notice && <p className="agent-batch-note" role="status">{notice}</p>}
                     </div>
-                    <footer className="agent-batch-footer">
+                    <ContextPanelFooter className="agent-batch-footer">
                         {draft ? <>
                             <div className="agent-batch-cost"><strong>{included.length} 次生成 ·
                                 同时处理 {BATCH_CONCURRENCY} 份</strong><span>确认后向所选供应商提交，可能产生费用。每份候选独立计费。</span>
@@ -640,10 +634,9 @@ function BatchSurface({batch, parentReadError}: { batch: GenerationBatch; parent
                                         })}>写入选中的 {selectedCount} 个目标</Button>
                             </div>
                         </>}
-                    </footer>
-                </DialogPrimitive.Content>
-            </DialogPrimitive.Portal>
-        </DialogPrimitive.Root>
+                    </ContextPanelFooter>
+            </ContextPanelContent>
+        </ContextPanel>
         <AlertDialog open={blocker.status === "blocked"} onOpenChange={next => {
             if (!next && !pending) blocker.reset?.();
         }}>

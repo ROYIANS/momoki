@@ -165,7 +165,7 @@ export function InstalledSkillsPanel({open, onOpenChange, controller, returnFocu
                 }}/>
     </>;
     if (inline) return <><div className="installed-skills-panel installed-skills-inline" data-installed-skills>{body}</div>{departure.confirmation}</>;
-    return <><ContextPanel open={open} width={520} onOpenChange={(next, reason) => {
+    return <><ContextPanel kind="skills" open={open} width={520} onOpenChange={(next, reason) => {
         if (next) return;
         if (reason === "guard-refused" || reason === "busy") {onOpenChange(false); return;}
         close();

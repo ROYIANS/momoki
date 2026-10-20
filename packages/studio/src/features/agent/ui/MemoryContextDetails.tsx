@@ -109,7 +109,7 @@ function MemoryContextContent({
     }
 
     return (
-        <ContextPanel open={open} onOpenChange={onOpenChange} onRequestDeparture={(proceed, cancel) => {
+        <ContextPanel kind="memory" open={open} onOpenChange={onOpenChange} onRequestDeparture={(proceed, cancel) => {
             if (!session.locked) proceed(); else cancel?.();
         }}>
             <ContextPanelContent

@@ -242,7 +242,7 @@ function TaskInspectorContent({
         void mutate(() => updateAgentTask(task.id, {plan}, editRevision), "执行清单已保存", () => setEditor(null));
     }
 
-    return <ContextPanel open={open}
+    return <ContextPanel kind="task" open={open}
                          onRequestDeparture={(proceed, cancel) => requestDeparture(proceed, undefined, cancel)}
                          onOpenChange={(next) => {
                              onOpenChange(next);

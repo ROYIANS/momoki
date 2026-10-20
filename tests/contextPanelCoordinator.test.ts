@@ -12,7 +12,8 @@ vi.mock("react",async original => {
 import {ContextPanelHostProvider} from "@/app/layout/ContextPanelHost";
 type Host = {active: string | null;docked: boolean;fullWidth: boolean;width: number;
     activeTitle: string | null;canToggle: boolean;closeActive: () => void;toggle: () => void;
-    register: (entry:{id:string;width:number;title?:string;reopen?:()=>void;close:(reason?:string)=>void;depart:(proceed:()=>void,cancel:()=>void)=>void})=>()=>void;
+    wouldDock: (width: number) => boolean;markOffered: (key: string) => void;isOffered: (key: string) => boolean;setPanelWidth: (width: number) => void;
+    register: (entry:{id:string;width:number;title?:string;kind?:string;reopen?:()=>void;close:(reason?:string)=>void;depart:(proceed:()=>void,cancel:()=>void)=>void})=>()=>void;
     request:(id:string)=>void;release:(id:string)=>void};
 function draw(surfaceWidth = 1440,navigationWidth = 260): Host {
     hooks.cursor = 0;
@@ -89,5 +90,24 @@ describe("controlled context-panel coordination", () => {
         const remove = host.register({id:"gone",width:400,close:vi.fn(),reopen,depart:yes=>yes()});
         host.request("gone"); host.release("gone"); remove();
         expect(() => draw().toggle()).not.toThrow(); expect(reopen).not.toHaveBeenCalled();
+    });
+
+    it("remembers what was offered so the same thing is never opened automatically twice", () => {
+        const host = draw();
+        expect(host.isOffered("batch:1")).toBe(false);
+        host.markOffered("batch:1");
+        expect(draw().isOffered("batch:1")).toBe(true);
+        expect(draw().isOffered("batch:2")).toBe(false);
+    });
+    it("says whether a panel would dock beside the content at the current allocation", () => {
+        expect(draw(1140,260).wouldDock(400)).toBe(true);
+        expect(draw(1139,260).wouldDock(400)).toBe(false);
+    });
+    it("applies a dragged width within limits, only to the active panel", () => {
+        const host = draw(); host.register({id:"task",width:400,kind:"task",close:vi.fn(),depart:yes=>yes()});
+        host.setPanelWidth(900); expect(draw().width).toBe(400);
+        host.request("task"); draw().setPanelWidth(600); expect(draw()).toMatchObject({width:600,docked:true});
+        draw().setPanelWidth(10); expect(draw().width).toBe(320);
+        draw(1000,260).setPanelWidth(700); expect(draw(1000,260).width).toBe(320);
     });
 });

@@ -248,7 +248,7 @@ export function AudioWorkspacePage({projectId}: { projectId: string }) {
                            clipHistory={clipHistory}
                            selectedId={clipId} onSelect={selectClip} mobileMode={mode} seekRequest={seekRequest}
                            onOpenSources={() => inspect()}/>
-            <ContextPanel open={inspectorOpen} onOpenChange={(open) => {
+            <ContextPanel kind="audio-inspector" open={inspectorOpen} onOpenChange={(open) => {
                 if (!pending.current) setInspectorOpen(open);
             }} width={320}
                           onRequestDeparture={(proceed, cancel) => {

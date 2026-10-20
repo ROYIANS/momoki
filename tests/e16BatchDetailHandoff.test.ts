@@ -129,14 +129,15 @@ describe("actual batch review target handoff", () => {
     it("keeps ordinary dirty close protection without approving or starting work", async () => {
         await showReview();
         await editPrompt("保留本地画面描述");
-        await click(button("关闭批量生成"));
+        // The review is a panel: its own close goes through the same departure guard as any panel.
+        await click(document.querySelector<HTMLElement>('button[aria-label="关闭"]')!);
         expect(document.querySelector(".agent-batch-dialog")).not.toBeNull();
         expect(document.querySelector<HTMLTextAreaElement>("textarea")?.value).toBe("保留本地画面描述");
         expect([...navigation.blockers.values()].some(owner => owner.shouldBlockFn())).toBe(true);
         expect(batches.confirmGenerationBatch).not.toHaveBeenCalled();
         expect(runtime.startGenerationBatch).not.toHaveBeenCalled();
     });
-    it.each([1440, 760])("releases the modal and restores the exact review at surface width %i", async width => {
+    it.each([1440, 760])("hands over to the detail panel and restores the exact review at surface width %i", async width => {
         await act(async () => root.render(h(Fixture, {width})));
         await showReview();
         const prompt = await editPrompt("保留本地画面描述");
@@ -206,7 +207,7 @@ describe("actual batch review target handoff", () => {
         await settle(() => expect(document.querySelector(".agent-batch-dialog")).not.toBeNull());
         noExecution();
     });
-    it("restores its review when a preexisting detail refuses admission", async () => {
+    it("never replaces a detail that holds unsaved input: the review stays closed and the draft stays put", async () => {
         await click(button("Inspect other shot"));
         await settle(() => expect(portal.querySelector("[data-shot-editor]")?.getAttribute("data-shot-editor")).toBe(fixture.shots[1].id));
         const duration = portal.querySelector<HTMLInputElement>('[aria-label="时长（秒）"]')!;
@@ -214,32 +215,16 @@ describe("actual batch review target handoff", () => {
             Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(duration, "invalid");
             duration.dispatchEvent(new Event("input", {bubbles: true}));
         });
-        await showReview();
-        await editPrompt("原审阅草稿仍在");
-        await click(targetLink());
+        await settle(() => expect(document.querySelector(".agent-batch-open")).not.toBeNull());
+        await click(document.querySelector<HTMLElement>(".agent-batch-open")!);
+        // The open detail's own guard decides; the review does not push it away.
         await settle(() => expect(document.querySelector('[role="alertdialog"]')).not.toBeNull());
         expect(document.querySelector(".agent-batch-dialog")).toBeNull();
         await click(button("继续编辑"));
-        await settle(() => expect(document.querySelector(".agent-batch-dialog")).not.toBeNull());
-        expect(document.querySelector<HTMLTextAreaElement>(".agent-batch-fields textarea")?.value).toBe("原审阅草稿仍在");
+        await settle(() => expect(document.querySelector('[role="alertdialog"]')).toBeNull());
+        expect(document.querySelector(".agent-batch-dialog")).toBeNull();
         expect(portal.querySelector('[aria-label="时长（秒）"]')).toBe(duration);
         expect(duration.value).toBe("invalid");
-        noExecution();
-    });
-    it("still opens the detail when the modal never reports onCloseAutoFocus", async () => {
-        const dispatch = EventTarget.prototype.dispatchEvent;
-        const swallowed = vi.fn();
-        vi.spyOn(EventTarget.prototype, "dispatchEvent").mockImplementation(function (this: EventTarget, event: Event) {
-            if (event.type === "focusScope.autoFocusOnUnmount") {swallowed(); return true;}
-            return dispatch.call(this, event);
-        });
-        await showReview(); await editPrompt("watchdog draft"); await click(targetLink());
-        await vi.waitFor(async () => {
-            await act(async () => {await new Promise(resolve => setTimeout(resolve, 50));});
-            expect(portal.querySelector("[data-shot-editor]")?.getAttribute("data-shot-editor")).toBe(fixture.shots[0].id);
-        }, {timeout: 3000});
-        expect(swallowed).toHaveBeenCalled();
-        expect([...document.querySelectorAll("button")].some(node => node.textContent === "返回批量审阅")).toBe(true);
         noExecution();
     });
     it("retires a replaced origin without reopening it over the new detail", async () => {
@@ -355,6 +340,40 @@ describe("actual batch review target handoff", () => {
         await click(button("返回批量审阅"));
         await settle(() => expect(document.querySelector(".agent-batch-dialog")).not.toBeNull());
         expect(document.querySelector<HTMLTextAreaElement>(".agent-batch-fields textarea")?.value).toBe("第二次让位仍保留");
+        noExecution();
+    });
+
+    it("opens a draft that needs confirming by itself, beside the content and without taking focus", async () => {
+        const typing = document.createElement("textarea"); document.body.append(typing); typing.focus();
+        await settle(() => expect(document.querySelector(".agent-batch-dialog")).not.toBeNull());
+        // The user keeps typing where they were; the panel does not pull focus away.
+        expect(document.activeElement).toBe(typing);
+        // The confirm and save actions live in the panel's fixed footer, not in the body.
+        const footer = document.querySelector(".context-panel-footer")!;
+        expect(footer.textContent).toContain("确认生成");
+        expect(footer.textContent).toContain("草稿已保存");
+        expect(document.querySelector(".agent-batch-body")!.contains(footer)).toBe(false);
+        typing.remove(); noExecution();
+    });
+
+    it("does not open by itself when the panel would cover the content, but still opens on request", async () => {
+        await act(async () => root.render(h(Fixture, {width: 760})));
+        await settle(() => expect(document.querySelector(".agent-batch-open")).not.toBeNull());
+        await act(async () => {await new Promise(resolve => setTimeout(resolve, 30));});
+        expect(document.querySelector(".agent-batch-dialog")).toBeNull();
+        await click(document.querySelector<HTMLElement>(".agent-batch-open")!);
+        await settle(() => expect(document.querySelector(".agent-batch-dialog")).not.toBeNull());
+    });
+
+    it("is offered once: after the user closes it, it does not come back by itself", async () => {
+        await settle(() => expect(document.querySelector(".agent-batch-dialog")).not.toBeNull());
+        await click(document.querySelector<HTMLElement>('button[aria-label="关闭"]')!);
+        await settle(() => expect(document.querySelector(".agent-batch-dialog")).toBeNull());
+        await act(async () => {await new Promise(resolve => setTimeout(resolve, 60));});
+        expect(document.querySelector(".agent-batch-dialog")).toBeNull();
+        // The row above the composer still brings it back.
+        await click(document.querySelector<HTMLElement>(".agent-batch-open")!);
+        await settle(() => expect(document.querySelector(".agent-batch-dialog")).not.toBeNull());
         noExecution();
     });
 });

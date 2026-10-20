@@ -1,4 +1,5 @@
 import {createContext, type ReactNode, useCallback, useContext, useMemo, useRef, useState} from "react";
+import {canDockPanel, clampPanelWidth, readPanelWidth, writePanelWidth} from "./panelWidth";
 
 export type ContextPanelHostCloseReason = "replaced" | "guard-refused" | "busy" | "user";
 type Registration = {
@@ -6,6 +7,8 @@ type Registration = {
     width: number;
     /** Shown in the top bar's panel zone. */
     title?: string;
+    /** Names the panel type so a width the user dragged to is remembered per type. */
+    kind?: string;
     /** Opens the panel again from the top bar toggle; the feature still owns its open state. */
     reopen?: () => void;
     depart: (proceed: () => void, cancel: () => void) => void;
@@ -13,6 +16,13 @@ type Registration = {
 };
 type Host = {
     target: HTMLElement | null; width: number; docked: boolean; fullWidth: boolean; active: string | null;
+    /** Whether a panel of this width would sit beside the content rather than cover it. */
+    wouldDock: (width: number) => boolean;
+    /** Remember that a thing was already offered or closed, so it is not opened automatically again. */
+    markOffered: (key: string) => void;
+    isOffered: (key: string) => boolean;
+    /** Sets the active panel's width, within its limits, and remembers it for its kind. */
+    setPanelWidth: (width: number) => void;
     /** True when the top bar draws the panel's header and close button, so the panel must not draw its own. */
     headerZone: boolean;
     /** Title of the active panel, for the top bar's panel zone. */
@@ -42,6 +52,9 @@ export function ContextPanelHostProvider({children, target, surfaceWidth, naviga
     const generation = useRef(0);
     const pending = useRef<string | null>(null);
     const [width, setWidth] = useState(400);
+    const offered = useRef(new Set<string>());
+    const space = useRef({surfaceWidth, navigationWidth});
+    space.current = {surfaceWidth, navigationWidth};
     const [activeTitle, setActiveTitle] = useState<string | null>(null);
     const lastId = useRef<string | null>(null);
     const [reopenable, setReopenable] = useState(false);
@@ -53,7 +66,19 @@ export function ContextPanelHostProvider({children, target, surfaceWidth, naviga
         setReopenable(true);
         setActive(id);
         setActiveTitle(entry.title ?? null);
-        setWidth(entry.width);
+        // A width the user chose for this kind of panel wins over the default, within what fits today.
+        const saved = readPanelWidth(entry.kind);
+        setWidth(saved !== undefined ? clampPanelWidth(saved, space.current) : entry.width);
+    }, []);
+    const wouldDock = useCallback((candidate: number) => canDockPanel(candidate, space.current), []);
+    const markOffered = useCallback((key: string) => {offered.current.add(key);}, []);
+    const isOffered = useCallback((key: string) => offered.current.has(key), []);
+    const setPanelWidth = useCallback((next: number) => {
+        const id = activeRef.current;
+        if (!id) return;
+        const clamped = clampPanelWidth(next, space.current);
+        setWidth(clamped);
+        writePanelWidth(registrations.current.get(id)?.kind, clamped);
     }, []);
     const release = useCallback((id: string) => {
         if (activeRef.current !== id) return;
@@ -116,6 +141,10 @@ export function ContextPanelHostProvider({children, target, surfaceWidth, naviga
         docked,
         fullWidth,
         active,
+        wouldDock,
+        markOffered,
+        isOffered,
+        setPanelWidth,
         headerZone,
         activeTitle,
         canToggle: !!active || reopenable,
@@ -124,6 +153,6 @@ export function ContextPanelHostProvider({children, target, surfaceWidth, naviga
         register,
         request,
         release
-    }), [target, width, docked, fullWidth, active, headerZone, activeTitle, reopenable, closeActive, toggle, register, request, release]);
+    }), [target, width, docked, fullWidth, active, wouldDock, markOffered, isOffered, setPanelWidth, headerZone, activeTitle, reopenable, closeActive, toggle, register, request, release]);
     return <ContextPanelHostContext value={value}>{children}</ContextPanelHostContext>;
 }
