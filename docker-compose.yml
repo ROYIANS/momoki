@@ -13,3 +13,4 @@ services:
     ports:
       - "8080:80"
     restart: unless-stopped
+    # The image defines its own HEALTHCHECK (GET /healthz); `docker compose ps` shows healthy/unhealthy.

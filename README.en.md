@@ -223,7 +223,7 @@ docker compose up -d
 
 Open `http://localhost:8080`. Compose maps host port `8080` to Nginx port `80` and uses the `unless-stopped` restart policy. For public HTTPS access, place a TLS reverse proxy in front of the site. Recording requires HTTPS or a local secure context.
 
-Update with `docker compose pull` and `docker compose up -d`. To pin a release, replace `latest` in Compose with an available version tag.
+The image has a built-in health check: every 30 seconds the container requests `/healthz`, which answers 200 only while the site files are present, so `docker compose ps` shows `healthy` or `unhealthy`. Update with `docker compose pull` and `docker compose up -d`. To pin a release, replace `latest` in Compose with an available version tag.
 
 ### Build the image locally
 

@@ -223,7 +223,7 @@ docker compose up -d
 
 打开 `http://localhost:8080`。Compose 将主机 `8080` 端口映射到容器 Nginx 的 `80` 端口，并配置 `unless-stopped` 重启策略。对外提供 HTTPS 时，在站点前配置 TLS 反向代理；录音功能需要 HTTPS 或本机安全上下文。
 
-更新镜像仍使用 `docker compose pull` 和 `docker compose up -d`。如需固定发布版本，可将 Compose 的 `latest` 标签改为已发布的版本号。
+镜像自带健康检查：容器每 30 秒请求一次 `/healthz`，只有站点文件存在时才返回 200，`docker compose ps` 会显示 `healthy` 或 `unhealthy`。更新镜像仍使用 `docker compose pull` 和 `docker compose up -d`。如需固定发布版本，可将 Compose 的 `latest` 标签改为已发布的版本号。
 
 ### 本地构建镜像
 
