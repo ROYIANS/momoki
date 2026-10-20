@@ -12,14 +12,7 @@ import {flushPendingDrafts} from "../../../platform/product/drafts";
 import {Button} from "../../../ui/button";
 import {Checkbox} from "../../../ui/checkbox";
 import {Input} from "../../../ui/input";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle
-} from "../../../ui/dialog";
+import {SidePanel} from "../../../app/layout/SidePanel";
 import {Field} from "../presentation/shared";
 import {SelectOption, WorkspaceSelect} from "../presentation/controls";
 
@@ -159,20 +152,27 @@ export function AudioArrangementActions({projectId, chapterId, snapshot, history
             })}>撤销时间线操作</Button>}
         {notice && <p role="status" className="basis-full text-xs text-muted-foreground break-words">{notice}</p>}
         {!mode && error && <p role="alert" className="basis-full text-xs text-destructive break-words">{error}</p>}
-        <Dialog open={Boolean(mode)} onOpenChange={value => {
-            if (!value && !lock.current) {
-                setMode(undefined);
-                setProposal(undefined);
-            }
-        }}>
-            <DialogContent className="flex max-h-[calc(100dvh-32px)] flex-col overflow-hidden sm:max-w-2xl"
-                           onCloseAutoFocus={event => {
-                               event.preventDefault();
-                               trigger.current?.focus({preventScroll: true});
-                           }}>
-                <DialogHeader
-                    className="shrink-0"><DialogTitle>{mode === "selection" ? "批量选用配音版本" : "排列已选声音"}</DialogTitle><DialogDescription>{mode === "selection" ? "选择声音版本并预览，只改变选用，不放入时间线。" : "按真实时长追加未放置的声音；已有剪辑全部保留。"}此操作未核验试听效果，请自行试听。</DialogDescription></DialogHeader>
-                <div className="min-h-0 overflow-y-auto pr-1">
+        <SidePanel open={Boolean(mode)} kind="audio-arrangement" width={520}
+                   onOpenChange={value => {
+                       if (!value && !lock.current) {
+                           setMode(undefined);
+                           setProposal(undefined);
+                       }
+                   }}
+                   title={mode === "selection" ? "批量选用配音版本" : "排列已选声音"}
+                   description={`${mode === "selection" ? "选择声音版本并预览，只改变选用，不放入时间线。" : "按真实时长追加未放置的声音；已有剪辑全部保留。"}此操作未核验试听效果，请自行试听。`}
+                   footer={<>
+                       <Button variant="outline" disabled={busy} onClick={() => {
+                           if (proposal) {
+                               setProposal(undefined);
+                               setError("");
+                               setConflicted(false);
+                           } else setMode(undefined);
+                       }}>{proposal ? "重新预览" : "取消"}</Button>
+                       <Button disabled={busy || !included.length || conflicted}
+                               onClick={() => void action(proposal ? apply : prepare)}>{busy ? "正在保存…" : proposal ? "确认应用" : "查看预览"}</Button>
+                   </>}>
+                <div className="min-w-0">
                     {!proposal ? <div className="grid min-w-0 gap-3">
                         {mode === "arrangement" && <div className="grid gap-3 sm:grid-cols-3">
                             <Field label="人声音轨"><WorkspaceSelect aria-label="排列目标人声音轨" disabled={busy}
@@ -246,18 +246,6 @@ export function AudioArrangementActions({projectId, chapterId, snapshot, history
                     </div>}
                     {error && <p role="alert" className="text-sm text-destructive break-words">{error}</p>}
                 </div>
-                <DialogFooter className="shrink-0 gap-2">
-                    <Button variant="outline" disabled={busy} onClick={() => {
-                        if (proposal) {
-                            setProposal(undefined);
-                            setError("");
-                            setConflicted(false);
-                        } else setMode(undefined);
-                    }}>{proposal ? "重新预览" : "取消"}</Button>
-                    <Button disabled={busy || !included.length || conflicted}
-                            onClick={() => void action(proposal ? apply : prepare)}>{busy ? "正在保存…" : proposal ? "确认应用" : "查看预览"}</Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+        </SidePanel>
     </div>;
 }

@@ -3,14 +3,8 @@ import {useProductQuery} from "../../../platform/product/queries";
 import {toast} from "sonner";
 import {Button} from "../../../ui/button";
 import {Checkbox} from "../../../ui/checkbox";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle
-} from "../../../ui/dialog";
+import {SidePanel} from "../../../app/layout/SidePanel";
+import {useAutoOpenPanel} from "../../../app/layout/autoOpen";
 import type {AudioProjectSnapshot} from "../models/audio";
 import type {AudioBatchItemState} from "../models/audioGenerationBatch";
 import {AUDIO_BATCH_LIMIT} from "../models/audioGenerationBatch";
@@ -44,6 +38,9 @@ function AudioBatchPanel({projectId, batchId}: { projectId: string; batchId: str
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
     const [retryIds, setRetryIds] = useState<string[]>([]);
+    const needsReview = !view?.batch.dormant && view?.batch.status === "draft";
+    // A prepared batch asks to be checked and confirmed: offer the panel once, without taking focus.
+    const reviewOpenChange = useAutoOpenPanel({key: needsReview ? `audio-batch:${batchId}` : undefined, ready: needsReview, open: reviewOpen, width: 480, setOpen: setReviewOpen});
     const abandonedCandidate = !view?.batch.dormant && view?.batch.status === "running" ? batchId : undefined;
     useEffect(() => {
         if (!abandonedCandidate) return;
@@ -119,13 +116,16 @@ function AudioBatchPanel({projectId, batchId}: { projectId: string; batchId: str
                         })}>为选中失败项准备新草稿</Button>}
             <p className="mt-2 text-xs text-muted-foreground">暂停或取消不会删除已提交的任务和已有音频。</p>
         </details>
-        <Dialog open={reviewOpen} onOpenChange={setReviewOpen}><DialogContent
-            className="flex max-h-[calc(100dvh-32px)] flex-col overflow-hidden sm:max-w-xl"><DialogHeader
-            className="shrink-0">
-            <DialogTitle>确认批量配音</DialogTitle><DialogDescription>{included.length} 段，最多 {included.length} 次付费请求；供应商按实际请求计费。本批最多同时发送
-            2 条，不自动选用或入轨。</DialogDescription></DialogHeader>
-            <div className="min-h-0 overflow-y-auto space-y-3 pr-1">{rows.map(row => <label key={row.item.id}
-                                                                                            className="flex min-w-0 items-start gap-3">
+        <SidePanel open={reviewOpen} onOpenChange={reviewOpenChange} kind="audio-batch-review" title="确认批量配音" width={480}
+                   description={`${included.length} 段，最多 ${included.length} 次付费请求；供应商按实际请求计费。本批最多同时发送 2 条，不自动选用或入轨。`}
+                   footer={<><Button variant="outline" onClick={() => setReviewOpen(false)}>暂不发送</Button><Button
+                       disabled={busy || !included.length || batch.status !== "draft"} onClick={() => void act(async () => {
+                       await flushPendingDrafts(projectId);
+                       await audioBatchUserAction(projectId, batchId, () => confirmAudioGenerationBatch(projectId, batchId, batch.revision));
+                       setReviewOpen(false);
+                       start();
+                   })}>确认并开始 {included.length} 段</Button></>}>
+            <div className="space-y-3">{rows.map(row => <label key={row.item.id} className="flex min-w-0 items-start gap-3">
                 <Checkbox aria-label={`包含：${row.item.snapshot.input.text.slice(0, 24)}`}
                           disabled={busy || batch.status !== "draft"} checked={row.item.included}
                           onCheckedChange={checked => void act(() => audioBatchUserAction(projectId, batchId, () => includeAudioBatchItem(projectId, batchId, batch.revision, row.item.id, checked === true)))}/>
@@ -150,15 +150,7 @@ function AudioBatchPanel({projectId, batchId}: { projectId: string; batchId: str
                             className="whitespace-pre-wrap break-all">{JSON.stringify(row.item.snapshot.input.mimo, null, 2)}</pre>}
                     </details></span>
             </label>)}{error && <p role="alert" className="break-words text-destructive">{error}</p>}</div>
-            <DialogFooter className="shrink-0"><Button variant="outline"
-                                                       onClick={() => setReviewOpen(false)}>暂不发送</Button><Button
-                disabled={busy || !included.length || batch.status !== "draft"} onClick={() => void act(async () => {
-                await flushPendingDrafts(projectId);
-                await audioBatchUserAction(projectId, batchId, () => confirmAudioGenerationBatch(projectId, batchId, batch.revision));
-                setReviewOpen(false);
-                start();
-            })}>确认并开始 {included.length} 段</Button></DialogFooter>
-        </DialogContent></Dialog>
+        </SidePanel>
     </section>;
 }
 
@@ -173,12 +165,19 @@ export function AudioBatchActions({projectId, chapterId, snapshot}: {
         setChosen(segments.filter(segment => !snapshot.takes.some(take => take.segmentId === segment.id)).map(segment => segment.id));
         setError("");
         setOpen(true);
-    }}>批量配音</Button><Dialog open={open} onOpenChange={setOpen}><DialogContent
-        className="flex max-h-[calc(100dvh-32px)] flex-col overflow-hidden sm:max-w-xl"><DialogHeader
-        className="shrink-0">
-        <DialogTitle>选择本批段落</DialogTitle><DialogDescription>默认包含没有声音版本的段落。每批 1–20
-        段；继承已保存角色音色，下一步核对实际请求再确认付费。</DialogDescription></DialogHeader>
-        <div className="min-h-0 overflow-y-auto space-y-3 pr-1">{segments.map(segment => {
+    }}>批量配音</Button><SidePanel open={open} onOpenChange={next => setOpen(next)} kind="audio-batch-select" title="选择本批段落" width={440}
+        description="默认包含没有声音版本的段落。每批 1–20 段；继承已保存角色音色，准备好后在右侧核对实际请求再确认付费。"
+        footer={<><Button variant="outline" onClick={() => setOpen(false)}>取消</Button><Button
+            disabled={busy || chosen.length < 1 || chosen.length > AUDIO_BATCH_LIMIT} onClick={() => {
+            setBusy(true);
+            setError("");
+            void flushPendingDrafts(projectId).then(() => prepareAudioGenerationBatch({
+                projectId,
+                chapterId,
+                segmentIds: segments.filter(segment => chosen.includes(segment.id)).map(segment => segment.id)
+            })).then(() => setOpen(false)).catch(cause => setError(message(cause))).finally(() => setBusy(false));
+        }}>准备 {chosen.length} 段请求</Button></>}>
+        <div className="space-y-3">{segments.map(segment => {
             const speaker = snapshot.speakers.find(row => row.id === segment.speakerId);
             return <label key={segment.id} className="flex min-w-0 items-start gap-3"><Checkbox
                 aria-label={`包含：${segment.text.slice(0, 24)}`} checked={chosen.includes(segment.id)}
@@ -188,17 +187,7 @@ export function AudioBatchActions({projectId, chapterId, snapshot}: {
         })}{error && <p role="alert" className="break-words text-destructive">{error}</p>}
             {chosen.length > AUDIO_BATCH_LIMIT &&
                 <p role="alert" className="text-destructive">每批最多 20 段，请选择一个明确子集。</p>}</div>
-        <DialogFooter className="shrink-0"><Button variant="outline" onClick={() => setOpen(false)}>取消</Button><Button
-            disabled={busy || chosen.length < 1 || chosen.length > AUDIO_BATCH_LIMIT} onClick={() => {
-            setBusy(true);
-            setError("");
-            void flushPendingDrafts(projectId).then(() => prepareAudioGenerationBatch({
-                projectId,
-                chapterId,
-                segmentIds: segments.filter(segment => chosen.includes(segment.id)).map(segment => segment.id)
-            })).then(() => setOpen(false)).catch(cause => setError(message(cause))).finally(() => setBusy(false));
-        }}>准备 {chosen.length} 段请求</Button></DialogFooter>
-    </DialogContent></Dialog></>;
+    </SidePanel></>;
 }
 
 export function AudioChapterBatches({projectId, chapterId}: { projectId: string; chapterId: string }) {

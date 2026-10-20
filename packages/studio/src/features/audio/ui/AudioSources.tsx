@@ -31,6 +31,7 @@ import {
     AlertDialogTitle
 } from "../../../ui/alert-dialog";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "../../../ui/dialog";
+import {SidePanel} from "../../../app/layout/SidePanel";
 import {errorText, Field, timeLabel} from "../presentation/shared";
 
 export async function keepAudioSource(projectId: string, blob: Blob, name: string, source: AudioTake["source"], segmentId?: string) {
@@ -137,12 +138,13 @@ export function AudioSources({projectId, segmentId, onSaved, compact = false, re
                 setRecording(false);
                 setCapture({dirty: false, saving: false});
             }}>舍弃并退出</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
-        <Dialog open={library} onOpenChange={setLibrary}><DialogContent
-            className="max-h-[90dvh] overflow-y-auto"><DialogHeader><DialogTitle>从素材库添加音频</DialogTitle><DialogDescription>添加后在当前项目保存独立副本。</DialogDescription></DialogHeader>{library &&
-            <AudioLibrary projectId={projectId} segmentId={targetSegmentId} onSaved={(take) => {
+        <SidePanel open={library} onOpenChange={setLibrary} kind="audio-source-library" title="从素材库添加音频"
+                   description="添加后在当前项目保存独立副本。">
+            {library && <AudioLibrary projectId={projectId} segmentId={targetSegmentId} onSaved={(take) => {
                 onSaved(take);
                 setLibrary(false);
-            }}/>}</DialogContent></Dialog>
+            }}/>}
+        </SidePanel>
     </>;
 }
 

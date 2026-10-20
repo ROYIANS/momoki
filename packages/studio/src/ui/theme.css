@@ -935,6 +935,24 @@
     background: var(--surface-panel);
 }
 
+.side-panel {
+    gap: 0;
+}
+
+.side-panel-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.side-panel-body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+    padding: 16px;
+}
+
 .app-context-panel-host[data-mode=docked] {
     border-left: 1px solid var(--border);
 }

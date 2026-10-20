@@ -10,7 +10,7 @@ import {prepareAudioGeneration, submitAudioGeneration} from "../generation/runti
 import {Button} from "../../../ui/button";
 import {Input} from "../../../ui/input";
 import {Textarea} from "../../../ui/textarea";
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "../../../ui/dialog";
+import {SidePanel} from "../../../app/layout/SidePanel";
 import {Tabs, TabsList, TabsTrigger} from "../../../ui/tabs";
 import {AudioPlayer, errorText} from "../presentation/shared";
 import {Disclosure, DisclosureTitle, SelectOption, WorkspaceSelect} from "../presentation/controls";
@@ -108,25 +108,18 @@ function VoiceLibraryContent({
         updateDraft({dirty: false, pending: false});
     }
 
-    function changeOpen(next: boolean) {
-        if (next) {
-            onOpenChange(true);
-            return;
-        }
-        requestLocalDeparture(() => {
-            onOpenChange(false);
-            leaveEditor();
-            setError("");
-        });
-    }
-
-    return <><Dialog open={open} onOpenChange={changeOpen}><DialogContent
-        className="max-h-[90dvh] overflow-y-auto sm:max-w-xl" onEscapeKeyDown={(e) => {
-        if (busy) e.preventDefault();
-    }} onInteractOutside={(e) => {
-        if (busy) e.preventDefault();
-    }}>
-        <DialogHeader><DialogTitle>{editing ? editing.initial ? "编辑音色" : "创作新音色" : "项目音色"}</DialogTitle><DialogDescription>{editing ? "给声音一个名字，描述它或提供一段参考录音。" : "这里的音色可用于所有章节，创作助手创建的音色也会出现在这里。"}</DialogDescription></DialogHeader>
+    return <><SidePanel open={open} kind="voice-library" width={480}
+                        onOpenChange={next => {
+                            if (next) onOpenChange(true);
+                            else {
+                                onOpenChange(false);
+                                leaveEditor();
+                                setError("");
+                            }
+                        }}
+                        onRequestDeparture={(proceed, cancel) => requestDeparture(proceed, cancel ?? (() => {}))}
+                        title={editing ? editing.initial ? "编辑音色" : "创作新音色" : "项目音色"}
+                        description={editing ? "给声音一个名字，描述它或提供一段参考录音。" : "这里的音色可用于所有章节，创作助手创建的音色也会出现在这里。"}>
         {editing ? <><Button className="justify-self-start" size="sm" variant="ghost" disabled={busy}
                              onClick={() => requestLocalDeparture(leaveEditor)}><ArrowLeft/>返回音色列表</Button><VoiceEditor
             key={`${projectId}:${editing.id}`} projectId={projectId} initial={editing.initial} takes={takes}
@@ -167,7 +160,7 @@ function VoiceLibraryContent({
                         }}>{row.id === selectedId ? <><Check/>已选</> : "使用"}</Button>}</div>)}</div>
             {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         </>}
-    </DialogContent></Dialog></>;
+    </SidePanel></>;
 }
 
 function VoiceEditor({projectId, initial, takes, onBusyChange, onSaved, onDraftStateChange}: {
