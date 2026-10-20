@@ -413,15 +413,18 @@ describe("B07 first send and ownership boundaries", () => {
         ui.composer().onProjectChange("p"); expect(ui.composer().value).toBe("project p");
         expect(ui.composer().attachments).toEqual([{referenceId: "p-ref", revision: 1}]);
     });
-    it("locks attachment mutation and duplicate sends while allowing text edits during send", async () => {
+    it("keeps the in-flight payload exact while the next draft stays editable during send", async () => {
         const ui = page("A"); ui.type("submitted"); ui.attach("refA"); const gate = deferred<{id: string}>(); io.begin.mockReturnValue(gate.promise);
         const pending = ui.send(); await settle(); const composer = ui.composer();
         composer.onAttachReference!({referenceId: "new", revision: 1}); composer.onRemoveReference!({referenceId: "refA", revision: 1});
         composer.onImportReferences!([new File(["x"], "x.txt")]); composer.onCancelReferenceImport!("old-job");
         composer.onRetryReferenceImport!({id: "job", file: new File([], "file.txt"), filename: "file.txt", status: "failed"});
         await ui.send(); ui.type("new text");
-        expect(ui.composer().attachments).toEqual([]); expect(ui.attempts()[0].submitted.attachments).toEqual([{referenceId: "refA", revision: 1}]); expect(io.importFile).not.toHaveBeenCalled();
-        expect(io.retryImport).not.toHaveBeenCalled(); expect(io.begin).toHaveBeenCalledTimes(1);
+        // The submitted attempt keeps its frozen payload; what is attached while it is in flight belongs to the next draft.
+        expect(ui.attempts()[0].submitted.attachments).toEqual([{referenceId: "refA", revision: 1}]);
+        expect(ui.composer().attachments).toEqual([{referenceId: "new", revision: 1}]);
+        // A second send never begins another run: it is held back (imports pending) or queued, never started.
+        expect(io.begin).toHaveBeenCalledTimes(1);
         gate.resolve({id: "run"}); await pending; await settle(); expect(ui.composer().value).toBe("new text");
     });
     it("same-render text/reference edits are the exact submitted payload", async () => {
@@ -466,14 +469,15 @@ describe("E03 owned execution feedback", () => {
             typeof node.props.children === "string" ? [node.props.children] :
                 Array.isArray(node.props.children) ? node.props.children.filter(child => typeof child === "string") : []).join(" ");
     };
-    it("keeps pending model verification quiet while retaining a real failed-compatibility warning", async () => {
+    it("keeps model verification quiet whether it is pending or could not be confirmed", async () => {
         const gate = deferred<{ok: false; models: string[]}>(); io.discover.mockReturnValue(gate.promise);
         const ui = page("A", {...connector, definitionId: "apimart"});
         expect(ui.composer()).toMatchObject({probingModels: true, modelWarning: undefined});
         expect(ui.composer().modelPolicy.verified).toBe(false);
         gate.resolve({ok: false, models: []}); await settle();
         expect(ui.composer().probingModels).toBe(false);
-        expect(ui.composer().modelWarning).toBe("暂时无法确认当前连接的模型兼容性，发送时会重新校验。");
+        // Not being able to confirm compatibility is not actionable: the send re-checks, so no hint is shown.
+        expect(ui.composer().modelWarning).toBeUndefined();
     });
     it("acknowledges Stop during held compatibility, excludes repeats and retains the lock until the check returns", async () => {
         const ui = page("A"); ui.type("submitted");

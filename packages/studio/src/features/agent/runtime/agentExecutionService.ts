@@ -157,9 +157,10 @@ export function createAgentExecutionService(options: ChatExecutionBinding) {
             for (const threadId of new Set(compactions.map(row => row.threadId))) await recoverManualCompactions(threadId, binding.locks, binding.store);
             // Startup continues only system items (a user-confirmed adoption); queued user items stay visible
             // for an explicit "send now" so a restart never auto-sends a paid request the user typed.
-            try {
-                for (const threadId of await threadsWithQueuedSystemInputs(binding.store)) scheduleDrain(threadId, true);
-            } catch { /* The queue stays durable; a later drain or explicit send picks it up. */ }
+            // Scanned in the background: the first send of a session must not wait on this extra read.
+            void threadsWithQueuedSystemInputs(binding.store)
+                .then(threadIds => {for (const threadId of threadIds) scheduleDrain(threadId, true);})
+                .catch(() => { /* The queue stays durable; a later drain or explicit send picks it up. */ });
         })();
         return initialized;
     }

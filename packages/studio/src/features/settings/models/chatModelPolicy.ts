@@ -42,7 +42,7 @@ export function chatModelIssue(model: string, policy: ChatModelPolicy): string |
     if (policy.incompatibleModels.includes(model.trim())) {
         return "当前模型的能力或接口与聊天不兼容，无法用于对话。请选择聊天模型；已有消息会保留。";
     }
-    if (!policy.verified) return "暂时无法确认当前连接的模型兼容性，发送时会重新校验。";
+    // An unverified connector is not an error the user can act on: sending re-checks it, so stay quiet.
     return undefined;
 }
 

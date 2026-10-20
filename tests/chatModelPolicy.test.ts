@@ -32,7 +32,8 @@ describe.each(["apimart", "aihubmix"] as const)("%s shared chat model selection 
   it.each(["loading", "error"] as const)("retains known restrictions during %s and does not offer unverified custom entries", (status) => {
     const policy = getChatModelPolicy(scopedConnector, { ...scopedCatalog, status });
     expect(chatModelIssue("image-model", policy)).toContain("无法用于对话");
-    expect(chatModelIssue("unknown-custom", policy)).toContain("无法确认");
+    // Unverified is not actionable (a send re-checks), so it shows no hint; it still offers no custom entries below.
+    expect(chatModelIssue("unknown-custom", policy)).toBeUndefined();
     expect(buildChatModelOptions(catalog.models, "image-model", "unknown-custom", policy)).toEqual([]);
   });
 

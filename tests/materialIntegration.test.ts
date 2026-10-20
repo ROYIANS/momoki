@@ -28,7 +28,7 @@ describe('IP and material integration with legacy projects', () => {
     await legacy.table('projects').add(project);
     legacy.close();
     await db.open();
-    expect(db.verno).toBe(27);
+    expect(db.verno).toBe(28);
     expect(await db.projects.get(project.id)).toEqual(project);
     for (const name of added) expect(await db.table(name).count()).toBe(0);
   });
