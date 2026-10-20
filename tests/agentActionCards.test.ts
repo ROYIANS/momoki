@@ -19,6 +19,10 @@ vi.mock("@/features/agent/ui/WebResearchSources", () => ({WebResearchSources: ()
 vi.mock("@/features/agent/ui/ProjectImageSources", () => ({ProjectImageSources: () => null}));
 vi.mock("@/features/agent/ui/CreatedEntityLinks", () => ({CreatedEntityLinks: () => null}));
 vi.mock("@/features/agent/ui/AgentWriteOutcomes", () => ({AgentWriteOutcomes: () => null}));
+const inspectImport = vi.hoisted(() => vi.fn(async () => undefined));
+vi.mock("@/features/library/services/desktopMediaImport", async original => ({
+    ...await original<typeof import("@/features/library/services/desktopMediaImport")>(), inspectDesktopMediaImport: inspectImport,
+}));
 vi.mock("@tanstack/react-router", () => ({Link: ({children}: {children?: ReactNode}) => h("a", null, children)}));
 
 const {ComposerActionCards} = await import("@/features/agent/ui/ComposerActionCards");
@@ -182,5 +186,31 @@ describe("message area and navigation no longer duplicate the cards", () => {
         // Expanded, it moves into the timeline instead of being drawn twice.
         expect(container.querySelectorAll(".agent-steered-message")).toHaveLength(1);
         expect(container.querySelector(".agent-execution-timeline .agent-steered-message")).toBeTruthy();
+    });
+
+    describe("desktop import row", () => {
+        const record = (status: "accepted" | "running" | "unknown" | "completed", actor: {kind: "agent"; runId: string; threadId: string; callId: string} | {kind: "human"} = {kind: "agent", runId: "run-1", threadId, callId: "c1"}) => ({
+            id: `imp-${status}`, projectId: "p1", actor, status, revision: 1, receipts: [], createdAt: at, updatedAt: at,
+            selection: {grantId: "g", scanId: "s", revision: "r", items: [{entryId: "e1", revision: "r", filename: "a.mp4", mimeType: "video/mp4", byteLength: 1, sourceMediaId: "m1", thumbnailMediaId: "t1"}]},
+        });
+        it("offers 核对 for an import left unknown, and runs the same check as the old in-message button", async () => {
+            await db.desktopMediaImports.add(record("unknown"));
+            await draw();
+            await vi.waitFor(() => expect(button("核对")).toBeTruthy());
+            expect(container.textContent).toContain("桌面导入");
+            expect(container.textContent).toContain("结果待核对");
+            await act(async () => button("核对")!.click());
+            expect(inspectImport).toHaveBeenCalledWith("imp-unknown", "p1");
+        });
+        it("has no row for a finished import, a human import, or another thread's import", async () => {
+            await db.desktopMediaImports.bulkAdd([
+                record("completed"),
+                {...record("unknown"), id: "imp-human", actor: {kind: "human"}},
+                {...record("unknown"), id: "imp-other", actor: {kind: "agent", runId: "r", threadId: "other-thread", callId: "c"}},
+            ]);
+            await draw();
+            await act(async () => {await Promise.resolve();});
+            expect(container.querySelector('[data-kind="import"]')).toBeNull();
+        });
     });
 });

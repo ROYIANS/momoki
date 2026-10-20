@@ -208,7 +208,7 @@ function MaterialEditor({material, requestedId, unavailable, onEditingChange, on
                     variant="ghost" disabled={pending} onClick={() => setDraft(null)}>撤销修改</Button></div>}
             </section>
             <section className="material-detail-section"><h3>来源与版本</h3><p
-                className="material-muted">{material.source ? `来自${material.source.materialId ? "另一份素材" : material.source.projectId === "studio" ? "工作室原件" : "项目原件"}，此处保存独立快照。` : "直接导入，原文件保存在素材版本中。"}</p>
+                className="material-muted">{material.source?.generated ? "由 AI 生成，此处保存独立快照。" : material.source ? `来自${material.source.materialId ? "另一份素材" : material.source.projectId === "studio" ? "工作室原件" : "项目原件"}，此处保存独立快照。` : "直接导入，原文件保存在素材版本中。"}</p>
                 {version?.payload.type === "setting" && material.source?.entityId && material.source.projectId &&
                     <LegacySettingLink row={{
                         id: material.source.entityId,

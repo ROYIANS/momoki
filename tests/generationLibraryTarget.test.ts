@@ -69,7 +69,7 @@ describe('generation into the material library', () => {
     expect(materials).toHaveLength(1);
     expect(materials[0]).toMatchObject({name: '海报', kind: 'image', archived: false});
     const mediaId = state.jobs.find(job => job.id === first.jobId)!.result!.mediaId;
-    expect(materials[0].source).toMatchObject({projectId: f.project.id, entityId: mediaId});
+    expect(materials[0].source).toMatchObject({projectId: f.project.id, entityId: mediaId, generated: true});
     expect((await db.media.get(mediaId))?.libraryRetained).toBe(true);
     expect((await db.shots.get(f.shot.id))!.firstFrame.result).toBeUndefined();
     // Applying again neither duplicates the material nor fails.

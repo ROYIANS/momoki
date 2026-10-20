@@ -44,7 +44,7 @@ export interface LibraryMaterial {
     tags: string[];
     createdAt: string;
     updatedAt: string;
-    source?: { projectId?: string; entityId?: string; materialId?: string; revision?: number };
+    source?: { projectId?: string; entityId?: string; materialId?: string; revision?: number; /** Made by an agent generation rather than imported. */ generated?: true };
 }
 
 export type MaterialPayload =

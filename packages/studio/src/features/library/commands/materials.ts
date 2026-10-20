@@ -238,7 +238,8 @@ export async function adoptGeneratedMedia(projectId: string, mediaId: string, na
         if (existing) return existing;
         const material = await promoteLegacyMaterial('media', mediaId, {kind: 'project', id: projectId}, db);
         const label = name?.trim();
-        if (label && label !== material.name) await db.libraryMaterials.put({...material, name: validName(label.slice(0, 120))});
+        await db.libraryMaterials.put({...material, source: {...material.source, generated: true},
+            ...(label && label !== material.name ? {name: validName(label.slice(0, 120))} : {})});
         await db.media.update(mediaId, {libraryRetained: true});
         return (await db.libraryMaterials.get(material.id))!;
     });

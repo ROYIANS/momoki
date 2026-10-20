@@ -15,7 +15,7 @@ import {deleteProject} from "@/features/projects/commands/lifecycle";
 import {deleteMediaIfOrphan, putMedia} from "@/features/library/commands/media";
 import { updateGenerationJob } from "@/features/agent/commands/agentGeneration";
 import type {ConnectorConfig} from "@/features/settings/models/connector";
-import { applyAgentGeneration, checkAgentGeneration, GenerationPendingError, monitorAgentGeneration, prepareAgentGeneration, submitAgentGeneration } from "@/features/video/agent/generationRuntime";
+import { applyAgentGeneration, checkAgentGeneration, GenerationPendingError, monitorAgentGeneration, prepareAgentGeneration, prepareGenerationApply, submitAgentGeneration } from "@/features/video/agent/generationRuntime";
 import { generationSubmitSchema, profileRequest, type GenerationSubmitArgs } from "@/features/video/agent/generationProfiles";
 import type { AgentToolContext } from "@/features/agent/runtime/tools";
 import { GENERATION_TOOLS as GENERATION_TOOLS_DEFINITIONS } from "@/features/video/agent/generationTools";
@@ -68,6 +68,28 @@ function hubFetch(kind:"image"|"video"="image",base64=false) {
 }
 
 describe("durable agent generation",()=>{
+  it.each(["image","video"] as const)("a library %s reaches local bytes, previews a save, and applies as one project material without touching any slot",async(kind)=>{
+    const f=await setup("apimart",kind);
+    const args:GenerationSubmitArgs={...f.args,target:{kind:"library",projectId:f.project.id,entityId:"covers",slot:kind,label:"封面备选"}};
+    const context=await toolContext(f.run.id,f.thread.id,"submit_generation",args);
+    context.preview=await prepareAgentGeneration(args,context);
+    expect(context.preview.summary).toContain("素材库");
+    expect(context.preview.changes.join("\n")).toContain("封面备选");
+    const job=await submitAgentGeneration(args,context,{fetchImpl:apimartFetch(kind),pollIntervalMs:0,maxPolls:3});
+    expect(job.status).toBe("downloaded");
+    expect(job.kind).toBe(kind);
+    const apply=await toolContext(f.run.id,f.thread.id,"apply_generation",{jobId:job.id});
+    apply.preview=await prepareGenerationApply(job.id,apply);
+    expect(apply.preview.summary).toContain("素材库");
+    expect(await applyAgentGeneration(job.id,apply)).toMatchObject({status:"applied",applied:true});
+    expect(await applyAgentGeneration(job.id,apply)).toMatchObject({status:"applied"});
+    const materials=(await db.libraryMaterials.toArray()).filter((item)=>item.scope.kind==="project"&&item.scope.id===f.project.id);
+    expect(materials).toHaveLength(1);
+    expect(materials[0]).toMatchObject({name:"封面备选",kind,archived:false,source:{projectId:f.project.id,entityId:job.result!.mediaId}});
+    const shot=(await db.shots.get(f.shot.id))!;
+    expect(shot.firstFrame.result).toBeUndefined();
+    expect(shot.clip.result).toBeUndefined();
+  });
   it.each(["apimart","aihubmix"] as const)("%s image reaches genuine local bytes then separately and atomically applies",async(provider)=>{
     const f=await setup(provider);
     const fetchImpl=provider === "apimart" ? apimartFetch():hubFetch();
