@@ -23,6 +23,7 @@ import type {ChatSurfaceMode, ComposerProps} from "./composerTypes";
 import {ModelSelectTrigger, SendCircleButton} from "./ModelSelectTrigger";
 import {ComposerCardHost, ComposerSurface} from "./ComposerCards";
 import {ComposerQueue} from "./ComposerQueue";
+import {ComposerActionCards} from "./ComposerActionCards";
 import "./composerControls.css";
 
 function popupRoot(): HTMLElement {
@@ -111,6 +112,7 @@ export function FloatingComposer({
                                      stopping,
                                      blocked,
                                      blockedReason,
+                                     readOnly,
                                      connectors,
                                      selectedConnectorId,
                                      model,
@@ -140,6 +142,7 @@ export function FloatingComposer({
                                      notice,
                                      attention,
                                      queue,
+                                     actions,
                                      surface = "home",
                                      expanded = false,
                                      onExpandedChange,
@@ -286,7 +289,7 @@ export function FloatingComposer({
     return (
         <ComposerSurface
             stackClassName={[expanded ? "is-expanded" : "", plusOpen ? "is-plus-open" : ""].filter(Boolean).join(" ") || undefined}
-            above={<><div ref={sheetHost} className="agent-composer-sheets"/>{queue ? <ComposerQueue threadId={queue.threadId} active={sending}/> : null}<ComposerCardHost notice={notice} attention={attention}/></>}
+            above={<><div ref={sheetHost} className="agent-composer-sheets"/>{actions ? <ComposerActionCards threadId={actions.threadId} busy={sending} readOnly={readOnly} onRunAction={actions.onRunAction}/> : null}{queue ? <ComposerQueue threadId={queue.threadId} active={sending}/> : null}<ComposerCardHost notice={notice} attention={attention}/></>}
             frameClassName={`agent-composer agent-composer-refined${dragging ? " reference-dragging" : ""}${inline ? " is-inline" : ""}`}
             frameProps={{
                  onDragOver: (event) => {

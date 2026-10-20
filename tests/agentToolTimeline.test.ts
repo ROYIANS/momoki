@@ -202,26 +202,27 @@ describe("tool timeline", () => {
         expect(row.querySelector(".agent-call-error")?.textContent).toBe("镜头不存在");
     });
 
-    it("auto-expands a pending approval with preview and decision buttons that fire onAction", async () => {
+    it("auto-expands a pending approval with its preview and points to the composer card instead of buttons", async () => {
         const pending = call("c1", {
             name: "shot_update", effect: "write", status: "awaiting_approval", highRisk: true, title: "修改镜头",
             preview: {summary: "把镜头 3 改为特写", changes: ["时长 3s → 5s"]},
         } as Partial<AgentToolCall>);
-        const onAction = await renderDetails([pending], {status: "waiting_approval"});
+        await renderDetails([pending], {status: "waiting_approval"});
         expect(container.querySelector<HTMLElement>("[data-activity-call] > [id]")?.hidden).toBe(false);
         expect(text()).toContain("把镜头 3 改为特写");
+        expect(text()).toContain("等待你在输入框上方批准");
         expect(text()).toContain("高风险操作");
-        await act(async () => buttons("批准")[0].click());
-        expect(onAction).toHaveBeenCalledWith("r1", "approve", "c1");
-        await act(async () => buttons("拒绝")[0].click());
-        expect(onAction).toHaveBeenCalledWith("r1", "reject", "c1");
+        // The decision itself lives on the composer action card (tests/agentActionCards.test.ts).
+        expect(buttons("批准")).toHaveLength(0);
+        expect(buttons("拒绝")).toHaveLength(0);
     });
 
-    it("keeps approval buttons visible even when the row is folded", async () => {
+    it("keeps the approval hint visible even when the row is folded, without buttons", async () => {
         await renderDetails([call("c1", {status: "awaiting_approval", effect: "write", name: "shot_update"})], {status: "waiting_approval"});
         await act(async () => container.querySelector<HTMLButtonElement>(".agent-tool-call-toggle")!.click());
         expect(container.querySelector<HTMLElement>("[data-activity-call] > [id]")?.hidden).toBe(true);
-        expect(buttons("批准")).toHaveLength(1);
+        expect(text()).toContain("等待你在输入框上方批准");
+        expect(buttons("批准")).toHaveLength(0);
     });
 
     it("keeps the generation review mounted for paid submission approval", async () => {
@@ -240,7 +241,8 @@ describe("tool timeline", () => {
 
 describe("composer attention", () => {
     it("points to a pending approval without its own approve/reject buttons and requests navigation", async () => {
-        const pending = call("c1", {status: "awaiting_approval", effect: "write", name: "shot_update", title: "修改镜头"});
+        // A reviewed form keeps its navigation item; plain approvals are on the action card instead.
+        const pending = call("c1", {status: "awaiting_approval", effect: "network", name: "submit_generation", title: "修改镜头"});
         attentionCalls = [pending];
         let seen: {runId: string; callId?: string} | null = null;
         function Probe() {
@@ -264,8 +266,8 @@ describe("composer attention", () => {
 
     it("shows one decision at a time", async () => {
         attentionCalls = [
-            call("c1", {status: "awaiting_approval", effect: "write", name: "shot_update", title: "修改镜头"}),
-            call("c2", {status: "awaiting_approval", effect: "write", name: "shot_update", title: "修改角色"}),
+            call("c1", {status: "awaiting_approval", effect: "network", name: "submit_generation", title: "修改镜头"}),
+            call("c2", {status: "awaiting_approval", effect: "network", name: "submit_generation", title: "修改角色"}),
         ];
         await act(async () => {
             root.render(h(AgentActivityNavigationProvider, {threadId: "t1"}, h(AgentComposerAttention, {

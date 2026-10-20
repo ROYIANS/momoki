@@ -3,8 +3,8 @@ import {agentExecution} from "../runtime/agentExecution";
 import type {AgentPendingInput} from "../models/agentPendingInput";
 import {PendingInputConflictError} from "../commands/agentPendingInputs";
 import {useComposerQueue} from "./useComposerQueue";
-import {ArrowDown, ArrowUp, MoreHorizontal, X} from "../../../ui/icons";
-import "./composerQueue.css";
+import {ArrowDown, ArrowUp, Check, CornerDownRight, ListTodo, Pencil, QueueList, Trash2, X} from "../../../ui/icons";
+import {ComposerPanel, ComposerRow, MenuItem, RowAction, RowMenu} from "./ComposerPanel";
 
 const STEER_HINT = "提交，但不中断模型运行";
 const ATTACHMENT_STEER_HINT = "带资料的消息只能排队";
@@ -19,8 +19,8 @@ function failure(cause: unknown): string {
 }
 
 /**
- * Durable pending-send cards attached above the composer. One card is one future turn; nothing here
- * interrupts the current run, and a card is only delivered by an explicit action or the service drain.
+ * Durable pending-send rows attached above the composer. One row is one future turn; nothing here
+ * interrupts the current run, and a row is only delivered by an explicit action or the service drain.
  */
 export function ComposerQueue({threadId, active}: {threadId: string; active: boolean}) {
     const view = useComposerQueue({threadId, active});
@@ -30,12 +30,11 @@ export function ComposerQueue({threadId, active}: {threadId: string; active: boo
     if (view.status !== "ready") return null;
     const {mode, items} = view;
     // A card that was delivered or removed elsewhere still reports why its action failed.
-    if (!items.length) return error ? <section className="agent-composer-queue" aria-label="待发送消息">
-        <p className="agent-composer-queue-error" role="alert">{error}</p>
-    </section> : null;
+    if (!items.length) return error ? <ComposerPanel label="待发送消息" note={error} noteRole="alert">{null}</ComposerPanel> : null;
     // A stopped/failed queue, an idle one and work the next send would end may all be sent explicitly.
-    // Only an approval wait keeps the card back, because that run is still going to continue on its own.
+    // Only an approval wait keeps the row back, because that run is still going to continue on its own.
     const canDispatch = mode !== "blocked" || view.blocked === "resume";
+    const note = error ?? view.notice;
 
     async function apply(operation: () => Promise<unknown>) {
         try {
@@ -68,17 +67,21 @@ export function ComposerQueue({threadId, active}: {threadId: string; active: boo
         });
     }
 
-    return <section className="agent-composer-queue" aria-label="待发送消息" data-mode={mode}>
-        {view.notice && <p className="agent-composer-queue-notice" role="status">{view.notice}</p>}
-        {error && <p className="agent-composer-queue-error" role="alert">{error}</p>}
-        <ul className="agent-composer-queue-list">
-            {items.map(item => {
-                const system = item.source === "system";
-                const editingThis = editing?.id === item.id;
-                const dispatchLabel = view.blocked === "resume" ? "结束上次执行并发送" : "立即发送";
-                return <li key={item.id} className="agent-composer-queue-card" data-source={item.source}
-                           data-status={item.status} data-mode={mode}>
-                    {editingThis ? <div className="agent-composer-queue-edit">
+    return <ComposerPanel label="待发送消息" className="agent-composer-queue" data-mode={mode}
+                          note={note} noteRole={error ? "alert" : "status"}>
+        {items.map(item => {
+            const system = item.source === "system";
+            const attachments = item.attachments?.length ?? 0;
+            const dispatchLabel = view.blocked === "resume" ? "结束上次执行并发送" : "立即发送";
+            const data = {"data-source": item.source, "data-status": item.status, "data-mode": mode} as const;
+            const removeLabel = `删除 ${cardText(item).slice(0, 20)}`;
+            if (editing?.id === item.id) {
+                return <ComposerRow key={item.id} icon={<Pencil size={16}/>} className="agent-composer-queue-card" {...data}
+                                    actions={<>
+                                        <RowAction icon={<Check size={16} aria-hidden/>} ariaLabel="保存" primary onClick={save}/>
+                                        <RowAction icon={<X size={16} aria-hidden/>} ariaLabel="取消" onClick={() => setEditing(undefined)}/>
+                                    </>}>
+                    <div className="composer-row-edit">
                         <textarea aria-label="编辑待发送消息" rows={2} value={editing.value}
                                   onChange={event => setEditing({...editing, value: event.target.value})}
                                   onKeyDown={event => {
@@ -88,94 +91,60 @@ export function ComposerQueue({threadId, active}: {threadId: string; active: boo
                                           save();
                                       }
                                   }}/>
-                        <div className="agent-composer-queue-actions">
-                            <button type="button" onClick={save}>保存</button>
-                            <button type="button" onClick={() => setEditing(undefined)}>取消</button>
-                        </div>
-                    </div> : <>
-                        <p className="agent-composer-queue-text">{cardText(item)}</p>
-                        <div className="agent-composer-queue-meta">
-                            {system ? <span>系统事件</span> : null}
-                            {item.attachments?.length ? <span>{`含 ${item.attachments.length} 份资料`}</span> : null}
-                            {item.status === "held" ? <span>{item.heldReason === "uncertain" ? "发送未确认" : "已停止"}</span> : null}
-                            {item.mode === "next-step" && item.status === "queued" ?
-                                <span className="agent-composer-queue-steered">{STEERED_LABEL}</span> : null}
-                            {item.lastError ?
-                                <span className="agent-composer-queue-last-error" title={item.lastError}>{item.lastError}</span> : null}
-                        </div>
-                    </>}
-                    {!editingThis && mode === "running" && <div className="agent-composer-queue-actions">
-                        {system ? <>
-                            <button type="button" className="is-primary" disabled title="本轮结束后会自动继续">立即发送</button>
-                            <button type="button" onClick={() => remove(item)}>取消继续</button>
-                        </> : <>
-                            <button type="button" disabled={Boolean(item.attachments?.length)}
-                                    title={item.attachments?.length ? ATTACHMENT_STEER_HINT : STEER_HINT}
-                                    onClick={() => void apply(() => agentExecution.setPendingMode({id: item.id,
-                                        expectedRevision: item.revision, mode: "next-step"}))}>引导</button>
-                            <button type="button" aria-label={`删除 ${cardText(item).slice(0, 20)}`}
-                                    onClick={() => remove(item)}>删除</button>
-                            <button type="button" aria-label="更多" aria-expanded={menu === item.id}
-                                    onClick={() => setMenu(menu === item.id ? undefined : item.id)}>
-                                <MoreHorizontal size={16} aria-hidden/>更多
-                            </button>
-                            {menu === item.id && <div className="agent-composer-queue-menu" role="menu">
-                                <button type="button" role="menuitem" onClick={() => {
-                                    setMenu(undefined);
-                                    setEditing({id: item.id, revision: item.revision, value: item.content});
-                                }}>编辑</button>
-                                <button type="button" role="menuitem" onClick={() => {
-                                    setMenu(undefined);
-                                    void apply(() => agentExecution.movePending({id: item.id, direction: "up"}));
-                                }}><ArrowUp size={14} aria-hidden/>上移</button>
-                                <button type="button" role="menuitem" onClick={() => {
-                                    setMenu(undefined);
-                                    void apply(() => agentExecution.movePending({id: item.id, direction: "down"}));
-                                }}><ArrowDown size={14} aria-hidden/>下移</button>
-                                <button type="button" role="menuitem" onClick={() => setMenu(undefined)}>
-                                    <X size={14} aria-hidden/>收起
-                                </button>
-                            </div>}
-                        </>}
-                    </div>}
-                    {!editingThis && mode === "paused" && <div className="agent-composer-queue-actions">
-                        {system ? <>
-                            <button type="button" className="is-primary" onClick={() => dispatch(item)}>{dispatchLabel}</button>
-                            <button type="button" onClick={() => remove(item)}>取消继续</button>
-                        </> : <>
-                            <button type="button" className="is-primary" onClick={() => dispatch(item)}>{dispatchLabel}</button>
-                            <button type="button" onClick={() => setEditing({id: item.id, revision: item.revision, value: item.content})}>编辑</button>
-                            <button type="button" aria-label={`删除 ${cardText(item).slice(0, 20)}`}
-                                    onClick={() => remove(item)}>删除</button>
-                        </>}
-                    </div>}
-                    {!editingThis && mode === "idle" && <div className="agent-composer-queue-actions">
-                        {system ? <>
-                            <button type="button" className="is-primary" onClick={() => dispatch(item)}>立即发送</button>
-                            <button type="button" onClick={() => remove(item)}>取消继续</button>
-                        </> : <>
-                            <button type="button" className="is-primary" onClick={() => dispatch(item)}>立即发送</button>
-                            <button type="button" onClick={() => setEditing({id: item.id, revision: item.revision, value: item.content})}>编辑</button>
-                            <button type="button" aria-label={`删除 ${cardText(item).slice(0, 20)}`}
-                                    onClick={() => remove(item)}>删除</button>
-                        </>}
-                    </div>}
-                    {!editingThis && mode === "blocked" && <div className="agent-composer-queue-actions">
-                        {system ? <>
-                            <button type="button" className="is-primary" disabled={!canDispatch}
-                                    title={canDispatch ? undefined : "等待审批，处理完成后再继续"}
-                                    onClick={() => dispatch(item)}>{dispatchLabel}</button>
-                            <button type="button" onClick={() => remove(item)}>取消继续</button>
-                        </> : canDispatch ? <>
-                            <button type="button" className="is-primary" onClick={() => dispatch(item)}>{dispatchLabel}</button>
-                            <button type="button" onClick={() => setEditing({id: item.id, revision: item.revision, value: item.content})}>编辑</button>
-                            <button type="button" aria-label={`删除 ${cardText(item).slice(0, 20)}`}
-                                    onClick={() => remove(item)}>删除</button>
-                        </> : <button type="button" aria-label={`删除 ${cardText(item).slice(0, 20)}`}
-                                      onClick={() => remove(item)}>删除</button>}
-                    </div>}
-                </li>;
-            })}
-        </ul>
-    </section>;
+                    </div>
+                </ComposerRow>;
+            }
+            const tags = <>
+                {system ? <span className="composer-row-tag">系统事件</span> : null}
+                {attachments ? <span className="composer-row-tag">{`含 ${attachments} 份资料`}</span> : null}
+                {item.status === "held" ? <span className="composer-row-tag">{item.heldReason === "uncertain" ? "发送未确认" : "已停止"}</span> : null}
+                {item.mode === "next-step" && item.status === "queued" ?
+                    <span className="composer-row-tag agent-composer-queue-steered">{STEERED_LABEL}</span> : null}
+                {item.lastError ? <span className="composer-row-tag" data-tone="warn" title={item.lastError}>{item.lastError}</span> : null}
+            </>;
+            const send = <RowAction icon={<ArrowUp size={16} aria-hidden/>} label={dispatchLabel} primary
+                                    disabled={system && mode === "running" || mode === "blocked" && !canDispatch}
+                                    title={system && mode === "running" ? "本轮结束后会自动继续"
+                                        : mode === "blocked" && !canDispatch ? "等待审批，处理完成后再继续" : undefined}
+                                    onClick={() => dispatch(item)}/>;
+            const rowMenu = <RowMenu open={menu === item.id}
+                                                           onOpenChange={open => setMenu(open ? item.id : undefined)}>
+                <MenuItem icon={<Pencil size={14} aria-hidden/>} label="编辑" onClick={() => {
+                    setMenu(undefined);
+                    setEditing({id: item.id, revision: item.revision, value: item.content});
+                }}/>
+                <MenuItem icon={<ArrowUp size={14} aria-hidden/>} label="上移" onClick={() => {
+                    setMenu(undefined);
+                    void apply(() => agentExecution.movePending({id: item.id, direction: "up"}));
+                }}/>
+                <MenuItem icon={<ArrowDown size={14} aria-hidden/>} label="下移" onClick={() => {
+                    setMenu(undefined);
+                    void apply(() => agentExecution.movePending({id: item.id, direction: "down"}));
+                }}/>
+            </RowMenu>;
+            const trash = <RowAction icon={<Trash2 size={16} aria-hidden/>} ariaLabel={removeLabel} onClick={() => remove(item)}/>;
+            let actions;
+            if (system) {
+                actions = <>
+                    {send}
+                    <RowAction icon={<X size={16} aria-hidden/>} ariaLabel="取消继续" onClick={() => remove(item)}/>
+                </>;
+            } else if (mode === "running") {
+                actions = <>
+                    <RowAction icon={<CornerDownRight size={16} aria-hidden/>} label="引导" disabled={attachments > 0}
+                               title={attachments ? ATTACHMENT_STEER_HINT : STEER_HINT}
+                               onClick={() => void apply(() => agentExecution.setPendingMode({id: item.id,
+                                   expectedRevision: item.revision, mode: "next-step"}))}/>
+                    {trash}{rowMenu}
+                </>;
+            } else {
+                actions = <>{canDispatch ? send : null}{trash}{rowMenu}</>;
+            }
+            return <ComposerRow key={item.id} icon={system ? <ListTodo size={16}/> : <QueueList size={16}/>}
+                                className="agent-composer-queue-card" actions={actions} {...data}>
+                <span className="composer-row-text" title={cardText(item)}>{cardText(item)}</span>
+                {tags}
+            </ComposerRow>;
+        })}
+    </ComposerPanel>;
 }

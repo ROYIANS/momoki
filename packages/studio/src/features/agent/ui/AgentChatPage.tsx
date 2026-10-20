@@ -593,6 +593,7 @@ function AgentChatInner({threadId, view}: { threadId?: Id; view?: "tasks" }) {
             onOpenTask: () => setTaskInspectorOpen(true),
         } : undefined,
         queue: activeThreadId ? {threadId: activeThreadId} : undefined,
+        actions: activeThreadId ? {threadId: activeThreadId, onRunAction} : undefined,
         contextUsage: <ContextUsageTrigger attachments={references.attachments} projectId={projectId}
                                            threadId={activeThreadId} interactionMode={interactionMode}
                                            draft={draft}

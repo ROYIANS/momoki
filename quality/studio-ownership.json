@@ -102,6 +102,27 @@
       "publicTypes": []
     },
     {
+      "file": "packages/studio/src/features/agent/ui/ComposerActionCards.tsx",
+      "target": "packages/studio/src/features/agent/ui/ComposerActionCards.tsx",
+      "owner": "features/agent",
+      "public": false,
+      "publicTypes": []
+    },
+    {
+      "file": "packages/studio/src/features/agent/ui/useComposerActions.ts",
+      "target": "packages/studio/src/features/agent/ui/useComposerActions.ts",
+      "owner": "features/agent",
+      "public": false,
+      "publicTypes": []
+    },
+    {
+      "file": "packages/studio/src/features/agent/runtime/runActionState.ts",
+      "target": "packages/studio/src/features/agent/runtime/runActionState.ts",
+      "owner": "features/agent",
+      "public": false,
+      "publicTypes": []
+    },
+    {
       "file": "packages/studio/src/features/agent/ui/ComposerQueue.tsx",
       "target": "packages/studio/src/features/agent/ui/ComposerQueue.tsx",
       "owner": "features/agent",
@@ -400,13 +421,6 @@
       "target": "packages/studio/src/features/agent/ui/composerControls.css",
       "owner": "features/agent",
       "public": false
-    },
-    {
-      "file": "packages/studio/src/features/agent/ui/composerQueue.css",
-      "target": "packages/studio/src/features/agent/ui/composerQueue.css",
-      "owner": "features/agent",
-      "public": false,
-      "publicTypes": []
     },
     {
       "original": "packages/studio/src/components/agent/composerTypes.ts",
@@ -6861,6 +6875,20 @@
       "publicSymbols": [
         "isLaterUserTurn"
       ]
+    },
+    {
+      "file": "packages/studio/src/features/agent/ui/composerPanel.css",
+      "target": "packages/studio/src/features/agent/ui/composerPanel.css",
+      "owner": "features/agent",
+      "public": false,
+      "publicTypes": []
+    },
+    {
+      "file": "packages/studio/src/features/agent/ui/ComposerPanel.tsx",
+      "target": "packages/studio/src/features/agent/ui/ComposerPanel.tsx",
+      "owner": "features/agent",
+      "public": false,
+      "publicTypes": []
     }
   ],
   "featureUiAppEntries": [

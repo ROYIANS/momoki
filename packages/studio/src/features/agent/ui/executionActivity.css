@@ -380,3 +380,10 @@
     white-space: normal;
     overflow-wrap: anywhere;
 }
+
+.agent-chat-root .agent-action-hint {
+    margin: 4px 0 0;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    line-height: 18px;
+}

@@ -2,6 +2,7 @@ import {useProductQuery} from "../../../platform/product/queries";
 import type {AgentTask} from "../models/agent";
 import {selectActivityAttention} from "../runtime/activityAttention";
 import {getTaskDisplayState} from "../runtime/taskState";
+import {isCardApproval, runActionState} from "../runtime/runActionState";
 import {useAgentActivityNavigation} from "./AgentActivityNavigation";
 
 /** One composer decision: the action name, the target, and the existing queue action. */
@@ -50,7 +51,16 @@ export function useComposerAttention({threadId, task, projectUnavailable, onOpen
     if (!state || state.threadId !== threadId || "idle" in state) return {status: "loading", items: []};
     if ("error" in state) return {status: "error", items: []};
     const attention = selectActivityAttention({...state, projectUnavailable});
-    const items: ComposerDecision[] = attention.map(item => ({
+    // A plain approval is decided on its own action card; the navigation item would only repeat it.
+    const coveredByCard = (item: (typeof attention)[number]) => {
+        if (item.kind !== "approval" || !item.target.callId) return false;
+        const run = state.runs.find(candidate => candidate.id === item.target.runId);
+        const call = state.calls.find(candidate => candidate.id === item.target.callId);
+        if (!run || !call) return false;
+        const runCalls = state.calls.filter(candidate => candidate.runId === run.id);
+        return isCardApproval(runActionState(run, runCalls), call);
+    };
+    const items: ComposerDecision[] = attention.filter(item => !coveredByCard(item)).map(item => ({
         id: item.id,
         title: item.label,
         detail: item.detail,

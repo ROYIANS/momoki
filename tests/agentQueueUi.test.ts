@@ -63,7 +63,9 @@ async function draw(active: boolean) {
     await act(async () => root.render(h(ComposerQueue, {threadId, active})));
 }
 const cards = () => [...container.querySelectorAll<HTMLElement>(".agent-composer-queue-card")];
-const button = (label: string) => [...container.querySelectorAll<HTMLButtonElement>("button")].find(node => node.textContent === label || node.getAttribute("aria-label") === label)!;
+const nameOf = (node: Element) => node.textContent || node.getAttribute("aria-label") || "";
+const button = (label: string) => [...container.querySelectorAll<HTMLButtonElement>("button")]
+    .find(node => nameOf(node) === label || nameOf(node).startsWith(`${label} `))!;
 async function click(label: string) {
     const target = button(label);
     expect(target, label).toBeTruthy();
@@ -134,8 +136,9 @@ describe("composer pending-send queue", () => {
         await draw(false);
         await vi.waitFor(() => expect(cards()[0].dataset.mode).toBe("idle"));
         expect(button("立即发送")).toBeTruthy();
-        expect(button("编辑")).toBeTruthy();
         expect(button("删除")).toBeTruthy();
+        await click("更多");
+        expect(button("编辑")).toBeTruthy();
         expect(network).not.toHaveBeenCalled();
     });
 
@@ -147,8 +150,9 @@ describe("composer pending-send queue", () => {
         expect(cards()[0].dataset.mode).toBe("paused");
         expect(container.textContent).toContain("已停止，未自动发送");
         expect(button("立即发送")).toBeTruthy();
-        expect(button("编辑")).toBeTruthy();
         expect(button("删除")).toBeTruthy();
+        await click("更多");
+        expect(button("编辑")).toBeTruthy();
         expect(button("引导")).toBeUndefined();
         expect(network).not.toHaveBeenCalled();
     });
@@ -179,13 +183,13 @@ describe("composer pending-send queue", () => {
         expect(system.textContent).toContain("已采纳 3 张图，继续");
         expect(system.textContent).toContain("系统事件");
         expect(system.querySelectorAll("button")).toHaveLength(2);
-        expect([...system.querySelectorAll("button")].map(node => node.textContent)).toEqual(["立即发送", "取消继续"]);
+        expect([...system.querySelectorAll("button")].map(nameOf)).toEqual(["立即发送", "取消继续"]);
         expect(system.querySelector('button[aria-label="更多"]')).toBeNull();
         // While this page runs, the drain continues it after the turn, so the card only offers cancelling.
-        const sendNow = [...system.querySelectorAll<HTMLButtonElement>("button")].find(node => node.textContent === "立即发送")!;
+        const sendNow = [...system.querySelectorAll<HTMLButtonElement>("button")].find(node => nameOf(node) === "立即发送")!;
         expect(sendNow.disabled).toBe(true);
         expect(sendNow.getAttribute("title")).toBe("本轮结束后会自动继续");
-        await act(async () => [...system.querySelectorAll<HTMLButtonElement>("button")].find(node => node.textContent === "取消继续")!.click());
+        await act(async () => [...system.querySelectorAll<HTMLButtonElement>("button")].find(node => nameOf(node) === "取消继续")!.click());
         await vi.waitFor(async () => expect(await db.agentPendingInputs.where("threadId").equals(threadId).toArray()).toHaveLength(1));
         await vi.waitFor(() => expect(container.textContent).not.toContain("已采纳 3 张图，继续"));
         expect(button("更多")).toBeTruthy();

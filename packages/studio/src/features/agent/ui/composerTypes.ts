@@ -2,6 +2,7 @@ import type {ReferenceAttachment} from "../../references/models/references";
 import type {ReferenceImportDraft} from "../models/chatDraft";
 import type {ChatModelMetadata} from "../../settings/models/modelMetadata";
 import type {AgentInteractionMode, AgentReasoningEffort, AgentTask} from "../models/agent";
+import type {RunAction} from "../models/chatRunAction";
 import type {ReactNode} from "react";
 import type {ConnectorConfig} from "../../settings/models/connector";
 import type {Id} from "../../../platform/identity";
@@ -63,4 +64,6 @@ export type ComposerProps = {
     };
     /** Durable pending-send queue for this thread, drawn above the draft frame. */
     queue?: {threadId: string};
+    /** Approval and resume/end cards for this thread; they run the same handler the message area used to. */
+    actions?: {threadId: string; onRunAction: (runId: string, action: RunAction, callId?: string) => void};
 };

@@ -14,10 +14,8 @@ import {AgentJobReport} from "./AgentJobReport";
 import {useEffect, useId, useMemo, useRef, useState} from "react";
 
 import {Check, ChevronDown, Circle, CircleAlert, LoaderCircle, ShieldQuestion} from "../../../ui/icons";
-import {canResumeAgentRun} from "../commands/agentTools";
 import type {AgentRun, AgentToolCall} from "../models/agent";
-import {MODEL_STEPS_PER_SEGMENT} from "../models/agent";
-import {Button} from "../../../ui/button";
+import {isCardApproval, isReviewedCall, runActionState, type RunActionState} from "../runtime/runActionState";
 import type {ChatMessage} from "../models/chat";
 import {buildRunActivity, liveRoundEcho} from "../runtime/runPresentation";
 import {readToolRecoveryFailure, readToolValidationFailure, type ToolRecoveryFailure} from "../runtime/toolErrors";
@@ -97,9 +95,9 @@ function TechnicalDetails({call}: { call: AgentToolCall }) {
     </div>;
 }
 
-function ToolCallRow({run, call, busy, readOnly, unknown, executing, onAction}: {
+function ToolCallRow({run, call, busy, readOnly, actions, onAction}: {
     run: AgentRun; call: AgentToolCall; busy: boolean; readOnly?: boolean;
-    unknown: boolean; executing: boolean;
+    actions: RunActionState;
     onAction: (runId: string, action: RunAction, callId?: string) => void;
 }) {
     const {request} = useAgentActivityNavigation();
@@ -112,14 +110,14 @@ function ToolCallRow({run, call, busy, readOnly, unknown, executing, onAction}: 
     useEffect(() => {
         if (awaiting) setOpen(true);
     }, [awaiting]);
-    const recoverable = canResumeAgentRun(run);
-    const reviewGeneration = !readOnly && call.name === "submit_generation" && awaiting && recoverable && !unknown && !executing;
+    const reviewGeneration = !readOnly && call.name === "submit_generation" && awaiting && actions.canDecide;
     const musicReview = call.name === "music_generate";
-    const activeMusicReview = musicReview && !readOnly && awaiting && recoverable && !unknown && !executing;
+    const activeMusicReview = musicReview && !readOnly && awaiting && actions.canDecide;
     const preview = call.generationOverride?.preview ?? call.preview;
     const validationError = useMemo(() => call.status === "failed" ? readToolValidationFailure(call.result)?.error : undefined, [call.status, call.result]);
     const recovery = useMemo(() => call.status === "failed" ? readToolRecoveryFailure(call.result) : undefined, [call.status, call.result]);
-    const decide = !readOnly && !reviewGeneration && !musicReview && awaiting && recoverable && !unknown && !executing;
+    // Plain approvals are decided on the composer card; the row only says so.
+    const decide = !readOnly && !isReviewedCall(call) && isCardApproval(actions, call);
     const status = STATUS[call.status];
     const object = callObject(call);
     const soft = isValidationFailure(call, validationError);
@@ -137,13 +135,8 @@ function ToolCallRow({run, call, busy, readOnly, unknown, executing, onAction}: 
             : <p className={soft ? "agent-call-error agent-call-error-soft" : "agent-call-error text-destructive"}
                  data-kind={soft ? "validation" : "failure"}
                  role="alert">{failureLine(call, recovery, validationError)}</p>)}
-        {/* Approval is never folded away: what will happen is the preview, the decision sits beside it. */}
-        {decide && <div className="agent-step-actions">
-            <Button size="sm" disabled={busy} onClick={() => onAction(run.id, "approve", call.id)}>批准</Button>
-            <Button size="sm" variant="outline" disabled={busy}
-                    onClick={() => onAction(run.id, "reject", call.id)}>拒绝</Button>
-            {call.highRisk && <small className="agent-high-risk">高风险操作</small>}
-        </div>}
+        {decide && <p className="agent-action-hint" data-agent-public="true">
+            等待你在输入框上方批准{call.highRisk ? " · 高风险操作" : ""}</p>}
         <AgentJobReport run={run} call={call} readOnly={readOnly}/>
         <AgentDesktopMediaReport run={run} call={call} readOnly={readOnly}/>
         <div id={panelId} hidden={!open}>
@@ -225,15 +218,12 @@ export function AgentRunDetails({run, message, calls, busy, readOnly, onAction}:
     const panelId = useId();
     const ownedCalls = useMemo(() => calls.filter((call) => call.runId === run.id && call.threadId === run.threadId), [run.id, run.threadId, calls]);
     const activity = useMemo(() => buildRunActivity(run, ownedCalls), [run, ownedCalls]);
-    const unknown = ownedCalls.some((call) => call.status === "unknown");
-    const executing = ownedCalls.some((call) => call.status === "running");
-    const pendingApproval = ownedCalls.some((call) => call.status === "awaiting_approval");
-    const recoverable = canResumeAgentRun(run);
+    const actions = useMemo(() => runActionState(run, ownedCalls), [run, ownedCalls]);
+    const {recoverable, pendingApproval, budgetPaused} = actions;
     const echo = liveRoundEcho(run, message, ownedCalls);
     const currentReasoning = echo.reasoning ? "" : message.reasoning?.trim();
     const currentContent = run.status === "running" && !echo.content ? message.content : "";
     const reasoningActive = run.status === "running" && !!currentReasoning && !currentContent;
-    const budgetPaused = run.status === "interrupted" && run.pauseReason === "model_step_limit";
     const toolCount = ownedCalls.filter((call) => call.effect !== "bookkeeping").length;
     const running = run.status === "running";
     // Plain replies without tools, reasoning or plan have no process to disclose.
@@ -290,7 +280,7 @@ export function AgentRunDetails({run, message, calls, busy, readOnly, onAction}:
                         ? <ThinkingPanel key={item.id} reasoning={item.content} active={false}
                                          durationMs={item.durationMs}/>
                         : <ToolGroup key={item.id} calls={item.calls} run={run} busy={busy} readOnly={readOnly}
-                                     unknown={unknown} executing={executing} onAction={onAction}/>)}
+                                     actions={actions} onAction={onAction}/>)}
                 {currentReasoning && <ThinkingPanel reasoning={currentReasoning} active={reasoningActive}
                                                     output={{runId: run.id, assistantMessageId: message.id}}
                                                     durationMs={message.reasoningDurationMs}/>}
@@ -311,12 +301,8 @@ export function AgentRunDetails({run, message, calls, busy, readOnly, onAction}:
             </>}
             {/* Keep mounted: review dialogs own unsaved drafts and navigation guards. */}
             <AgentGenerationResults runId={run.id}/>
-            {!readOnly && recoverable && <div className="agent-step-actions">
-                {!unknown && !pendingApproval && <Button size="sm" variant="outline" disabled={busy}
-                                                         onClick={() => onAction(run.id, "resume")}>{budgetPaused ? `继续执行 · 最多 ${MODEL_STEPS_PER_SEGMENT} 轮` : "从已保存的步骤继续"}</Button>}
-                <Button size="sm" variant="ghost" disabled={busy}
-                        onClick={() => onAction(run.id, "cancel")}>结束本次执行</Button>
-            </div>}
+            {!readOnly && recoverable && !pendingApproval && <p className="agent-action-hint">
+                {budgetPaused ? "已暂停，可在输入框上方继续" : "执行未完成，可在输入框上方继续或结束"}</p>}
         </div>
     </section>;
 }
