@@ -8,6 +8,7 @@ import {installMcpHostServices, clearMcpHostServices} from "@/platform/runtime/m
 import type {McpHostServices} from "@/platform/runtime/mcp";
 import {AgentJobReport} from "@/features/agent/ui/AgentJobReport";
 import {AgentRunDetails} from "@/features/agent/ui/AgentRunDetails";
+import {ComposerActionCards} from "@/features/agent/ui/ComposerActionCards";
 import {admitAgentJob, checkpointAgentJob, clearAgentJobResult, markAgentJobRunning, publishAgentJob, stopAgentJob} from "@/features/agent/commands/agentJobs";
 import type {AgentRun, AgentToolCall} from "@/features/agent/models/agent";
 import type {AgentJob, AgentJobReader, AgentJobSelection} from "@/features/agent/models/agentJob";
@@ -267,8 +268,17 @@ it("keeps MCP unknown evidence readable in its original report while preserving 
             scope: {runId: owner.run.id, callId: owner.call.id, scopeId: owner.run.threadId}, target: facts.target, argumentsDigest: "digest_one"}},
             jobId: job.id, revision: job.revision, context: owner.context});
         await draw(owner); await publish();
-        await click("检查结果");
+        // The check is an action row above the composer, never a button inside the message.
+        expect(button("检查结果")).toBeFalsy();
+        const rowHost = document.createElement("div"); rowHost.className = "agent-chat-root"; document.body.append(rowHost);
+        const rowRoot = createRoot(rowHost);
+        await act(async () => rowRoot.render(h(ComposerActionCards, {threadId: owner.run.threadId, busy: false, readOnly: false, onRunAction: vi.fn()})));
         await publish();
+        const rowButton = [...rowHost.querySelectorAll("button")].find(item => item.textContent?.includes("检查结果"));
+        expect(rowButton).toBeTruthy();
+        await act(async () => rowButton!.click());
+        await publish();
+        await act(async () => rowRoot.unmount()); rowHost.remove();
         expect((await db.agentToolCalls.get(owner.call.id))!.status).toBe("completed");
         expect(host.invocationStatus).toHaveBeenCalledTimes(1); expect(host.invoke).not.toHaveBeenCalled();
     } finally {await clearMcpHostServices(host);}

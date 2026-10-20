@@ -6,7 +6,6 @@ import {StorageError} from "../../../platform/storage/errors";
 import {Button} from "../../../ui/button";
 import {ChevronDown} from "../../../ui/icons";
 import {AGENT_JOB_LIMITS, clearAgentJobResult, readAgentJob, readAgentJobPage, selectionMatchesCall} from "../commands/agentJobs";
-import {canReconcileOriginalMcpInvocation, reconcileOriginalMcpInvocation} from "../mcp/runtime/executionOwner";
 import type {AgentRun, AgentToolCall} from "../models/agent";
 import type {AgentJob, AgentJobObservation, AgentJobReader} from "../models/agentJob";
 
@@ -103,7 +102,6 @@ function OwnedJobReport({run, call, readOnly}: {run: AgentRun; call: AgentToolCa
     const [retry, setRetry] = useState(0);
     const [open, setOpen] = useState(false);
     const [busy, setBusy] = useState(false);
-    const [reconcileError, setReconcileError] = useState(false);
     const [clearError, setClearError] = useState<"failed" | "unknown">();
     const pending = useRef(false);
     const mounted = useRef(true);
@@ -114,7 +112,6 @@ function OwnedJobReport({run, call, readOnly}: {run: AgentRun; call: AgentToolCa
     const callId = call.id;
     const key = JSON.stringify([threadId, projectId, runId, callId]);
     const reader: AgentJobReader = {threadId, projectId, original: {runId, callId}};
-    const originalContext = {threadId, projectId, runId, callId};
     useEffect(() => {mounted.current = true; return () => {mounted.current = false;};}, []);
     const state = useProductQueryState(async tx => {
         const admitted = await tx.agentJobs.where("callId").equals(callId).first();
@@ -141,14 +138,6 @@ function OwnedJobReport({run, call, readOnly}: {run: AgentRun; call: AgentToolCa
         }
     }
 
-    async function reconcile() {
-        if (pending.current || readonlyRef.current) return;
-        pending.current = true; setBusy(true); setReconcileError(false);
-        try {await reconcileOriginalMcpInvocation(originalContext);}
-        catch {if (mounted.current) setReconcileError(true);}
-        finally {pending.current = false; if (mounted.current) {setBusy(false); setRetry(value => value + 1);}}
-    }
-
     if (state.error) return <section className="agent-job-report" aria-label="保留报告" role="alert">
         <p>任务进度与报告读取失败。</p>
         <Button size="sm" variant="ghost" onClick={() => setRetry(value => value + 1)}>重试读取任务</Button>
@@ -162,9 +151,6 @@ function OwnedJobReport({run, call, readOnly}: {run: AgentRun; call: AgentToolCa
     return <section className="agent-job-report" aria-label={reportTitle(job)}
                     data-agent-job={job.id}>
         <JobProgress job={job}/>
-        {job.kind === "mcp" && job.status === "unknown" && !cleared && !readOnly && canReconcileOriginalMcpInvocation(originalContext) &&
-            <Button size="sm" variant="ghost" disabled={busy} aria-busy={busy} onClick={() => void reconcile()}>检查结果</Button>}
-        {reconcileError && <p role="alert">无法检查结果，不会重新执行。</p>}
         {cleared ? <p>保留结果已清理，原始调用记录仍可查看。</p> : <>
             {job.output?.retention === "retained" && <>
                 <button type="button" className="agent-quiet-toggle" aria-expanded={open} aria-controls={panelId}

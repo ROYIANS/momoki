@@ -225,9 +225,11 @@ describe("tool timeline", () => {
         expect(buttons("批准")).toHaveLength(0);
     });
 
-    it("keeps the generation review mounted for paid submission approval", async () => {
+    it("keeps the paid-submission review out of the message: the row says it waits, the form lives in the side panel", async () => {
         await renderDetails([call("c1", {name: "submit_generation", effect: "network", status: "awaiting_approval"})], {status: "waiting_approval"});
-        expect(container.querySelector("[data-testid=generation-review]")).not.toBeNull();
+        expect(text()).toContain("生成提案待确认，在右侧栏审阅");
+        // No form in the stream; the side panel renders it once it is open.
+        expect(container.querySelector("[data-testid=generation-review]")).toBeNull();
         expect(container.querySelector("[data-testid=results]")).not.toBeNull();
         expect(buttons("批准")).toHaveLength(0);
     });
@@ -240,31 +242,22 @@ describe("tool timeline", () => {
 });
 
 describe("composer attention", () => {
-    it("points to a pending approval without its own approve/reject buttons and requests navigation", async () => {
-        // A reviewed form keeps its navigation item; plain approvals are on the action card instead.
+    it("adds no pill for a proposal waiting for confirmation: its own row above the composer brings it back", async () => {
         const pending = call("c1", {status: "awaiting_approval", effect: "network", name: "submit_generation", title: "修改镜头"});
         attentionCalls = [pending];
-        let seen: {runId: string; callId?: string} | null = null;
-        function Probe() {
-            seen = useAgentActivityNavigation().request;
-            return null;
-        }
         await act(async () => {
-            root.render(h(AgentActivityNavigationProvider, {threadId: "t1"}, h(Probe), h(AgentComposerAttention, {
+            root.render(h(AgentActivityNavigationProvider, {threadId: "t1"}, h(AgentComposerAttention, {
                 threadId: "t1", runs: [run({status: "waiting_approval"})], messages: [], projectUnavailable: false, onOpenTask: vi.fn(),
             })));
         });
-        expect(text()).toContain("待批准");
-        expect(text()).not.toContain("需要你处理");
-        expect(text()).not.toContain("进度已保存");
+        await new Promise(resolve => setTimeout(resolve, 30));
+        expect(text()).not.toContain("待批准");
+        expect(container.querySelector(".agent-composer-card")).toBeNull();
         expect(buttons("批准")).toHaveLength(0);
         expect(buttons("拒绝")).toHaveLength(0);
-        expect(buttons("允许")).toHaveLength(0);
-        await act(async () => container.querySelector<HTMLButtonElement>(".agent-composer-card-action")!.click());
-        expect(seen).toMatchObject({runId: "r1", callId: "c1"});
     });
 
-    it("shows one decision at a time", async () => {
+    it("shows no decision pill for several proposals either", async () => {
         attentionCalls = [
             call("c1", {status: "awaiting_approval", effect: "network", name: "submit_generation", title: "修改镜头"}),
             call("c2", {status: "awaiting_approval", effect: "network", name: "submit_generation", title: "修改角色"}),
@@ -274,10 +267,7 @@ describe("composer attention", () => {
                 threadId: "t1", projectUnavailable: false, onOpenTask: vi.fn(),
             })));
         });
-        expect(container.querySelectorAll(".agent-composer-card")).toHaveLength(1);
-        expect(container.querySelectorAll(".agent-composer-card-action")).toHaveLength(1);
-        expect(text()).toContain("修改镜头");
-        expect(text()).not.toContain("修改角色");
-        expect(text()).not.toContain("需要你处理");
+        await new Promise(resolve => setTimeout(resolve, 30));
+        expect(container.querySelectorAll(".agent-composer-card")).toHaveLength(0);
     });
 });

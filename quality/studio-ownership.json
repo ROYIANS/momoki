@@ -102,6 +102,13 @@
       "publicTypes": []
     },
     {
+      "file": "packages/studio/src/features/agent/ui/CallReviewPanel.tsx",
+      "target": "packages/studio/src/features/agent/ui/CallReviewPanel.tsx",
+      "owner": "features/agent",
+      "public": false,
+      "publicTypes": []
+    },
+    {
       "file": "packages/studio/src/features/agent/ui/ComposerActionCards.tsx",
       "target": "packages/studio/src/features/agent/ui/ComposerActionCards.tsx",
       "owner": "features/agent",

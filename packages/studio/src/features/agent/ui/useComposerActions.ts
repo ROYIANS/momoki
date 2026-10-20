@@ -2,9 +2,12 @@ import {useProductQuery} from "../../../platform/product/queries";
 import type {AgentRun, AgentToolCall} from "../models/agent";
 import type {AgentGenerationStatus} from "../models/agentGeneration";
 import type {GenerationBatch} from "../models/agentGenerationBatch";
+import type {AgentJob} from "../models/agentJob";
+import type {DesktopMediaImport} from "../../library/models/desktopMediaImport";
+import {canReconcileOriginalMcpInvocation} from "../mcp/runtime/executionOwner";
 import {readGenerationBatch} from "../commands/agentGenerationBatches";
 import {isLaterUserTurn} from "../models/chatTurns";
-import {isCardApproval, runActionState} from "../runtime/runActionState";
+import {isCardApproval, isReviewedCall, runActionState} from "../runtime/runActionState";
 
 export interface ApprovalCardData {
     kind: "approval";
@@ -13,6 +16,13 @@ export interface ApprovalCardData {
     /** Pending decisions of this run including this one; shown as "1/N". */
     position: number;
     total: number;
+}
+
+/** A generation or music proposal waiting for confirmation; the form itself lives in the side panel. */
+export interface ReviewCardData {
+    kind: "review";
+    run: AgentRun;
+    call: AgentToolCall;
 }
 
 /** What a generation batch is waiting for, derived the same way the review surface derives it. */
@@ -32,7 +42,19 @@ export interface BatchCardData {
     readOnly: boolean;
 }
 
-export type ComposerActionData = ApprovalCardData | BatchCardData;
+/** A local-video import that is running or whose result has to be checked. */
+export interface ImportCardData {
+    kind: "import";
+    record: DesktopMediaImport;
+}
+
+/** An external MCP call whose outcome is unconfirmed and can be checked without running it again. */
+export interface McpCheckCardData {
+    kind: "mcp-check";
+    job: AgentJob;
+}
+
+export type ComposerActionData = ApprovalCardData | ReviewCardData | BatchCardData | ImportCardData | McpCheckCardData;
 
 const WORKING = new Set<AgentGenerationStatus>(["submitting", "submitted", "running", "remote_completed", "downloading"]);
 
@@ -69,11 +91,13 @@ function batchCard(batch: GenerationBatch, detail: Awaited<ReturnType<typeof rea
 export function useComposerActions({threadId, readOnly}: {threadId?: string; readOnly?: boolean}): ComposerActionData[] {
     const state = useProductQuery(async db => {
         if (!threadId) return undefined;
-        const [runs, calls, messages, batches] = await Promise.all([
+        const [runs, calls, messages, batches, imports, mcpJobs] = await Promise.all([
             db.agentRuns.where("threadId").equals(threadId).toArray(),
             db.agentToolCalls.where("threadId").equals(threadId).toArray(),
             db.chatMessages.where("threadId").equals(threadId).toArray(),
             db.agentGenerationBatches.where("threadId").equals(threadId).sortBy("createdAt"),
+            db.desktopMediaImports.filter(record => record.actor.kind === "agent" && record.actor.threadId === threadId).toArray(),
+            db.agentJobs.filter(job => job.threadId === threadId && job.kind === "mcp" && job.status === "unknown" && job.output?.retention !== "cleared").toArray(),
         ]);
         const cards: BatchCardData[] = [];
         for (const [index, batch] of batches.entries()) {
@@ -85,7 +109,7 @@ export function useComposerActions({threadId, readOnly}: {threadId?: string; rea
                 if (card) cards.push(card);
             } catch { /* An unreadable batch keeps its in-message status; it must not hide the other cards. */ }
         }
-        return {threadId, runs, calls, messages, batchCards: cards};
+        return {threadId, runs, calls, messages, batchCards: cards, imports, mcpJobs};
     }, [threadId]);
     if (!threadId || readOnly || !state || state.threadId !== threadId) return [];
     const cards: ComposerActionData[] = [];
@@ -98,7 +122,18 @@ export function useComposerActions({threadId, readOnly}: {threadId?: string; rea
         const actions = runActionState(run, calls);
         const pending = calls.filter(call => isCardApproval(actions, call));
         pending.forEach((call, index) => cards.push({kind: "approval", run, call, position: index + 1, total: pending.length}));
+        // A proposal is confirmed in the side panel; this row only brings it back.
+        for (const call of calls) {
+            if (call.status === "awaiting_approval" && isReviewedCall(call) && actions.canDecide) cards.push({kind: "review", run, call});
+        }
     }
     cards.push(...state.batchCards);
+    for (const record of state.imports) {
+        if (["accepted", "running", "stopping", "unknown"].includes(record.status)) cards.push({kind: "import", record});
+    }
+    for (const job of state.mcpJobs) {
+        const context = {threadId: job.threadId, projectId: job.projectId, runId: job.runId, callId: job.callId};
+        if (canReconcileOriginalMcpInvocation(context)) cards.push({kind: "mcp-check", job});
+    }
     return cards;
 }

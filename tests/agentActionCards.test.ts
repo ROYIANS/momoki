@@ -24,7 +24,7 @@ vi.mock("@tanstack/react-router", () => ({Link: ({children}: {children?: ReactNo
 const {ComposerActionCards} = await import("@/features/agent/ui/ComposerActionCards");
 const {AgentComposerAttention} = await import("@/features/agent/ui/AgentComposerAttention");
 const {AgentRunDetails} = await import("@/features/agent/ui/AgentRunDetails");
-const {AgentActivityNavigationProvider} = await import("@/features/agent/ui/AgentActivityNavigation");
+const {AgentActivityNavigationProvider, useAgentActivityNavigation} = await import("@/features/agent/ui/AgentActivityNavigation");
 
 const at = "2026-10-19T00:00:00.000Z";
 let root: Root, container: HTMLDivElement, threadId = "";
@@ -136,7 +136,7 @@ describe("message area and navigation no longer duplicate the cards", () => {
         }
     });
 
-    it("the navigation queue drops a plain approval that the card owns but keeps reviewed forms", async () => {
+    it("the navigation queue drops both a plain approval and a proposal: their rows above the composer own them", async () => {
         await db.agentRuns.add(makeRun());
         await db.agentToolCalls.add(makeCall("c1"));
         const draw2 = () => act(async () => root.render(h(AgentActivityNavigationProvider, {threadId},
@@ -145,7 +145,25 @@ describe("message area and navigation no longer duplicate the cards", () => {
         await new Promise(resolve => setTimeout(resolve, 30));
         expect(container.querySelector(".agent-composer-card")).toBeNull();
         await db.agentToolCalls.update("c1", {name: "submit_generation"});
-        await vi.waitFor(() => expect(container.textContent).toContain("待批准"));
+        await new Promise(resolve => setTimeout(resolve, 60));
+        expect(container.querySelector(".agent-composer-card")).toBeNull();
+    });
+
+    it("a proposal waiting for confirmation gets a review row that opens its panel, and can be cancelled from there", async () => {
+        await db.agentRuns.add(makeRun());
+        await db.agentToolCalls.add(makeCall("c1", {name: "submit_generation", title: "生成首帧"}));
+        const requests: unknown[] = [];
+        function Probe() {requests.push(useAgentActivityNavigation().request); return null;}
+        await act(async () => root.render(h(AgentActivityNavigationProvider, {threadId}, h(Probe),
+            h(ComposerActionCards, {threadId, busy: false, readOnly: false, onRunAction}))));
+        await vi.waitFor(() => expect(container.querySelector('[data-kind="review"]')).toBeTruthy());
+        expect(container.querySelector('[data-kind="review"]')!.textContent).toContain("等待确认 · 生成首帧");
+        // Confirming costs money and edits the proposal, so the row never approves it itself.
+        expect(button("批准")).toBeUndefined();
+        await act(async () => button("打开生成提案：生成首帧")!.click());
+        expect(requests.at(-1)).toMatchObject({runId: "run-1", callId: "c1"});
+        await act(async () => button("取消本次生成")!.click());
+        expect(onRunAction).toHaveBeenCalledWith("run-1", "reject", "c1");
     });
 
     it("AgentRunDetails shows a steered message where the run took it in, expanded or collapsed", async () => {

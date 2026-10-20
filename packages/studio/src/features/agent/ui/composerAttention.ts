@@ -1,6 +1,7 @@
 import {useProductQuery} from "../../../platform/product/queries";
 import type {AgentTask} from "../models/agent";
 import {selectActivityAttention} from "../runtime/activityAttention";
+import {isReviewedCall} from "../runtime/runActionState";
 import {getTaskDisplayState} from "../runtime/taskState";
 import {isCardApproval, runActionState} from "../runtime/runActionState";
 import {useAgentActivityNavigation} from "./AgentActivityNavigation";
@@ -51,7 +52,10 @@ export function useComposerAttention({threadId, task, projectUnavailable, onOpen
     if (!state || state.threadId !== threadId || "idle" in state) return {status: "loading", items: []};
     if ("error" in state) return {status: "error", items: []};
     // A batch waiting on the user already has its own row above the composer; a second pill for it would repeat it.
-    const attention = selectActivityAttention({...state, projectUnavailable}).filter(item => !item.target.batchId);
+    // A proposal waiting for confirmation also has its own row above the composer.
+    const proposalIds = new Set(state.calls.filter(call => call.status === "awaiting_approval" && isReviewedCall(call)).map(call => call.id));
+    const attention = selectActivityAttention({...state, projectUnavailable})
+        .filter(item => !item.target.batchId && !(item.target.callId && proposalIds.has(item.target.callId)));
     // A plain approval is decided on its own action card; the navigation item would only repeat it.
     const coveredByCard = (item: (typeof attention)[number]) => {
         if (item.kind !== "approval" || !item.target.callId) return false;

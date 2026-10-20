@@ -5,8 +5,8 @@ import {CreatedEntityLinks} from "./CreatedEntityLinks";
 import {AgentWriteOutcomes} from "./AgentWriteOutcomes";
 import {WebResearchSources} from "./WebResearchSources";
 import {ProjectImageSources} from "./ProjectImageSources";
-import {GenerationReview} from "./GenerationReview";
 import {MusicGenerationReview} from "./MusicGenerationReview";
+import {CallReviewPanel} from "./CallReviewPanel";
 import {AgentGenerationResults} from "./AgentGenerationResults";
 import {AgentDesktopMediaReport} from "./AgentDesktopMediaReport";
 import {AgentJobReport} from "./AgentJobReport";
@@ -138,13 +138,14 @@ function ToolCallRow({run, call, busy, readOnly, actions, onAction}: {
                  role="alert">{failureLine(call, recovery, validationError)}</p>)}
         {decide && <p className="agent-action-hint" data-agent-public="true">
             等待你在输入框上方批准{call.highRisk ? " · 高风险操作" : ""}</p>}
+        {(reviewGeneration || activeMusicReview) &&
+            <CallReviewPanel call={call} kind={activeMusicReview ? "music" : "generation"} busy={busy} onAction={onAction}/>}
         <AgentJobReport run={run} call={call} readOnly={readOnly}/>
         <AgentDesktopMediaReport run={run} call={call} readOnly={readOnly}/>
         <div id={panelId} hidden={!open}>
             <div className="agent-step-payload">
-                {musicReview ? <MusicGenerationReview key={call.id} call={call} busy={busy} active={activeMusicReview}
-                                                      onAction={onAction}/> : reviewGeneration ?
-                    <GenerationReview call={call} busy={busy} onAction={onAction}/> : preview &&
+                {musicReview ? (activeMusicReview ? null : <MusicGenerationReview key={call.id} call={call} busy={busy} active={false}
+                                                      onAction={onAction}/>) : reviewGeneration ? null : preview &&
                     <div className="agent-change-preview" data-agent-public="true">
                         <strong>{preview.summary}</strong>
                         {preview.changes.length > 0 &&

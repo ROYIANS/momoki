@@ -19,7 +19,8 @@
   "pr_url": null,
   "subtasks": [],
   "children": [
-    "10-19-agent-queue-steer-parallel"
+    "10-19-agent-queue-steer-parallel",
+    "10-20-sidebar-panels"
   ],
   "parent": null,
   "relatedFiles": [],

@@ -733,3 +733,31 @@
     margin-top: auto;
     padding: 12px 16px;
 }
+
+
+/* Proposal and music review forms inside the side panel. The panel sits outside the chat column, so it carries the
+   chat scope class; padding comes from the panel, and the pinned footer reaches its edges. */
+.context-panel-content.agent-call-review-panel {
+    gap: 12px;
+    padding: 16px;
+}
+
+.context-panel-content.agent-call-review-panel .agent-generation-review {
+    border: 0;
+    padding: 0;
+    background: transparent;
+}
+
+.context-panel-content.agent-call-review-panel .context-panel-footer {
+    margin: auto -16px -16px;
+    padding: 12px 16px;
+}
+
+/* The form fills the panel so its footer sits at the bottom, whatever the content height. */
+.context-panel-content.agent-call-review-panel > .agent-generation-review,
+.context-panel-content.agent-call-review-panel > section {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+    gap: 12px;
+}

@@ -24,6 +24,7 @@ import {reviewAndApproveGeneration} from "../../video/agent/generationReview";
 import {recommendGenerationSelection} from "../../video/agent/generationSelection";
 import {applyGenerationSelection} from "../../video/agent/generationReviewDraft";
 import type {RunAction} from "../models/chatRunAction";
+import {ContextPanelFooter} from "../../../app/layout/context-panel";
 
 const PROVIDER_LABELS = {apimart: "APIMart", aihubmix: "AIHubMix"};
 
@@ -49,8 +50,10 @@ const options = (values: readonly (string | number)[]) => values.map((value) => 
 }));
 
 /** The model's proposal remains immutable; only confirmed overrides become executable. */
-export function GenerationReview({call, busy, onAction}: {
+export function GenerationReview({call, busy, onAction, retained}: {
     call: AgentToolCall; busy: boolean; onAction: (runId: string, action: RunAction, callId?: string) => void;
+    /** A draft held outside this form, so edits survive the side panel closing and reopening. */
+    retained?: RetainedDraft;
 }) {
     let raw: unknown;
     try {
@@ -63,16 +66,24 @@ export function GenerationReview({call, busy, onAction}: {
         role="alert">生成提案不完整，请取消后让助手重新准备。</p><Button variant="ghost" size="sm" disabled={busy}
                                                                        onClick={() => onAction(call.runId, "reject", call.id)}>取消本次生成</Button>
     </div>;
-    return <GenerationReviewForm key={call.id} call={call} initial={parsed.data} busy={busy} onAction={onAction}/>;
+    return <GenerationReviewForm key={call.id} call={call} initial={parsed.data} busy={busy} onAction={onAction} retained={retained}/>;
 }
 
-function GenerationReviewForm({call, initial, busy, onAction}: {
+export type RetainedDraft = {draft: GenerationSubmitArgs | undefined; set: (draft: GenerationSubmitArgs) => void};
+
+function GenerationReviewForm({call, initial, busy, onAction, retained}: {
     call: AgentToolCall;
     initial: GenerationSubmitArgs;
     busy: boolean;
     onAction: (runId: string, action: RunAction, callId?: string) => void;
+    retained?: RetainedDraft;
 }) {
-    const [draft, setDraft] = useState(initial);
+    const [localDraft, setLocalDraft] = useState(initial);
+    const draft = retained?.draft ?? localDraft;
+    const setDraft = (next: GenerationSubmitArgs) => {
+        setLocalDraft(next);
+        retained?.set(next);
+    };
     const [saving, setSaving] = useState(false);
     const [remember, setRemember] = useState(false);
     const [error, setError] = useState<string>();
@@ -171,7 +182,8 @@ function GenerationReviewForm({call, initial, busy, onAction}: {
         {remember &&
             <p className="agent-generation-form-note">用于未设置项目默认值的后续生成，仅记住连接、模型和通用参数。</p>}
         {(error || validation) && <p role="alert" className="agent-generation-form-error">{error ?? validation}</p>}
-        <div className="agent-generation-confirm-actions">
+        <p className="agent-generation-cost-note">确认后向所选供应商提交，可能产生费用。生成结果会先保存到本地。</p>
+        <ContextPanelFooter className="agent-generation-confirm-actions">
             <Button size="sm" disabled={disabled || Boolean(validation)} onClick={() => void confirm()}>{saving &&
                 <LoaderCircle size={14} className="animate-spin motion-reduce:animate-none"/>}确认并生成{title}</Button>
             <Button size="sm" variant="ghost" disabled={disabled}
@@ -182,8 +194,7 @@ function GenerationReviewForm({call, initial, busy, onAction}: {
                 setNotice(undefined);
             }}><Restore size={13} aria-hidden/>恢复 AI 建议
             </button>
-        </div>
-        <p className="agent-generation-cost-note">确认后向所选供应商提交，可能产生费用。生成结果会先保存到本地。</p>
+        </ContextPanelFooter>
     </div>;
 }
 

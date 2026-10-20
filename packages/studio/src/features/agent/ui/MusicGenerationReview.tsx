@@ -11,6 +11,7 @@ import {
 } from "../../music/agent/musicGenerationReview";
 import {describeMusicReview} from "../../music/agent/musicReviewPresentation";
 import type {RunAction} from "../models/chatRunAction";
+import {ContextPanelFooter} from "../../../app/layout/context-panel";
 
 function ReviewText({label, text}: { label: string; text: string }) {
     const [expanded, setExpanded] = useState(false);
@@ -95,7 +96,10 @@ export function MusicGenerationReview({call, busy, active, onAction}: {
             <div
                 className="text-xs text-muted-foreground">确认后通过 {snapshot.connectorLabel} 提交，可能消耗额度或产生费用；具体费用以服务商为准。
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div
+                className="text-xs text-muted-foreground">如需修改，请先在项目中保存草稿，再取消本次提案，让助手按新版本准备。
+            </div>
+            <ContextPanelFooter className="flex-wrap justify-start">
                 <Button size="sm" disabled={disabled || readiness?.status !== "ready"}
                         onClick={() => void confirm()}>{saving && <LoaderCircle aria-hidden
                                                                                 className="animate-spin motion-reduce:animate-none"/>}确认并生成音乐</Button>
@@ -103,10 +107,7 @@ export function MusicGenerationReview({call, busy, active, onAction}: {
                         onClick={() => onAction(call.runId, "reject", call.id)}>取消本次生成</Button>
                 <Button variant="ghost" size="sm" asChild><Link to="/p/$projectId"
                                                                 params={{projectId: snapshot.projectId}}>查看项目</Link></Button>
-            </div>
-            <div
-                className="text-xs text-muted-foreground">如需修改，请先在项目中保存草稿，再取消本次提案，让助手按新版本准备。
-            </div>
+            </ContextPanelFooter>
         </div>}
         <div className="min-w-0">
             <Button variant="ghost" size="sm" aria-expanded={details} aria-controls={detailsId}
