@@ -81,9 +81,12 @@ export function buildRunActivity(run: AgentRun, calls: readonly AgentToolCall[],
     return result;
 }
 
+function savedPublicSteps(run: AgentRun, calls?: readonly AgentToolCall[]): AgentActivityStep[] {
+    return calls ? [...publicSteps(run, ownedCalls(run, calls)).values()] : run.activitySteps ?? [];
+}
+
 function latestPublicStep(run: AgentRun, calls?: readonly AgentToolCall[]): AgentActivityStep | undefined {
-    const savedSteps = calls ? [...publicSteps(run, ownedCalls(run, calls)).values()] : run.activitySteps ?? [];
-    return savedSteps.reduce<AgentActivityStep | undefined>((found, step) => !found || step.step >= found.step ? step : found, undefined);
+    return savedPublicSteps(run, calls).reduce<AgentActivityStep | undefined>((found, step) => !found || step.step >= found.step ? step : found, undefined);
 }
 
 /**
@@ -94,10 +97,17 @@ export function liveRoundEcho(run: AgentRun, output: Pick<AgentRunOutput, "conte
     // A successfully completed model response is final, even if it repeats earlier text.
     if (run.status === "completed" || !run.hasToolCalls) return {content: false, reasoning: false};
     const latest = latestPublicStep(run, calls);
-    if (latest) return {
-        content: latest.content === output.content,
-        reasoning: latest.reasoning === undefined || latest.reasoning === (output.reasoning ?? ""),
-    };
+    if (latest) {
+        // A round that only called tools says nothing, yet the message keeps the last sentence it streamed, which is
+        // already in the timeline under its own step. Only when the newest step is silent is an older match a stale
+        // echo; if the newest step has its own text, equal text in the message is new output and must be shown.
+        const staleOlderSentence = latest.content === "" && Boolean(output.content)
+            && savedPublicSteps(run, calls).some(step => step.content === output.content);
+        return {
+            content: latest.content === output.content || staleOlderSentence,
+            reasoning: latest.reasoning === undefined || latest.reasoning === (output.reasoning ?? ""),
+        };
+    }
     if (calls) return {content: false, reasoning: false};
     // Legacy caller without the ledger: only rounds appended after this run's base.
     const rounds = currentContinuation(run).filter((message) => message.role === "assistant" && message.tool_calls?.length);

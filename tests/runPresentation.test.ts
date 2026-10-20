@@ -113,3 +113,29 @@ describe("run elapsed time", () => {
     expect(formatRunElapsed(-1)).toBe("0 秒");
   });
 });
+
+describe("a sentence already in the timeline is not drawn again as live output", () => {
+    // Step 1 said something and called a tool; steps 2 and 3 only called tools. The message still carries step 1's text.
+    const running = (steps: Array<{step: number; content: string; reasoning?: string}>) =>
+        ({id: "r", threadId: "t", status: "running", hasToolCalls: true, requestMessages: [], activitySteps: steps}) as unknown as import("@/features/agent/models/agent").AgentRun;
+
+    it("treats the stale sentence as an echo even when the newest steps carry no text", () => {
+        const run = running([{step: 1, content: "我先做一次只读查询"}, {step: 2, content: ""}, {step: 3, content: ""}]);
+        expect(liveRoundEcho(run, {content: "我先做一次只读查询", reasoning: ""}).content).toBe(true);
+    });
+
+    it("still shows genuinely new text that no saved step has said", () => {
+        const run = running([{step: 1, content: "我先做一次只读查询"}, {step: 2, content: ""}]);
+        expect(liveRoundEcho(run, {content: "查询结果如下", reasoning: ""}).content).toBe(false);
+    });
+
+    it("does not hide anything once the run has completed", () => {
+        const run = {...running([{step: 1, content: "完成了"}]), status: "completed"} as never;
+        expect(liveRoundEcho(run, {content: "完成了", reasoning: ""}).content).toBe(false);
+    });
+
+    it("shows text equal to an older step when the newest step has its own text, because it is new output", () => {
+        const run = running([{step: 1, content: "重复的话"}, {step: 2, content: "另一段"}]);
+        expect(liveRoundEcho(run, {content: "重复的话", reasoning: ""}).content).toBe(false);
+    });
+});
