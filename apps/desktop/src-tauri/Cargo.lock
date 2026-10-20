@@ -2353,7 +2353,7 @@ dependencies = [
 
 [[package]]
 name = "momoki"
-version = "0.1.7"
+version = "0.1.8"
 dependencies = [
  "apple-native-keyring-store",
  "async-trait",

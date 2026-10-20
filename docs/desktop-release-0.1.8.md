@@ -1,17 +1,17 @@
 <!--
-维护者使用说明：这是 Momoki 0.1.7 的具体 GitHub Release 正文草稿，不会被发布器自动读取。
-1. 仅在 desktop-v0.1.7 的流水线上传完成后复制正文；核对五个安装包、SHA256SUMS、
+维护者使用说明：这是 Momoki 0.1.8 的具体 GitHub Release 正文草稿，不会被发布器自动读取。
+1. 仅在 desktop-v0.1.8 的流水线上传完成后复制正文；核对五个安装包、SHA256SUMS、
    release-manifest.json，以及既有 ownership marker 的 status 为 complete。
    不要在工作流运行或重试期间编辑，发布器的完成步骤可能重写草稿正文。
 2. 只替换面向用户的说明。保留原草稿的上传状态提示与 momoki-desktop-release HTML
    ownership marker 原文，不修改、删除或复制其他版本的 marker，也不由此改变 draft/prerelease 状态。
 3. 对照实际 release-manifest.json，保留 manifest.limitations 的全部版本特定限制。
    下方通用限制与源码测试结果均不能代替这份发布记录，也不能证明安装版已验收。
-4. 源码与文档使用 desktop-v0.1.7 链接，准确构建 SHA 由 manifest.context.sourceSha 提供。
+4. 源码与文档使用 desktop-v0.1.8 链接，准确构建 SHA 由 manifest.context.sourceSha 提供。
    上传后核对标签来源、五个实际文件名和文档/配图链接，再由维护者完成功能检查并决定是否公开。
 -->
 
-# 默默 Momoki 0.1.7 · 桌面体验版
+# 默默 Momoki 0.1.8 · 桌面体验版
 
 感谢你体验默默。它把创作助手、分镜、音频与音乐放进同一个工作室，让你围绕项目逐步整理和完成作品。
 
@@ -21,11 +21,11 @@
 
 | 你的设备 | 下载 | 要求 |
 | --- | --- | --- |
-| Mac · Apple 芯片（M 系列） | [下载 Apple 芯片版 DMG](https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.7/Momoki_0.1.7_macos_arm64.dmg) | macOS 14 或更新版本 |
-| Mac · Intel 处理器 | [下载 Intel 版 DMG](https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.7/Momoki_0.1.7_macos_x64.dmg) | macOS 14 或更新版本 |
-| Windows · x64 | [下载 Windows 安装包](https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.7/Momoki_0.1.7_windows_x64_setup.exe) | x64 Windows；缺少 WebView2 时安装需要联网 |
-| Linux · x64（Debian / Ubuntu 系） | [下载 DEB](https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.7/Momoki_0.1.7_linux_x64.deb) | Ubuntu 22.04 构建基线，需满足运行依赖 |
-| Linux · x64（AppImage） | [下载 AppImage](https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.7/Momoki_0.1.7_linux_x64.AppImage) | 需满足运行依赖，部分环境需要 FUSE |
+| Mac · Apple 芯片（M 系列） | [下载 Apple 芯片版 DMG](https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.8/Momoki_0.1.8_macos_arm64.dmg) | macOS 14 或更新版本 |
+| Mac · Intel 处理器 | [下载 Intel 版 DMG](https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.8/Momoki_0.1.8_macos_x64.dmg) | macOS 14 或更新版本 |
+| Windows · x64 | [下载 Windows 安装包](https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.8/Momoki_0.1.8_windows_x64_setup.exe) | x64 Windows；缺少 WebView2 时安装需要联网 |
+| Linux · x64（Debian / Ubuntu 系） | [下载 DEB](https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.8/Momoki_0.1.8_linux_x64.deb) | Ubuntu 22.04 构建基线，需满足运行依赖 |
+| Linux · x64（AppImage） | [下载 AppImage](https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.8/Momoki_0.1.8_linux_x64.AppImage) | 需满足运行依赖，部分环境需要 FUSE |
 
 Mac 可在 **Apple 菜单 → 关于本机** 查看芯片；Windows 可在 **设置 → 系统 → 系统信息（关于）** 查看是否为“基于 x64 的处理器”。当前没有 Windows ARM、Linux ARM 或 Mac 通用安装包。
 
@@ -40,10 +40,10 @@ Mac 可在 **Apple 菜单 → 关于本机** 查看芯片；Windows 可在 **设
 ### Windows：更多信息 → 仍要运行
 
 1. 双击安装包。若出现 **Windows 已保护你的电脑**，点击 **更多信息**。
-2. 核对文件名为 `Momoki_0.1.7_windows_x64_setup.exe`，并确认它来自本页。当前包可能显示 **未知发布者**，这个字样无法验证作者身份；愿意继续体验时，再点击 **仍要运行**。
+2. 核对文件名为 `Momoki_0.1.8_windows_x64_setup.exe`，并确认它来自本页。当前包可能显示 **未知发布者**，这个字样无法验证作者身份；愿意继续体验时，再点击 **仍要运行**。
 3. 按安装向导完成安装，从开始菜单打开 **Momoki**。没有出现上述提示时，直接按向导操作即可。
 
-![Windows 操作示意：更多信息后核对文件名和来源，再决定是否仍要运行](https://raw.githubusercontent.com/ROYIANS/momoki/desktop-v0.1.7/docs/assets/installation/windows-first-open.png)
+![Windows 操作示意：更多信息后核对文件名和来源，再决定是否仍要运行](https://raw.githubusercontent.com/ROYIANS/momoki/desktop-v0.1.8/docs/assets/installation/windows-first-open.png)
 
 *操作示意，非系统截图；按钮名称和位置以你的设备为准。*
 
@@ -52,13 +52,13 @@ Mac 可在 **Apple 菜单 → 关于本机** 查看芯片；Windows 可在 **设
 1. 双击 DMG，将 **Momoki** 拖入 **Applications（应用程序）**，再从“应用程序”启动它。
 2. 如果遇到开发者未验证或未公证的提示，先关闭提示。确认下载来源后，打开 **系统设置 → 隐私与安全性**，向下找到 Momoki 对应的说明；愿意继续体验时点击 **仍要打开**，按系统要求确认后点击 **打开**。
 
-![macOS 操作示意：先尝试打开，再在隐私与安全性中找到 Momoki 并决定是否仍要打开](https://raw.githubusercontent.com/ROYIANS/momoki/desktop-v0.1.7/docs/assets/installation/macos-first-open.png)
+![macOS 操作示意：先尝试打开，再在隐私与安全性中找到 Momoki 并决定是否仍要打开](https://raw.githubusercontent.com/ROYIANS/momoki/desktop-v0.1.8/docs/assets/installation/macos-first-open.png)
 
 *操作示意，非系统截图；按钮名称和位置以你的设备为准。*
 
 **没有对应的继续按钮？** 请反馈完整提示；公司或学校管理的设备请联系管理员。**如果提示病毒、恶意软件、将损坏电脑或文件已损坏，请停止安装并反馈，不要按上述步骤强行继续。**
 
-Linux 用户及需要更多帮助的读者，可查看 [完整安装与首次打开指南](https://github.com/ROYIANS/momoki/blob/desktop-v0.1.7/docs/desktop-installation.md)。
+Linux 用户及需要更多帮助的读者，可查看 [完整安装与首次打开指南](https://github.com/ROYIANS/momoki/blob/desktop-v0.1.8/docs/desktop-installation.md)。
 
 ## 本次更新
 
@@ -69,6 +69,8 @@ Linux 用户及需要更多帮助的读者，可查看 [完整安装与首次打
 - **生成过程更清爽**：生成时只有一个进度占位块，完成后图片直接显示在对话里。
 - **镜头衔接**：agent 生成镜头时可以读取上一镜的尾帧作为参考。
 - **收尾更可靠**：agent 结束前会对照本轮真实写入的字段，不再把只写在备注里的设计说成已落实。
+- **修复 0.1.7 未能发布的问题**：0.1.7 的打包因第三方 FFmpeg 压缩包的下载地址失效而失败，本版把同一份、已校验的 FFmpeg 可执行文件放进本项目自己的发布里，解码器内容没有变化。
+- **Docker 镜像带健康检查**：容器会报告 `healthy` / `unhealthy`。
 - **队列与并行**：生成批次可以和对话并行；agent 运行中可以排队追加消息或“引导”。
 
 ### 重要：从 0.1.6 升级
@@ -84,20 +86,20 @@ Linux 用户及需要更多帮助的读者，可查看 [完整安装与首次打
 - **设置 → 通用** 中的“启动时自动检查更新”默认关闭，可按需开启；成功检查后 24 小时内不再自动检查。
 - 更新前请导出项目 ZIP 备份。桌面版与浏览器版的数据目前不会自动同步。
 
-更多用法见 [项目 README](https://github.com/ROYIANS/momoki/blob/desktop-v0.1.7/README.md)。
+更多用法见 [项目 README](https://github.com/ROYIANS/momoki/blob/desktop-v0.1.8/README.md)。
 
 <details>
 <summary>文件校验、版本来源与当前限制</summary>
 
-- 版本：`0.1.7`；标签：`desktop-v0.1.7`。
+- 版本：`0.1.8`；标签：`desktop-v0.1.8`。
 - 对应源码：[__SOURCE_SHA__](https://github.com/ROYIANS/momoki/commit/__SOURCE_SHA__)。
-- 校验值：[SHA256SUMS](https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.7/SHA256SUMS)。操作方法见 [安装指南的 SHA-256 核对步骤](https://github.com/ROYIANS/momoki/blob/desktop-v0.1.7/docs/desktop-installation.md)。
-- 发布记录：[release-manifest.json](https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.7/release-manifest.json)。其中包含本版本实际限制，请以该发布记录为准。
+- 校验值：[SHA256SUMS](https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.8/SHA256SUMS)。操作方法见 [安装指南的 SHA-256 核对步骤](https://github.com/ROYIANS/momoki/blob/desktop-v0.1.8/docs/desktop-installation.md)。
+- 发布记录：[release-manifest.json](https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.8/release-manifest.json)。其中包含本版本实际限制，请以该发布记录为准。
 - 当前是早期桌面体验包。发布工作流仅自动打包，未运行自动化测试、应用启动或运行时验收；上传完成不代表功能测试通过，公开发布前仍由维护者完成功能检查。
 - 构建来源与安装包哈希核对不代表已验证安装后的架构、界面、SQLite 持久保存、音频、麦克风、打印、PDF、AI 服务或媒体编解码器。
 - Linux 使用 Ubuntu 22.04 x64 构建基线；其他发行版、AppImage/FUSE 启动及媒体环境需要在对应设备上确认。
 - Windows 工作区要求本机 NTFS。现有恢复机制不保证突然断电或系统崩溃后所有新文件和目录均已持久保存，请定期导出项目备份。
-- 项目 ZIP 不包含整个工作室、全部连接/API Key 或完整聊天历史；范围见 [备份说明](https://github.com/ROYIANS/momoki/blob/desktop-v0.1.7/README.md#项目-zip-的范围)。
+- 项目 ZIP 不包含整个工作室、全部连接/API Key 或完整聊天历史；范围见 [备份说明](https://github.com/ROYIANS/momoki/blob/desktop-v0.1.8/README.md#项目-zip-的范围)。
 
 哈希值一致，可以确认文件内容与本页列出的内容一致；它不能单独证明软件没有安全问题。签名状态、版本来源和实际功能情况应结合查看。
 

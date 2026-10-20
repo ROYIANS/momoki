@@ -1,7 +1,7 @@
 {
   "name": "@momoki/agent-todo",
   "private": true,
-  "version": "0.1.7",
+  "version": "0.1.8",
   "type": "module",
   "engines": {"node": ">=24.11.0"},
   "scripts": {
