@@ -28,6 +28,7 @@ import {ContextPanelFooter} from "../../../app/layout/context-panel";
 
 const PROVIDER_LABELS = {apimart: "APIMart", aihubmix: "AIHubMix"};
 
+/** The panel and the chat each have their own themed root; the list opens inside the one holding the trigger. */
 function popupRoot() {
     return document.querySelector<HTMLElement>(".agent-chat-root") ?? document.body;
 }
@@ -39,7 +40,7 @@ function Choice({label, value, options, onChange, disabled}: {
     const id = useId();
     return <div className="agent-generation-field"><label htmlFor={id}>{label}</label>
         <Select id={id} value={value} options={options} onChange={onChange} disabled={disabled} variant="borderless"
-                getPopupContainer={(trigger: HTMLElement) => trigger.closest<HTMLElement>('[role=dialog]') ?? popupRoot()}
+                getPopupContainer={(trigger: HTMLElement) => trigger.closest<HTMLElement>('.agent-chat-root') ?? popupRoot()}
                 popupMatchSelectWidth virtual={false} className="agent-generation-choice"/>
     </div>;
 }
