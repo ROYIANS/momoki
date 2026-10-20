@@ -1,4 +1,4 @@
-import {withThreadRunLock} from '@cuepoint/studio/reference/lib/agent/runOwnership';
+import {withThreadRunLock} from '@momoki/studio/reference/lib/agent/runOwnership';
 import {assert, Evidence} from './acceptanceEvidence';
 
 const PREFIX = '原生 Web Locks：';
@@ -39,7 +39,7 @@ export async function checkNativeLocks(evidence: Evidence) {
         return held;
     };
     const threadId = `native-lock-probe-${crypto.randomUUID()}`;
-    const ownerName = `cuepoint:agent:${threadId}`;
+    const ownerName = `momoki:agent:${threadId}`;
     try {
         const available = await evidence.check(`${PREFIX}真实安全上下文与默认管理器`, async () => {
             assert(isSecureContext, '实际打包上下文不是 secure context');
@@ -165,7 +165,7 @@ export async function checkNativeLocks(evidence: Evidence) {
         }, value => value);
 
         await evidence.check(`${PREFIX}真实音频批次前缀同名排他与释放`, async () => {
-            const name = `cuepoint.audio-batch.native-lock-probe-${crypto.randomUUID()}`, entered = gate(),
+            const name = `momoki.audio-batch.native-lock-probe-${crypto.randomUUID()}`, entered = gate(),
                 hold = heldGate();
             let conflictCalls = 0;
             const owner = observe(locks.request(name, {ifAvailable: true}, async lock => {

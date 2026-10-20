@@ -55,7 +55,7 @@ After building an application, verify the resource selected by its real
 
 ```sh
 python3 apps/desktop/scripts/generate-native-icons.py --check \
-  --bundle 'apps/desktop/.acceptance/builds/<build>/Cuepoint Prototype.app'
+  --bundle 'apps/desktop/.acceptance/builds/<build>/Momoki Prototype.app'
 ```
 
 The packaged ICNS must exactly match this generated artifact, with every pixel

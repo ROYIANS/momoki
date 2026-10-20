@@ -49,11 +49,11 @@ async function allPages(api,path) {
     throw new Error('GitHub pagination bound exceeded');
 }
 function marker(manifest,payloadDigest,status) {
-    return `<!-- cuepoint-desktop-release:${JSON.stringify({schema:1,repository:manifest.context.repository,workflow:manifest.context.workflow,tag:manifest.context.tag,sourceSha:manifest.context.sourceSha,payloadDigest,status})} -->`;
+    return `<!-- momoki-desktop-release:${JSON.stringify({schema:1,repository:manifest.context.repository,workflow:manifest.context.workflow,tag:manifest.context.tag,sourceSha:manifest.context.sourceSha,payloadDigest,status})} -->`;
 }
 function owned(release,manifest,digest) {
     if (release.draft !== true || release.prerelease !== true || release.immutable === true || release.tag_name !== manifest.context.tag) throw new Error('Existing release is published/immutable or has wrong mode');
-    const matches=[...(release.body ?? '').matchAll(/<!-- cuepoint-desktop-release:(.*?) -->/g)];
+    const matches=[...(release.body ?? '').matchAll(/<!-- momoki-desktop-release:(.*?) -->/g)];
     if (matches.length !== 1) throw new Error('Draft is unowned or has duplicate ownership');
     const value=JSON.parse(matches[0][1]);
     if (!['incomplete','complete'].includes(value.status) || marker(manifest,digest,value.status) !== matches[0][0]) throw new Error('Draft ownership/source/payload conflict');
@@ -82,10 +82,10 @@ export async function publishDraft(directory,{api,context=runContext()}={}) {
     const digest=sha256(JSON.stringify(files));
     const releases=(await allPages(api,`${repo}/releases`)).filter(release=>release.tag_name === manifest.context.tag);
     if (releases.length > 1) throw new Error('Multiple releases match the desktop tag');
-    const notes=`Cuepoint ${manifest.context.version} — test distribution\n\n**UPLOAD INCOMPLETE. Do not publish until the workflow finishes and the ownership marker says complete.**\n\nSource: ${manifest.context.sourceSha}\n\n${manifest.limitations.map(line=>`- ${line}`).join('\n')}\n\nmacOS: ad-hoc signed, not notarized; allow the app through Privacy & Security if macOS blocks it. Windows: unsigned; review the publisher warning before allowing installation. WebView2 bootstrapper needs internet if the runtime is absent. Linux: Ubuntu 22.04 x64 baseline; install DEB dependencies or required AppImage/FUSE runtime.\n\nAll packages share the normal React/Agent product and SQLite/managed files. No updater or synchronization is claimed.\n`;
+    const notes=`Momoki ${manifest.context.version} — test distribution\n\n**UPLOAD INCOMPLETE. Do not publish until the workflow finishes and the ownership marker says complete.**\n\nSource: ${manifest.context.sourceSha}\n\n${manifest.limitations.map(line=>`- ${line}`).join('\n')}\n\nmacOS: ad-hoc signed, not notarized; allow the app through Privacy & Security if macOS blocks it. Windows: unsigned; review the publisher warning before allowing installation. WebView2 bootstrapper needs internet if the runtime is absent. Linux: Ubuntu 22.04 x64 baseline; install DEB dependencies or required AppImage/FUSE runtime.\n\nAll packages share the normal React/Agent product and SQLite/managed files. No updater or synchronization is claimed.\n`;
     let release=releases[0];
     if (release) owned(release,manifest,digest);
-    else release=await api.json('POST',`${repo}/releases`,{tag_name:manifest.context.tag,target_commitish:manifest.context.sourceSha,name:`Cuepoint ${manifest.context.version} (test)`,body:notes+'\n'+marker(manifest,digest,'incomplete'),draft:true,prerelease:true,make_latest:'false'});
+    else release=await api.json('POST',`${repo}/releases`,{tag_name:manifest.context.tag,target_commitish:manifest.context.sourceSha,name:`Momoki ${manifest.context.version} (test)`,body:notes+'\n'+marker(manifest,digest,'incomplete'),draft:true,prerelease:true,make_latest:'false'});
     owned(release,manifest,digest);
     const getOwned=async ()=> {const current=await api.json('GET',`${repo}/releases/${release.id}`);owned(current,manifest,digest);return current;};
     const getAssets=()=>allPages(api,`${repo}/releases/${release.id}/assets`);

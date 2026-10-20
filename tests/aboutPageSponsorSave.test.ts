@@ -22,7 +22,7 @@ vi.mock("@/platform/runtime/nativeSystemServices", () => ({saveNativeBlob: host.
 
 import {AboutPage} from "@/features/settings/ui/AboutPage";
 import {Button} from "@/ui/button";
-import {GITHUB_URL} from "@cuepoint/distribution/brand";
+import {GITHUB_URL} from "@momoki/distribution/brand";
 
 type Node = ReactElement<Record<string, unknown>>;
 function nodes(value: unknown): Node[] {
@@ -66,7 +66,7 @@ describe("About sponsor export caller", () => {
         const blob = host.save.mock.calls[0][0] as Blob;
         expect(blob.type).toBe("image/jpeg");
         expect(new Uint8Array(await blob.arrayBuffer())).toEqual(jpegBytes);
-        expect(host.save).toHaveBeenCalledWith(blob, "小光点-微信赞赏码.jpg", undefined);
+        expect(host.save).toHaveBeenCalledWith(blob, "默默-微信赞赏码.jpg", undefined);
         expect(saveButton().props).toMatchObject({disabled: true, children: "正在保存赞赏码…", variant: "outline"});
         expect(host.success).not.toHaveBeenCalled();
         finish("saved");
@@ -128,7 +128,7 @@ describe("About sponsor export caller", () => {
         const fetcher = vi.fn();
         vi.stubGlobal("fetch", fetcher);
         const anchor = render().find(node => node.type === "a" && "download" in node.props);
-        expect(anchor?.props).toMatchObject({href: "/brand/sponsor-wechat.jpg", download: "小光点-微信赞赏码.jpg", children: "保存赞赏码"});
+        expect(anchor?.props).toMatchObject({href: "/brand/sponsor-wechat.jpg", download: "默默-微信赞赏码.jpg", children: "保存赞赏码"});
         expect(render().some(node => node.type === Button && typeof node.props.onClick === "function")).toBe(false);
         expect(fetcher).not.toHaveBeenCalled();
         expect(host.save).not.toHaveBeenCalled();

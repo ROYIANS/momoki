@@ -10,8 +10,8 @@ const target=getTarget(options['--target']),context=runContext();
 if (!options['--evidence-dir'] || process.platform !== target.platform || process.arch !== target.arch) throw new Error('Native checks require corresponding host and fresh evidence');
 const evidence=resolve(options['--evidence-dir']);await mkdir(evidence,{recursive:false});
 const root=resolve(desktopRoot,'../..'),tools=resolveTools();
-const env={...tools.env,CARGO_INCREMENTAL:'0',CUEPOINT_RUST_TARGET:target.triple};
-env.CUEPOINT_NATIVE_STORE_PROBE=nativeProbePath(env);
+const env={...tools.env,CARGO_INCREMENTAL:'0',MOMOKI_RUST_TARGET:target.triple};
+env.MOMOKI_NATIVE_STORE_PROBE=nativeProbePath(env);
 async function run(args,path,cwd=desktopRoot) {
     console.log(`Native check started: ${path}`);
     const {code,signal}=await runLoggedProcess(process.execPath,args,{cwd,env,logPath:resolve(evidence,path)});

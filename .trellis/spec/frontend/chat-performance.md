@@ -1,16 +1,16 @@
 # Agent Chat Performance
 
-> Cuepoint-sized contracts distilled from LobeHub Conversation (external reference `src/features/Conversation/ChatList`), not a virtua port.
+> Momoki-sized contracts distilled from LobeHub Conversation (external reference `src/features/Conversation/ChatList`), not a virtua port.
 
 ---
 
 ## Overview
 
-LobeHub’s list is a `virtua` `VList` plus ConversationStore. Cuepoint threads are short, local Dexie rows. We copy the **scroll and render isolation** rules, not the virtualizer, spacer, or zustand.
+LobeHub’s list is a `virtua` `VList` plus ConversationStore. Momoki threads are short, local Dexie rows. We copy the **scroll and render isolation** rules, not the virtualizer, spacer, or zustand.
 
 Source of truth in LobeHub (do not vendor):
 
-| LobeHub | Cuepoint |
+| LobeHub | Momoki |
 | --- | --- |
 | `VirtualizedList` + `virtua` | Plain `.agent-message-list` overflow |
 | `overflowAnchor: 'none'` | Same CSS on `.agent-message-list` |
@@ -120,7 +120,7 @@ if (stickToBottom.current) snapChatToBottom(listEl);
 
 **Context**: LobeHub virtualizes because a topic can be thousands of tool/markdown rows; recycling would replay markdown animations unless `keepMounted` keeps the streaming index alive.
 
-**Decision**: Cuepoint Agent MVP is local plain chat. Isolating the last row + `scrollTop` is enough. Do not add `virtua` / `react-virtuoso` until a thread is large enough that mounting every `ChatItem` is the measured cost.
+**Decision**: Momoki Agent MVP is local plain chat. Isolating the last row + `scrollTop` is enough. Do not add `virtua` / `react-virtuoso` until a thread is large enough that mounting every `ChatItem` is the measured cost.
 
 **Extensibility**: If we virtualize later, copy LobeHub `keepMounted` for `status === "streaming"` and keep `overflowAnchor: "none"`. Still do not vendor ConversationStore.
 
@@ -131,7 +131,7 @@ if (stickToBottom.current) snapChatToBottom(listEl);
 - New `markdownProps={{ variant: "chat" }}` object on every map iteration (breaks ChatItem memo).
 - New `avatar={{ ... }}` object per row per tick (same).
 - `overflow-anchor: auto` on the transcript (browser anchoring fights programmatic `scrollTop` during stream).
-- Porting LobeHub’s spacer / send-scroll animation window — that exists to pin the user turn to the top of the viewport; Cuepoint has not adopted that UX.
+- Porting LobeHub’s spacer / send-scroll animation window — that exists to pin the user turn to the top of the viewport; Momoki has not adopted that UX.
 
 ## Rich transcript loading
 

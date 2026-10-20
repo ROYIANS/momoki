@@ -1,6 +1,6 @@
 import {randomUUID} from 'node:crypto';
-import {executeRun, modelStepLimitReached, offeredToolNames, offeredToolNamesForCall, requiresToolApproval, toolMetadataMatches, type RuntimeHost, type RuntimeEvent, type AgentWireToolCall, type ResourceGrantPort} from '@cuepoint/agent-core';
-import {responseRoundMatches, type ResponseItem} from '@cuepoint/agent-providers';
+import {executeRun, modelStepLimitReached, offeredToolNames, offeredToolNamesForCall, requiresToolApproval, toolMetadataMatches, type RuntimeHost, type RuntimeEvent, type AgentWireToolCall, type ResourceGrantPort} from '@momoki/agent-core';
+import {responseRoundMatches, type ResponseItem} from '@momoki/agent-providers';
 import {TodoStore, encode} from './store.js';
 import {actionOf, validate} from './tools.js';
 import {prepareContext} from './summary.js';

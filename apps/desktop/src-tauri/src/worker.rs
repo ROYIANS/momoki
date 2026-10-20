@@ -112,7 +112,7 @@ impl StorageWorker {
         let worker_closed = Arc::clone(&closed);
         let worker_ops = Arc::clone(&operations);
         let thread = thread::Builder::new()
-            .name("cuepoint-storage".into())
+            .name("momoki-storage".into())
             .spawn(move || {
                 let initialized = match mode {
                     StartMode::Create => {

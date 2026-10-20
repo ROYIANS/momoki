@@ -42,18 +42,18 @@ def stored_key(value):
 
 class VerifySmokeStore(unittest.TestCase):
     def setUp(self):
-        self.temporary = tempfile.TemporaryDirectory(prefix="cuepoint-release-verifier-")
+        self.temporary = tempfile.TemporaryDirectory(prefix="momoki-release-verifier-")
         self.root = Path(self.temporary.name)
         self.workspace = self.root / "product-workspace-v1"
         (self.workspace / ".local").mkdir(parents=True)
         (self.workspace / "assets").mkdir()
         self.database = self.workspace / ".local" / "state.sqlite"
-        self.content = b"CUEPOINT_VERIFIER_MARKER\n" + b"fixture repeated bytes\n" * 18000
+        self.content = b"MOMOKI_VERIFIER_MARKER\n" + b"fixture repeated bytes\n" * 18000
         self.binary = "11111111-1111-4111-8111-111111111111"
         self.asset = self.workspace / "assets" / ("id-" + self.binary.encode().hex())
         self.asset.write_bytes(self.content)
         self.expected = {"projectName": "UI project", "fixtureFilename": "fixture.txt", "fixtureBytes": len(self.content),
-                         "fixtureSha256": hashlib.sha256(self.content).hexdigest(), "previewMarker": "CUEPOINT_VERIFIER_MARKER",
+                         "fixtureSha256": hashlib.sha256(self.content).hexdigest(), "previewMarker": "MOMOKI_VERIFIER_MARKER",
                          "sourcePath": str(self.root / "removed-source.txt")}
         self.reference = {"version": 1, "workspaceId": "workspace", "binaryId": self.binary, "byteLength": len(self.content),
                           "mimeType": "text/plain", "contentHash": self.expected["fixtureSha256"]}

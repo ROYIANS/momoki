@@ -1,7 +1,7 @@
 import type {AgentRun} from "./agent";
 
 export const DISCOVERY_TOOL_NAME = "load_tool_groups";
-export {MAX_LOADED_TOOLS,offeredToolNames as getOfferedToolNames,offeredToolNamesForCall as toolNamesForCall} from '@cuepoint/agent-core';
+export {MAX_LOADED_TOOLS,offeredToolNames as getOfferedToolNames,offeredToolNamesForCall as toolNamesForCall} from '@momoki/agent-core';
 
 /**
  * A run that holds its thread: it is either active now, or ended with saved work

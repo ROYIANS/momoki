@@ -1,5 +1,5 @@
 {
-  "name": "@cuepoint/agent-providers",
+  "name": "@momoki/agent-providers",
   "version": "0.1.6",
   "private": true,
   "type": "module",
@@ -26,6 +26,6 @@
     "vitest": "^5.0.1"
   },
   "dependencies": {
-    "@cuepoint/agent-core": "workspace:*"
+    "@momoki/agent-core": "workspace:*"
   }
 }

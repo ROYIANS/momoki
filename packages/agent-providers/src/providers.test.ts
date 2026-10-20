@@ -1,6 +1,6 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
-import {streamChatCompletions, streamResponses, decodeResponseOutput, responseRoundMatches, appendResponseToolResult, responseContinuationTokens, type ResponsesInput, type ResponsesHandlers} from '@cuepoint/agent-providers';
-import {requestOnce, ResponseLimitError, readResponseBytes} from '@cuepoint/agent-providers/http';
+import {streamChatCompletions, streamResponses, decodeResponseOutput, responseRoundMatches, appendResponseToolResult, responseContinuationTokens, type ResponsesInput, type ResponsesHandlers} from '@momoki/agent-providers';
+import {requestOnce, ResponseLimitError, readResponseBytes} from '@momoki/agent-providers/http';
 
 const input: ResponsesInput = {baseUrl: 'https://example.test/v1', apiKey: 'secret', model: 'model', messages: [{role: 'user', content: 'hello'}]};
 const response = (output: unknown[]) => Response.json({status: 'completed', output});

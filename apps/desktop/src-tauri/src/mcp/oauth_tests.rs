@@ -659,7 +659,7 @@ async fn mcp_oauth_stray_empty_closed_slow_and_oversized_connections_do_not_end_
     drop(TcpStream::connect(address.clone()).await.unwrap());
     // Partial head that is then closed.
     let mut partial = TcpStream::connect(address.clone()).await.unwrap();
-    partial.write_all(b"GET /cuepoint").await.unwrap();
+    partial.write_all(b"GET /momoki").await.unwrap();
     drop(partial);
     // Oversized head without a terminator.
     let mut big = TcpStream::connect(address.clone()).await.unwrap();
@@ -1118,7 +1118,7 @@ async fn mcp_oauth_service_retires_original_authority_on_scope_change_before_eff
         let vault = Arc::new(
             CredentialVault::new(
                 harness.memory.clone(),
-                "dev.cuepoint",
+                "dev.momoki",
                 "isolated",
                 "workspace1",
                 "server1",

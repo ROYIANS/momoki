@@ -1,4 +1,4 @@
-import {SKILL_LIMITS, splitSkillDocument, validateSkillMetadata, validateSkillResourcePaths} from "@cuepoint/agent-core";
+import {SKILL_LIMITS, splitSkillDocument, validateSkillMetadata, validateSkillResourcePaths} from "@momoki/agent-core";
 import {isAlias, isMap, isPair, isScalar, isSeq, parseDocument} from "yaml";
 import {sha256Bytes, Sha256} from "../../../../platform/media/sha256";
 import type {SkillComponent, SkillImportCandidate, SkillImportExclusions, SkillImportFile, SkillTextRecord} from "../models/installedSkill";
@@ -73,7 +73,7 @@ function component(path: string, text: string, ordinal: number): SkillComponent 
 }
 
 export function skillContentRevision(components: readonly SkillComponent[]): string {
-    const hash = new Sha256().update(encoder.encode("cuepoint-skill-v1\n"));
+    const hash = new Sha256().update(encoder.encode("momoki-skill-v1\n"));
     for (const entry of [...components].sort((left, right) => left.path < right.path ? -1 : Number(left.path > right.path))) {
         // Length+digest framing preserves exact byte identity without retaining another copy.
         hash.update(encoder.encode(JSON.stringify([entry.path, entry.byteLength, entry.digest]) + "\n"));

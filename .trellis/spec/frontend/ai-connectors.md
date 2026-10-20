@@ -14,7 +14,7 @@ Read before changing provider discovery/probes or adding consumers of the APIMar
 
 ## 2. Signatures
 
-The shared `@cuepoint/agent-providers` root owns the actual Chat Completions and
+The shared `@momoki/agent-providers` root owns the actual Chat Completions and
 Responses implementation and neutral wire/continuation types. Its explicit
 `/http` export owns neutral bounded reading/SSE/redaction/request mechanisms.
 Studio's `features/agent/providers/{chatStream,responsesStream}.ts` binds current
@@ -242,7 +242,7 @@ Tests assert result and exact requests/methods: malformed GET1/POST0, allowed fa
 Inbound provider JSON/error bodies, speech audio/base64 envelopes, CDN downloads, and Chat/Responses streaming accumulation.
 
 ### 2. Signatures
-`readResponseBytes/Text/Json/Blob` share actual Uint8Array byte enforcement while consuming a Response body, before parsing or Blob construction. `readSseEvents` handles bounded UTF-8 events and cancellation. Their single defining owner is now `@cuepoint/agent-providers/http`, including `ResponseLimitError` and the shared error 64 KiB / ordinary JSON and retained chat output 4 MiB budgets. Product policies stay in `packages/studio/src/platform/media/limits.ts`: raw audio 32 MiB, MiMo speech envelope ceil(audioLimit/3)*4 + the shared JSON budget, protected/public image/video binary download 256 MiB. These are local application limits, not supplier specifications. Tavily remains at 2 MiB. Audio byte limits agree with the existing decoder guard.
+`readResponseBytes/Text/Json/Blob` share actual Uint8Array byte enforcement while consuming a Response body, before parsing or Blob construction. `readSseEvents` handles bounded UTF-8 events and cancellation. Their single defining owner is now `@momoki/agent-providers/http`, including `ResponseLimitError` and the shared error 64 KiB / ordinary JSON and retained chat output 4 MiB budgets. Product policies stay in `packages/studio/src/platform/media/limits.ts`: raw audio 32 MiB, MiMo speech envelope ceil(audioLimit/3)*4 + the shared JSON budget, protected/public image/video binary download 256 MiB. These are local application limits, not supplier specifications. Tavily remains at 2 MiB. Audio byte limits agree with the existing decoder guard.
 
 ### 3. Contracts
 Content-Length is a hint, never the only enforcement. Reject an oversized body during reading, cancel and release the reader, and preserve AbortError semantics. Check exact decoded base64 size including padding before allocating and validate the resulting Blob. An SSE response bounds each pending line/event and the aggregate retained content/reasoning/tool output before delivering an over-limit delta; repeated legal usage-only events do not consume a lifetime response allowance. Retained output accounting handles UTF-16 surrogate pairs split across JSON deltas: charge actual appended UTF-8 bytes, rather than summing independent encodings that overcount a completed pair. Responses' existing event/output protections remain.
@@ -283,7 +283,7 @@ Maintain this contract when changing APIMart/image/audio, AIHubMix, MiMo, OpenAI
 
 ## 2. Signatures / Owners
 
-- `@cuepoint/agent-providers/http` owns `normalizeBaseUrl(baseUrl: string)` with the existing trim/trailing-slash behavior unchanged; actual product normalizer consumers use its public export or the meaningful OpenAI-compatible adapter API.
+- `@momoki/agent-providers/http` owns `normalizeBaseUrl(baseUrl: string)` with the existing trim/trailing-slash behavior unchanged; actual product normalizer consumers use its public export or the meaningful OpenAI-compatible adapter API.
 - The same `/http` entry owns neutral `RequestBoundaryOptions`, `requestOnce(url, init, options)`, `HttpJsonReadPolicy` and `readHttpJson(response, policy, signal): Promise<unknown>`. Transport, credentials/redirect and native/bounded success/failure policies are explicit caller inputs; bounded policy includes maxBytes and fatalUtf8. Neutral `requestOnce` checks an already-aborted signal and invokes the required injected fetch once. Studio's `platform/http/requestBoundary.ts` owns its product options and selects `runtimeFetchFor(runtimePurpose)` before delegating.
 - The package's `http/{boundedResponse,boundedSse,safeError,limits}.ts` are the single actual byte-read, abort/cleanup, SSE framing, redaction and shared JSON/error budget owners. Product media/speech limits retain their existing policy owner.
 - Existing provider adapters retain URL/key/route validation, headers/body, timeout controllers, HTTP/provider error formatting, envelope/schema/status/result decoding and durable runtime APIs. Shared JSON returns unknown, preserving the real adapter parse/validation boundary; it discards only unreadable optional non-2xx diagnostics and propagates success/abort failures.

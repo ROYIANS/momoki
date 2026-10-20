@@ -1,11 +1,11 @@
 import {useEffect, useRef, useState} from 'react';
 import {invoke} from '@tauri-apps/api/core';
 import {getCurrentWebviewWindow} from '@tauri-apps/api/webviewWindow';
-import {Button} from '@cuepoint/studio/reference/components/ui/button';
-import {encodePcm16Wav} from '@cuepoint/studio/reference/lib/audio/wav';
-import {decodeAudioBlob} from '@cuepoint/studio/reference/lib/audio/engine';
-import type {RecordingState} from '@cuepoint/studio/reference/lib/audio/recorder';
-import {MicrophoneRecorder} from '@cuepoint/studio/reference/lib/audio/recorder';
+import {Button} from '@momoki/studio/reference/components/ui/button';
+import {encodePcm16Wav} from '@momoki/studio/reference/lib/audio/wav';
+import {decodeAudioBlob} from '@momoki/studio/reference/lib/audio/engine';
+import type {RecordingState} from '@momoki/studio/reference/lib/audio/recorder';
+import {MicrophoneRecorder} from '@momoki/studio/reference/lib/audio/recorder';
 import {acceptanceRequest, native, sha256} from './bridge';
 import {
     type AcceptanceEvent,

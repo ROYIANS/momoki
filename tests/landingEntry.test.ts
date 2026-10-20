@@ -4,7 +4,7 @@ import {createRoot, type Root} from "react-dom/client";
 import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
 import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
-import {GITHUB_URL} from "@cuepoint/distribution/brand";
+import {GITHUB_URL, STUDIO_URL} from "@momoki/distribution/brand";
 import {Landing} from "../apps/site/src/Landing";
 import {SCENE_COPY} from "../apps/site/src/content/copy";
 import {FORBIDDEN_CLAIMS} from "./fixtures/landing/forbiddenClaims";
@@ -45,12 +45,12 @@ describe("landing page content", () => {
         expect(container.querySelectorAll("section[data-scene]")).toHaveLength(7);
         expect(link("在 GitHub 查看所有版本")?.getAttribute("href")).toBe(`${GITHUB_URL}/releases`);
         expect(link("GitHub")?.getAttribute("href")).toBe(GITHUB_URL);
-        expect(container.querySelector("h1")?.textContent).toBe("小光点 Cuepoint");
+        expect(container.querySelector("h1")?.textContent).toBe("默默 Momoki");
     });
 
     it("declares every external link and uses no remote images", () => {
         for (const a of container.querySelectorAll("a[href^='http']")) {
-            expect(a.getAttribute("href")!.startsWith(GITHUB_URL)).toBe(true);
+            expect([GITHUB_URL, STUDIO_URL].some(base => a.getAttribute("href")!.startsWith(base))).toBe(true);
             expect(a.getAttribute("rel")).toContain("noopener");
         }
         for (const img of container.querySelectorAll("img")) expect(img.getAttribute("src")).toMatch(/^\/brand\//);
@@ -89,7 +89,7 @@ describe("apps/site/landing.html", () => {
     it("subsets the display font and falls back without blocking", () => {
         const href = documentFromHtml.querySelector("link[href*='fonts.googleapis.com/css2']")!.getAttribute("href")!;
         expect(href).toContain("display=swap");
-        expect(decodeURIComponent(href)).toContain("text=小光点 Cuepoint");
+        expect(decodeURIComponent(href)).toContain("text=默默 Momoki");
         const text = decodeURIComponent(href).split("text=")[1];
         for (const scene of Object.values(SCENE_COPY)) for (const ch of scene.subtitle.text) expect(text, `subtitle character ${ch}`).toContain(ch); // the subtitles are set in the display font too
     });

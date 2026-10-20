@@ -1152,7 +1152,7 @@ mod tests {
     struct Fixture(PathBuf);
     impl Fixture {
         fn new() -> Self {
-            let root = std::env::temp_dir().join(format!("cuepoint-desktop-media-{}", id()));
+            let root = std::env::temp_dir().join(format!("momoki-desktop-media-{}", id()));
             fs::create_dir(&root).unwrap();
             Self(root)
         }
@@ -1312,10 +1312,10 @@ mod tests {
         worker.close().unwrap();
     }
     #[test]
-    #[ignore = "Requires the explicit verified decoder resource root; run the fixture command with CUEPOINT_MEDIA_TEST_RESOURCES"]
+    #[ignore = "Requires the explicit verified decoder resource root; run the fixture command with MOMOKI_MEDIA_TEST_RESOURCES"]
     fn real_fixture_prepares_two_native_claims_and_cleans_snapshot() {
         let resources = PathBuf::from(
-            std::env::var_os("CUEPOINT_MEDIA_TEST_RESOURCES")
+            std::env::var_os("MOMOKI_MEDIA_TEST_RESOURCES")
                 .expect("explicit decoder resource root"),
         );
         let fixture = Fixture::new();

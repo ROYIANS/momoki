@@ -78,7 +78,7 @@ describe("native binary TS access", () => {
         preview.release();preview.release();
         expect(releases).toEqual([previewId]);
         for (const invalidUrl of [
-            "file:///private/user/original.wav", "invalid-url", `cuepoint-media://localhost/${previewId}`,
+            "file:///private/user/original.wav", "invalid-url", `momoki-media://localhost/${previewId}`,
             `http://localhost:49152/${previewId}`, `http://127.0.0.2:49152/${previewId}`, `http://127.1:49152/${previewId}`,
             `http://2130706433:49152/${previewId}`, `https://127.0.0.1:49152/${previewId}`, `http://127.0.0.1/${previewId}`,
             `http://127.0.0.1:443/${previewId}`, `http://127.0.0.1:49152/${previewId}?path=x`, `http://127.0.0.1:49152/${previewId}#x`,

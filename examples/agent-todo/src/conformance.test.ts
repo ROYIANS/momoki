@@ -5,8 +5,8 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {spawn, type ChildProcessWithoutNullStreams} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {executeRun, requiresToolApproval, offeredToolNames, selectCapabilityGroups, type RuntimeEvent} from '@cuepoint/agent-core';
-import {streamResponses, streamChatCompletions} from '@cuepoint/agent-providers';
+import {executeRun, requiresToolApproval, offeredToolNames, selectCapabilityGroups, type RuntimeEvent} from '@momoki/agent-core';
+import {streamResponses, streamChatCompletions} from '@momoki/agent-providers';
 import {TodoStore, encode} from './store.js';
 import {execute, createHost} from './host.js';
 import {registry} from './tools.js';
@@ -14,7 +14,7 @@ import {prepareContext} from './summary.js';
 import type {Faults, TodoRun, TodoCall} from './types.js';
 
 async function fixture(faults: Faults = {}) {
-    const directory = await mkdtemp(join(tmpdir(), 'cuepoint-todo-conformance-'));
+    const directory = await mkdtemp(join(tmpdir(), 'momoki-todo-conformance-'));
     const store = new TodoStore(join(directory, 'todo.sqlite'), faults);
     store.installCreateCapability();
     return {directory, store, cleanup: async () => {store.close(); await rm(directory, {recursive: true, force: true});}};
@@ -52,7 +52,7 @@ await test('independent schema freezes scope/permissions and rejects duplicate b
 });
 
 await test('real live process ownership rejects a second process, then kernel releases it after SIGKILL', {timeout: 20_000}, async () => {
-    const directory = await mkdtemp(join(tmpdir(), 'cuepoint-todo-live-')), file = join(directory, 'todos.sqlite');
+    const directory = await mkdtemp(join(tmpdir(), 'momoki-todo-live-')), file = join(directory, 'todos.sqlite');
     const first = child(['hold', file]); try {
         assert.equal((await first.frame()).ready, 'ownership');
         const second = child(['hold', file]); assert.equal((await second.exit).code, 1); assert.match(second.error(), /live owner/);
@@ -162,7 +162,7 @@ await test('abort immediately before local COMMIT rolls back; partial stream flu
 });
 
 await test('actual durable checkpoint handshake then SIGKILL/reopen performs zero work until explicit resume', {timeout: 20_000}, async () => {
-    const directory = await mkdtemp(join(tmpdir(), 'cuepoint-todo-restart-')), file = join(directory, 'todo.sqlite');
+    const directory = await mkdtemp(join(tmpdir(), 'momoki-todo-restart-')), file = join(directory, 'todo.sqlite');
     const running = child(['begin', file, 'restart'], {TODO_HOLD: 'checkpoint'});
     try {
         const saved = await running.frame(); assert.equal(saved.ready, 'checkpoint'); assert.ok(saved.state!.run.checkpoint > 0); assert.equal(saved.state!.output.content, 'durable partial answer');
@@ -197,7 +197,7 @@ await test('shared capability loading persists the ceiling, pins pending calls a
 });
 
 await test('summary job is durable before summarization, kill/reopen performs zero startup requests and explicit resume activates once', {timeout: 20_000}, async () => {
-    const directory = await mkdtemp(join(tmpdir(), 'cuepoint-todo-summary-')), file = join(directory, 'todo.sqlite');
+    const directory = await mkdtemp(join(tmpdir(), 'momoki-todo-summary-')), file = join(directory, 'todo.sqlite');
     const running = child(['begin', file, 'summary'], {TODO_HOLD: 'summary'}); try {
         const frame = await running.frame(); assert.equal(frame.ready, 'summary'); assert.equal(frame.state?.summaries[0].status, 'running'); assert.equal(frame.state?.run.summaryRequests, 1); assert.equal(frame.state?.run.requestCount, 0);
         const id = frame.runId!; await stop(running.process, running.exit);
@@ -234,7 +234,7 @@ await test('packed protocols dispatch deterministic fixtures with exact opaque c
     const chat = await streamChatCompletions({baseUrl: 'https://fixture.invalid/v1', apiKey: secret, model: 'fixture', maxOutputTokens: 128, messages: [{role: 'user', content: 'fixture'}]}, {fetchImpl: () => Promise.reject(new Error(`Authorization Bearer ${secret}`))});
     assert.equal(chat.ok, false); assert.equal(JSON.stringify(chat).includes(secret), false); assert.equal(count, 1);
     const f = await fixture(); try {const events: RuntimeEvent[] = [], run = trustedBegin(f.store, 'list', 'todo', 'full'); await execute(f.store, run, new AbortController(), {observe: event => events.push(event)}); assert.equal(JSON.stringify(events).includes('opaque exact'), false); assert.deepEqual(events.map(event => event.sequence), events.map((_event, i) => i + 1)); assert.equal(events.at(-1)?.type, 'settled');} finally {await f.cleanup();}
-    const manifest = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')) as {dependencies: Record<string, string>}; assert.deepEqual(Object.keys(manifest.dependencies).sort(), ['@cuepoint/agent-core', '@cuepoint/agent-providers']);
+    const manifest = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')) as {dependencies: Record<string, string>}; assert.deepEqual(Object.keys(manifest.dependencies).sort(), ['@momoki/agent-core', '@momoki/agent-providers']);
 });
 
 
@@ -270,7 +270,7 @@ await test('summary activation refuses a changed durable job and retains an exac
 
 
 await test('SIGKILL after a completed tool and durable checkpoint reuses the saved result without another mutation', {timeout: 20_000}, async () => {
-    const directory = await mkdtemp(join(tmpdir(), 'cuepoint-todo-committed-')), file = join(directory, 'todo.sqlite');
+    const directory = await mkdtemp(join(tmpdir(), 'momoki-todo-committed-')), file = join(directory, 'todo.sqlite');
     const running = child(['begin', file, 'committed'], {TODO_HOLD: 'checkpoint', TODO_PERMISSION: 'full'}); try {
         const frame = await running.frame(); assert.equal(frame.ready, 'checkpoint'); assert.equal(frame.state?.calls[0].status, 'completed'); assert.equal(frame.state?.todos.length, 1); assert.ok(frame.state.run.checkpoint > 0);
         const saved = frame.state.calls[0], id = frame.runId!; await stop(running.process, running.exit);

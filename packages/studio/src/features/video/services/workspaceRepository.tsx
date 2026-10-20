@@ -61,8 +61,8 @@ const PRODUCT_CAPABILITIES: VideoWorkspaceCapability[] =
         status: item.id === "sync" ? "unavailable" : "available",
         reason: item.id === "sync" ? item.reason : undefined,
     }));
-const CHANGED = "cuepoint:video-workspace-changed";
-const READ_STATUS = "cuepoint:video-read-status";
+const CHANGED = "momoki:video-workspace-changed";
+const READ_STATUS = "momoki:video-read-status";
 const readErrors = new Map<symbol, string>();
 
 function currentReadError() {

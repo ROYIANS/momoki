@@ -46,7 +46,7 @@ async function publicClient(info: OAuthServerInfo, config: Remote, redirect: str
     if (client.client_secret) throw new McpHostError("unsupported", "not_started", "oauth_registration");
     return client;
 }
-function publicMetadata(redirect: string) {return {client_name: "Cuepoint", redirect_uris: [redirect], token_endpoint_auth_method: "none" as const,
+function publicMetadata(redirect: string) {return {client_name: "Momoki", redirect_uris: [redirect], token_endpoint_auth_method: "none" as const,
     grant_types: ["authorization_code", "refresh_token"], response_types: ["code"]};}
 function principal(credential: Credential): string {
     return browserMcpDigest(JSON.stringify([credential.endpoint, credential.resource?.href, credential.info.authorizationServerMetadata?.issuer,

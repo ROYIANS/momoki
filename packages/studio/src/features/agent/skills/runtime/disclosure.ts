@@ -1,4 +1,4 @@
-import {formatSkillCatalogue} from "@cuepoint/agent-core";
+import {formatSkillCatalogue} from "@momoki/agent-core";
 import type {InstalledSkillsSnapshot} from "../models/installedSkill";
 
 export const INSTALLED_SKILL_TOOL_NAMES = ["load_skill", "read_skill_resource"] as const;

@@ -1,7 +1,7 @@
 import type {ThreadActivityIdentity} from "../models/threadActivity";
 import {prepareRunActivityKey, publishAssistantActivity, publishAgentReportActivity} from "./threadActivity";
-import {modelStepLimitReached} from '@cuepoint/agent-core';
-import {responseRoundMatches, appendResponseToolResult} from '@cuepoint/agent-providers';
+import {modelStepLimitReached} from '@momoki/agent-core';
+import {responseRoundMatches, appendResponseToolResult} from '@momoki/agent-providers';
 import type {ProductStore, StoreTx} from "../../../platform/storage/types";
 import {StorageError} from "../../../platform/storage/errors";
 import {MUSIC_REVIEW_MAX_BYTES, parseMusicGenerationReview} from "../../music/agent/musicGenerationReviewSnapshot";

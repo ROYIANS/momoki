@@ -1,5 +1,5 @@
 import {createCapabilityRegistry, createToolFactory, type ToolBindingIdentity, type ToolContext, type ToolDefinition,
-    type ToolSpec, type ResourceGrantPort, type ResourceGrantRequest, type ResourceGrantSnapshot} from '@cuepoint/agent-core';
+    type ToolSpec, type ResourceGrantPort, type ResourceGrantRequest, type ResourceGrantSnapshot} from '@momoki/agent-core';
 
 type Fact = {kind: 'list'; listId: string; action: 'create'};
 type Preview = {title: string; authority: ResourceGrantSnapshot<Fact>};

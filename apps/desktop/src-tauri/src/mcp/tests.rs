@@ -653,7 +653,7 @@ fn mcp_real_available_host_vault_roundtrip() {
     let server = uuid::Uuid::new_v4().to_string();
     let vault = vault::CredentialVault::new(
         store,
-        "dev.cuepoint.mcp.fixture",
+        "dev.momoki.mcp.fixture",
         "isolated-test",
         "temporary-store",
         &server,

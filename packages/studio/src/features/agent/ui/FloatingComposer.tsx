@@ -208,7 +208,7 @@ export function FloatingComposer({
 
     const [sendShortcut, setSendShortcut] = useState<"enter" | "mod-enter">(() => {
         try {
-            return localStorage.getItem("cuepoint.agent.sendShortcut") === "mod-enter" ? "mod-enter" : "enter";
+            return localStorage.getItem("momoki.agent.sendShortcut") === "mod-enter" ? "mod-enter" : "enter";
         } catch {
             return "enter";
         }
@@ -456,7 +456,7 @@ export function FloatingComposer({
                                     onClick: ({key}) => {
                                         setSendShortcut(key as "enter" | "mod-enter");
                                         try {
-                                            localStorage.setItem("cuepoint.agent.sendShortcut", key);
+                                            localStorage.setItem("momoki.agent.sendShortcut", key);
                                         } catch { /* Current page still uses the selection. */
                                         }
                                     },

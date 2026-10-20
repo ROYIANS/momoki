@@ -1,5 +1,5 @@
 import {requestOnce, normalizeBaseUrl, appendedUtf8Bytes, assertResponseBytes, isReadAbort, readErrorText, readResponseJson, utf8Bytes, readSseEvents, MAX_ERROR_BYTES, MAX_JSON_BYTES, redactCredentials} from './http/index.js';
-import type {AgentTokenUsage, AgentWireToolCall} from '@cuepoint/agent-core';
+import type {AgentTokenUsage, AgentWireToolCall} from '@momoki/agent-core';
 import type {StreamChatInput, StreamChatHandlers, StreamChatResult} from './chatCompletions.js';
 import type {ChatMessage, ResponseItem, ResponseRequestItem} from './wire.js';
 import {authHeaders} from './endpoints.js';

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { initUmami } from "@cuepoint/distribution/analytics";
+import { initUmami } from "@momoki/distribution/analytics";
 
 function mockDocument() {
   const scripts: Array<{

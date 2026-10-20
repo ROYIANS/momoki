@@ -26,7 +26,7 @@ function browserLocks(): ThreadLockManager {
 }
 
 /** A generation batch is excluded by its own lock, never by the conversation's. */
-export const generationBatchLockName = (batchId: string) => `cuepoint.generation-batch.${batchId}`;
+export const generationBatchLockName = (batchId: string) => `momoki.generation-batch.${batchId}`;
 
 export function withGenerationBatchLock<T>(batchId: string, execute: () => Promise<T>, locks: ThreadLockManager = browserLocks()): Promise<T> {
     return locks.request(generationBatchLockName(batchId), {ifAvailable: true}, async lock => {
@@ -71,7 +71,7 @@ export function withOwnedExecution<T>(ownership:ThreadOwnership,threadId:string,
 
 /** An execution-only lease never runs recovery against a newly created run. */
 export async function withExecutionOwnership<T>(threadId:string,execute:(ownership:ThreadOwnership)=>Promise<T>,locks:ThreadLockManager=browserLocks()):Promise<T> {
-    return locks.request(`cuepoint:agent:${threadId}`,{ifAvailable:true},async lock=>{
+    return locks.request(`momoki:agent:${threadId}`,{ifAvailable:true},async lock=>{
         if (!lock) throw new ThreadLockBusyError();
         const state:CapabilityState={held:true,executing:false,accepting:true,threadId};
         const ownership:ThreadOwnership={
@@ -109,7 +109,7 @@ export async function recoverAbandonedRuns(locks: ThreadLockManager = browserLoc
     const repairableCalls = await db.agentToolCalls.filter(call => isLegacyAtomicPlanCall(call) || isUnknownBatchPreparation(call)).toArray();
     const jobs = await db.agentJobs.filter(job => ['accepted', 'running', 'stopping'].includes(job.status)).toArray();
     for (const threadId of new Set([...active, ...repairableCalls, ...jobs].map((run) => run.threadId))) {
-        await locks.request(`cuepoint:agent:${threadId}`, {ifAvailable: true}, async (lock) => {
+        await locks.request(`momoki:agent:${threadId}`, {ifAvailable: true}, async (lock) => {
             if (lock) {
                 const state: CapabilityState = {held: true, executing: false, accepting: true, threadId};
                 const ownership: ThreadOwnership = {[ownershipBrand]: true, threadId, assertHeld() {assertThreadOwnership(ownership, threadId);}};

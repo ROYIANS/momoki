@@ -1,6 +1,6 @@
 # Desktop distribution
 
-Cuepoint's desktop application loads the same React interface, business commands
+Momoki's desktop application loads the same React interface, business commands
 and Agent as the browser. Normal desktop packaging selects `product-sqlite`: all
 ProductStore tables live in the application workspace's SQLite database, and
 imported media is copied into managed files. The browser keeps a separate
@@ -20,9 +20,9 @@ require a separately designed data migration. This does not import browser data.
 
 This is the first test-package matrix. Windows ARM64, Linux ARM64, a universal
 Mac binary, MSI, RPM and mobile packages are outside it. The normal display name
-is **Cuepoint**, the window title is **小光点 Cuepoint**, and the existing dark
+is **Momoki**, the window title is **默默 Momoki**, and the existing dark
 application icons are reused. The internal bundle identifier remains
-`dev.cuepoint.prototype.offline`; the executable remains `cuepoint-prototype`.
+`design.tulai.momoki`; the executable remains `momoki`.
 Changing visible branding must not create a new data profile.
 
 The current source version is `0.1.6`. Root package, desktop package, Cargo and

@@ -237,7 +237,7 @@ class NativeTransaction implements TransactionBackend {
     }
 
     async prepareBatch(): Promise<{ capability: string; fingerprint: string }> {
-        const hash = new Sha256().update(new TextEncoder().encode("cuepoint-batch-v1\n"));
+        const hash = new Sha256().update(new TextEncoder().encode("momoki-batch-v1\n"));
         let chunkIndex = 0;
         const send = async (entry: WireBatchEntry) => {
             const bytes = new TextEncoder().encode(JSON.stringify(entry) + "\n");

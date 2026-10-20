@@ -193,7 +193,7 @@ def generate(pnpm):
     if json.loads(dependency.read_text())["version"] != TAURI_VERSION:
         raise ValueError(f"Native icons require the pinned @tauri-apps/cli {TAURI_VERSION}")
     before = web_hashes()
-    with tempfile.TemporaryDirectory(prefix="cuepoint-native-icons-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="momoki-native-icons-") as temporary:
         directory = Path(temporary)
         source = directory / "source.png"
         source.write_bytes(png_bytes(opaque_source()))
@@ -210,7 +210,7 @@ def generate(pnpm):
         report = inspect(directory)
         if before != web_hashes():
             raise ValueError("Web branding changed during native icon generation")
-        manifest = {"format": "cuepoint.native-icons.v1", "source": SOURCE.relative_to(ROOT).as_posix(),
+        manifest = {"format": "momoki.native-icons.v1", "source": SOURCE.relative_to(ROOT).as_posix(),
                     "sourceSha256": sha256(SOURCE), "sourceSize": [1024, 1024], "background": "#f4f0e8",
                     "composition": "approved opaque tile copied as-is for PNG and ICNS; Windows ICO frames use a rounded-rect alpha mask at 0.2237 of the side",
                     "generator": {"pillow": pillow_version, "tauriCli": TAURI_VERSION,

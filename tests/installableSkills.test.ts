@@ -1,5 +1,5 @@
 import {afterEach, describe, expect, it, vi} from "vitest";
-import {SKILL_LIMITS} from "@cuepoint/agent-core";
+import {SKILL_LIMITS} from "@momoki/agent-core";
 import {db} from "@/platform/product/store";
 import {UnknownCommitError} from "@/platform/storage/errors";
 import {browserDatabase} from "@/platform/storage/browserDatabase";

@@ -8,11 +8,11 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {githubApi} from './publish-draft.mjs';
 
-const assetUrl='https://uploads.github.com/repos/ROYIANS/Cuepoint/releases/1/assets?name=Cuepoint%20%E7%89%88%20%2B%23.dmg';
+const assetUrl='https://uploads.github.com/repos/ROYIANS/momoki/releases/1/assets?name=Momoki%20%E7%89%88%20%2B%23.dmg';
 const binary=Buffer.from(Array.from({length:150003},(_,index)=>(index*37)%256));
 
 async function fixture(t,handler) {
-    const directory=await mkdtemp(join(tmpdir(),'cuepoint-upload-http-'));
+    const directory=await mkdtemp(join(tmpdir(),'momoki-upload-http-'));
     const path=join(directory,'actual binary.dmg');
     await writeFile(path,binary);
     const state={requests:[],calls:[],streams:[]};
@@ -86,7 +86,7 @@ test('GitHub upload sends exact multichunk binary bytes with Content-Length and 
     assert.equal(row.headers.accept,'application/vnd.github+json');
     assert.equal(row.headers['x-github-api-version'],'2022-11-28');
     assert.equal(row.url,new URL(assetUrl).pathname+new URL(assetUrl).search);
-    assert.equal(new URL(row.url,f.origin).searchParams.get('name'),'Cuepoint 版 +#.dmg');
+    assert.equal(new URL(row.url,f.origin).searchParams.get('name'),'Momoki 版 +#.dmg');
     assert.deepEqual(row.body,binary);
     assert.equal(f.state.calls[0].init.duplex,'half');
     await assertClosed(f.state);
@@ -138,13 +138,13 @@ test('GitHub JSON and asset download retain their separate HTTP behavior',async 
             else {response.writeHead(200,{'Content-Type':'application/json'});response.end(JSON.stringify({draft:true}));}
         });
     });
-    assert.deepEqual(await f.api.json('POST','/repos/ROYIANS/Cuepoint/releases',{draft:true}),{draft:true});
+    assert.deepEqual(await f.api.json('POST','/repos/ROYIANS/momoki/releases',{draft:true}),{draft:true});
     assert.deepEqual(JSON.parse(f.state.requests[0].body.toString()),{draft:true});
     assert.equal(f.state.requests[0].headers['content-type'],'application/json');
     assert.equal(f.state.calls[0].init.headers['Content-Length'],undefined);
     assert.equal(f.state.calls[0].init.duplex,undefined);
-    assert.equal(await f.api.json('DELETE','/repos/ROYIANS/Cuepoint/releases/1'),null);
-    assert.deepEqual(await f.api.download('/repos/ROYIANS/Cuepoint/releases/assets/7'),binary);
+    assert.equal(await f.api.json('DELETE','/repos/ROYIANS/momoki/releases/1'),null);
+    assert.deepEqual(await f.api.download('/repos/ROYIANS/momoki/releases/assets/7'),binary);
     assert.equal(f.state.requests[2].headers.accept,'application/octet-stream');
     assert.equal(f.state.requests[2].headers.authorization,'Bearer fixture-token');
     assert.equal(f.state.requests[2].headers['content-length'],undefined);

@@ -4,7 +4,7 @@
 
 `packages/agent-providers` owns the existing Chat Completions and Responses
 implementation and neutral HTTP mechanisms. It consumes core types and exposes
-emitted ESM/declarations at `@cuepoint/agent-providers` and its explicit `/http`
+emitted ESM/declarations at `@momoki/agent-providers` and its explicit `/http`
 entry. Hosts supply transport, credentials and materialized wire content.
 
 ## Guidelines Index

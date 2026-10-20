@@ -101,6 +101,6 @@ test('explicit historical delivery relocates module references and preserves pro
     assert.ok(delivered.includes('from "@/platform/product/store"'));
     assert.ok(delivered.includes('import type {Id} from "@/platform/identity"'));
     assert.ok(delivered.includes('import type {Project} from "@/features/projects/models/project"'));
-    assert.ok(delivered.includes('from "@cuepoint/distribution/brand"'));
+    assert.ok(delivered.includes('from "@momoki/distribution/brand"'));
     assert.equal(delivered.slice(delivered.indexOf('const accept')), original.slice(original.indexOf('const accept')));
 });

@@ -1,15 +1,15 @@
-# Pull the published image and serve Cuepoint on http://localhost:8080
+# Pull the published image and serve Momoki on http://localhost:8080
 #
 #   docker login ghcr.io
 #   docker compose pull
 #   docker compose up -d
 #
 # Local image iteration (optional):
-#   docker build -t ghcr.io/royians/cuepoint:latest .
+#   docker build -t ghcr.io/royians/momoki:latest .
 
 services:
-  cuepoint:
-    image: ghcr.io/royians/cuepoint:latest
+  momoki:
+    image: ghcr.io/royians/momoki:latest
     ports:
       - "8080:80"
     restart: unless-stopped

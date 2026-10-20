@@ -150,7 +150,7 @@ export async function buildProductionContext(projectId: Id, episodeId: Id, shotI
         const image = project.generationDefaults?.image;
         const video = project.generationDefaults?.video;
         return {
-            format: "cuepoint-production-context-v1" as const,
+            format: "momoki-production-context-v1" as const,
             project: {
                 id: project.id,
                 name: project.name,

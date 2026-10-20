@@ -65,9 +65,9 @@ async function download(url,path) {
 }
 
 async function main() {
-    if (process.env.GITHUB_ACTIONS !== 'true' || process.env.CUEPOINT_TOOL_MODE !== 'hosted' || !process.env.RUNNER_TEMP || !process.env.GITHUB_ENV) throw new Error('Driver setup requires the explicit hosted runner lane');
+    if (process.env.GITHUB_ACTIONS !== 'true' || process.env.MOMOKI_TOOL_MODE !== 'hosted' || !process.env.RUNNER_TEMP || !process.env.GITHUB_ENV) throw new Error('Driver setup requires the explicit hosted runner lane');
     if (!['linux','win32'].includes(process.platform)) throw new Error('External native driver is only supported on Windows/Linux');
-    const directory=resolve(process.env.RUNNER_TEMP,'cuepoint-release-driver');
+    const directory=resolve(process.env.RUNNER_TEMP,'momoki-release-driver');
     if (!contained(await realpath(process.env.RUNNER_TEMP),directory)) throw new Error('Driver directory must stay inside runner temporary root');
     await mkdir(directory,{recursive:false});
     const report={schema:1,platform:process.platform,tauriVersion:TAURI_DRIVER_VERSION,source:'https://crates.io/crates/tauri-driver/2.1.0',status:'running'};
@@ -101,7 +101,7 @@ async function main() {
             report.webview2={path:runtime.path,...compatibleDriver(runtime.version,version)};
         }
         report.executables={tauri:{path:tauri,sha256:sha256(await readFile(tauri))},native:{path:native,sha256:sha256(await readFile(native))}};
-        await appendFile(process.env.GITHUB_ENV,`TAURI_DRIVER_PATH=${tauri}\nCUEPOINT_NATIVE_WEBDRIVER_PATH=${native}\nMSEDGEDRIVER_TELEMETRY_OPTOUT=1\n`);
+        await appendFile(process.env.GITHUB_ENV,`TAURI_DRIVER_PATH=${tauri}\nMOMOKI_NATIVE_WEBDRIVER_PATH=${native}\nMSEDGEDRIVER_TELEMETRY_OPTOUT=1\n`);
         report.status='passed';
     } catch (error) {report.status='failed';report.error=error.stack ?? error.message;throw error;}
     finally {await writeFile(join(directory,'driver-setup.json'),JSON.stringify(report,null,2)+'\n',{flag:'wx'});}

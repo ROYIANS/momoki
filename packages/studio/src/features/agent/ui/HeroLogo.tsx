@@ -1,5 +1,5 @@
 import {useRef, useState} from "react";
-import {LOGO_LOOP_SRC, LOGO_SRC} from "@cuepoint/distribution/brand";
+import {LOGO_LOOP_SRC, LOGO_SRC} from "@momoki/distribution/brand";
 
 function hoverPlaybackAllowed() {
     return typeof window !== "undefined"

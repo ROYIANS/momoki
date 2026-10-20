@@ -15,7 +15,7 @@ export function historicalSource(source, originalModule) {
     const originalName = specifier => specifier.startsWith('.') ? '@/' + posix.normalize(posix.join(posix.dirname(original), specifier)) : specifier;
     const targetFor = specifier => {
         const name = originalName(specifier);
-        return {name, split: policy.snapshotSplitModules[name], target: name === '@/lib/brand' ? '@cuepoint/distribution/brand' : relocated.get(name) ?? policy.snapshotSourceModules[name]};
+        return {name, split: policy.snapshotSplitModules[name], target: name === '@/lib/brand' ? '@momoki/distribution/brand' : relocated.get(name) ?? policy.snapshotSourceModules[name]};
     };
     const replaceSpecifier = node => {
         const {target} = targetFor(node.text);

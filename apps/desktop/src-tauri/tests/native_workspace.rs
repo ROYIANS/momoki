@@ -1,5 +1,5 @@
 mod support;
-use cuepoint_native_storage::{
+use momoki_native_storage::{
     AssetKind, Availability, Beat, Hooks, Job, Outcome, Project, Shot, StorageWorker, TimingRef,
 };
 use std::fs;
@@ -204,10 +204,10 @@ fn video_domain_reopens_with_stable_order_and_checkpoint_boundary() {
         .unwrap()
         .clone();
     worker
-        .run(Job::SaveEpisode(cuepoint_native_storage::Episode {
+        .run(Job::SaveEpisode(momoki_native_storage::Episode {
             script: "进入房间".into(),
             updated_at: "2".into(),
-            shot_filters: cuepoint_native_storage::ShotFilters {
+            shot_filters: momoki_native_storage::ShotFilters {
                 statuses: vec![],
                 beat_ids: vec![],
                 gaps: vec![],
@@ -225,7 +225,7 @@ fn video_domain_reopens_with_stable_order_and_checkpoint_boundary() {
             time_of_day: "day".into(),
             character_ids: vec![],
             scene_id: None,
-            script_range: Some(cuepoint_native_storage::ScriptRange {
+            script_range: Some(momoki_native_storage::ScriptRange {
                 start: 0,
                 end: 4,
                 excerpt: "进入房间".into(),
@@ -653,7 +653,7 @@ fn source_change_injected_io_error_and_precommit_abort_leave_no_ready_asset() {
     for point in ["copy-chunk", "precommit"] {
         let hooks = Hooks::new(move |p| {
             if p == point {
-                return Err(cuepoint_native_storage::Error {
+                return Err(momoki_native_storage::Error {
                     code: "injected",
                     message: "Deterministic failure".into(),
                 });
@@ -771,7 +771,7 @@ fn owner_is_rechecked_at_real_commit_and_fresh_publication_never_overwrites() {
     let w = StorageWorker::create(&fresh_root, Hooks::default()).unwrap();
     project(&w, "project");
     let reference =
-        cuepoint_native_storage::derive_ref(&state(&w).workspace_id, "project", "asset").unwrap();
+        momoki_native_storage::derive_ref(&state(&w).workspace_id, "project", "asset").unwrap();
     let target = fresh_root.join(reference.relative_path);
     fs::create_dir_all(target.parent().unwrap()).unwrap();
     fs::write(&target, b"keep existing").unwrap();

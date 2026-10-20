@@ -7,9 +7,9 @@
     "baseUrl": "../..",
     "paths": {
       "@/*": ["packages/studio/src/*"],
-      "@cuepoint/agent-core": ["packages/agent-core/src/index.ts"],
-      "@cuepoint/agent-providers": ["packages/agent-providers/src/index.ts"],
-      "@cuepoint/agent-providers/http": ["packages/agent-providers/src/http/index.ts"]
+      "@momoki/agent-core": ["packages/agent-core/src/index.ts"],
+      "@momoki/agent-providers": ["packages/agent-providers/src/index.ts"],
+      "@momoki/agent-providers/http": ["packages/agent-providers/src/http/index.ts"]
     }
   },
   "include": [

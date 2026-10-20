@@ -1,8 +1,8 @@
-import {db} from '@cuepoint/studio/reference/db/database';
-import {executeWebRequest, testSearchConnection} from '@cuepoint/studio/reference/lib/ai/tavily';
-import {connectorProbeFetch} from '@cuepoint/studio/reference/lib/runtimeFetch';
-import {isTauriRuntime} from '@cuepoint/studio/reference/lib/runtimeIdentity';
-import {getProductStorage} from '@cuepoint/studio/reference/lib/productStorage';
+import {db} from '@momoki/studio/reference/db/database';
+import {executeWebRequest, testSearchConnection} from '@momoki/studio/reference/lib/ai/tavily';
+import {connectorProbeFetch} from '@momoki/studio/reference/lib/runtimeFetch';
+import {isTauriRuntime} from '@momoki/studio/reference/lib/runtimeIdentity';
+import {getProductStorage} from '@momoki/studio/reference/lib/productStorage';
 import {assert, type Evidence} from './acceptanceEvidence';
 
 import {fixtureTavilyFetch, TAVILY_PROBE_KEY} from './tavilyProbeFetch';
@@ -11,7 +11,7 @@ const PREFIX = '原生 Tavily 合成探针：';
 
 export async function checkTavilyNative(evidence: Evidence, endpoint: string) {
     const profile = getProductStorage();
-    assert(isTauriRuntime() && profile.runtime === 'tauri' && profile.profileId?.startsWith('dev.cuepoint.review.tavily.'), '必须是独立原生 Tavily 探针身份');
+    assert(isTauriRuntime() && profile.runtime === 'tauri' && profile.profileId?.startsWith('dev.momoki.review.tavily.'), '必须是独立原生 Tavily 探针身份');
     assert(await db.searchConnections.count() === 0, '独立探针已有搜索配置，停止且不覆盖');
     const revision = `tavily-probe-${crypto.randomUUID()}`;
     let calls = 0;

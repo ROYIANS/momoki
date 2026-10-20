@@ -90,7 +90,7 @@ test('release identities close over measured decoders, notices and all correspon
     assert.equal(await mediaReleaseIdentity('linux-x64'), null);
 });
 test('streamed downloads reject wrong digest, length, overflow and interruption', async () => {
-    const root = await mkdtemp(join(tmpdir(), 'cuepoint-media-download-'));
+    const root = await mkdtemp(join(tmpdir(), 'momoki-media-download-'));
     try {
         const expected = {bytes: 3, sha256: digest('abc')};
         const response = bytes => async () => new globalThis.Response(bytes, {status: 200});
@@ -107,7 +107,7 @@ test('streamed downloads reject wrong digest, length, overflow and interruption'
     } finally {await rm(root, {recursive: true, force: true});}
 });
 test('VideoLAN fetch metadata is origin-specific while ordinary downloads follow cross-origin redirects', async t => {
-    const root = await mkdtemp(join(tmpdir(), 'cuepoint-media-fetch-mode-'));
+    const root = await mkdtemp(join(tmpdir(), 'momoki-media-fetch-mode-'));
     t.after(() => rm(root, {recursive: true, force: true}));
     const received = [];
     const asset = createServer((request, response) => {
@@ -156,7 +156,7 @@ test('failed downloads retain the original URL and HTTP status even when body ca
         {message: `Pinned media asset download failed: ${url} (HTTP 204)`});
 });
 test('retained source archives keep exact pins and fail closed without a network fallback', async () => {
-    const root = await mkdtemp(join(tmpdir(), 'cuepoint-media-source-'));
+    const root = await mkdtemp(join(tmpdir(), 'momoki-media-source-'));
     try {
         const lock = JSON.parse(await readFile(new URL('../media/source-lock.json', import.meta.url), 'utf8'));
         const source = lock.sources.find(source => source.name === 'libaom');
@@ -177,7 +177,7 @@ test('retained source archives keep exact pins and fail closed without a network
     } finally {await rm(root, {recursive: true, force: true});}
 });
 test('ordinary source archives still download once and reuse only a verified cache', async () => {
-    const root = await mkdtemp(join(tmpdir(), 'cuepoint-media-network-source-'));
+    const root = await mkdtemp(join(tmpdir(), 'momoki-media-network-source-'));
     try {
         const source = {name: 'fixture', commit: 'revision', archiveUrl: 'https://fixture.invalid/source.tar.gz', archiveBytes: 3, archiveSha256: digest('abc')};
         let fetches = 0;
@@ -194,7 +194,7 @@ test('ordinary source archives still download once and reuse only a verified cac
     } finally {await rm(root, {recursive: true, force: true});}
 });
 test('failed preparation cleans only its temporary directory and never replaces existing resources', async () => {
-    const root = await mkdtemp(join(tmpdir(), 'cuepoint-media-preparation-'));
+    const root = await mkdtemp(join(tmpdir(), 'momoki-media-preparation-'));
     try {
         let fetches = 0;const fetchImpl = async () => {fetches++;return new globalThis.Response('wrong archive');};
         await assert.rejects(prepareMediaResources('macos-arm64', {cacheRoot: root, fetchImpl}), /checksum/);

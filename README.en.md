@@ -1,10 +1,10 @@
-# Cuepoint · 小光点
+# Momoki · 默默
 
 **A local-first AI creative studio for developing stories, visuals, audio, and music.**
 
 [简体中文](README.md) · **English**
 
-Cuepoint brings a creative assistant, film storyboarding, audio production, music generation, and reusable IP and material libraries into one shared browser and desktop workspace. Work directly in the editors, or ask the assistant to use project references, organize a task, and operate creative tools—then inspect the results saved in the workspace.
+Momoki brings a creative assistant, film storyboarding, audio production, music generation, and reusable IP and material libraries into one shared browser and desktop workspace. Work directly in the editors, or ask the assistant to use project references, organize a task, and operate creative tools—then inspect the results saved in the workspace.
 
 The desktop product stores project data in an internal SQLite database and copies media into its managed file workspace. The browser uses the same interface, business commands and Agent with IndexedDB. AI features use your own service connections and API keys (BYOK). The browser can be deployed as a static website or with Docker; no application database is required on the server. See [desktop distribution](docs/desktop-distribution.md) for installer targets and the release verification process.
 
@@ -30,7 +30,7 @@ The desktop product stores project data in an internal SQLite database and copie
 
 ## Download and install
 
-**[Download a desktop preview](https://github.com/ROYIANS/Cuepoint/releases) · [Illustrated installation guide (Chinese)](docs/desktop-installation.md)**
+**[Download a desktop preview](https://github.com/ROYIANS/momoki/releases) · [Illustrated installation guide (Chinese)](docs/desktop-installation.md)**
 
 Choose a desktop release with a `desktop-v<version>` tag, expand **Assets**, and select the installer for your device:
 
@@ -43,7 +43,7 @@ Choose a desktop release with a `desktop-v<version>` tag, expand **Assets**, and
 
 **Your system may show a warning on first installation or launch.** The Windows package is unsigned; the Mac application uses an ad-hoc signature and has not completed Developer ID signing or Apple notarization. Confirm that the file came from the official release above, then use the [Windows / Mac illustrated steps](docs/desktop-installation.md) to decide whether to continue. You do not need to disable system security features.
 
-If a warning reports malware, a virus, or a damaged file, stop installation and [report the full message](https://github.com/ROYIANS/Cuepoint/issues). **Source code (zip / tar.gz)** files are source archives, not installers. Windows ARM, Linux ARM, and universal Mac installers are not currently provided. From 0.1.3, **Settings → About and updates** can check versions, download and verify an installer, and save it for you to install. Export project ZIP backups before updating.
+If a warning reports malware, a virus, or a damaged file, stop installation and [report the full message](https://github.com/ROYIANS/momoki/issues). **Source code (zip / tar.gz)** files are source archives, not installers. Windows ARM, Linux ARM, and universal Mac installers are not currently provided. From 0.1.3, **Settings → About and updates** can check versions, download and verify an installer, and save it for you to install. Export project ZIP backups before updating.
 
 ## Features
 
@@ -82,7 +82,7 @@ Local project editing, material management, and supported exports do not require
 - **Produce visuals:** review the provider, model, prompt, and destination in the assistant's generation flow; inspect candidates and adopt them into shots or assets.
 - **Prepare delivery:** inspect missing information and media, then export an episode CSV, printable storyboard, or production material handoff ZIP.
 
-A production handoff archive delivers shots and materials. A project backup ZIP is intended for reimport into Cuepoint. Cuepoint does not currently provide a complete video editing timeline, transition compositor, or automatic full-film renderer.
+A production handoff archive delivers shots and materials. A project backup ZIP is intended for reimport into Momoki. Momoki does not currently provide a complete video editing timeline, transition compositor, or automatic full-film renderer.
 
 ### Audio: manuscript → voices → tracks → output
 
@@ -126,7 +126,7 @@ An IP profile organizes a long-lived creative identity or world; it is not a sep
 
 Connections are studio-wide, so projects can reuse them. Choose the chat model in the assistant and confirm generation models and parameters in their respective flows.
 
-| Connection | Use in Cuepoint |
+| Connection | Use in Momoki |
 | --- | --- |
 | OpenAI-compatible | Compatible chat services, proxies, or local gateways |
 | DeepSeek | A preset connection for its compatible chat service |
@@ -180,8 +180,8 @@ Import creates independent project and resource IDs. Imported memories require r
 Browser and the main GHCR quality job use **Node.js 22**; the independent Agent example and desktop release jobs use **Node.js 24.11.0**, as described in the [desktop distribution guide](docs/desktop-distribution.md). Follow the `packageManager` entry in [`package.json`](package.json), currently **pnpm 10.15.0**. In an existing workspace, also follow [`AGENTS.md`](AGENTS.md) and machine-specific package-manager instructions to avoid rebuilding dependencies with an incompatible version.
 
 ```bash
-git clone https://github.com/ROYIANS/Cuepoint.git
-cd Cuepoint
+git clone https://github.com/ROYIANS/momoki.git
+cd Momoki
 corepack enable
 pnpm install --frozen-lockfile
 pnpm dev
@@ -195,7 +195,7 @@ Open the URL printed by Vite, usually `http://localhost:5173`. Basic startup req
 | --- | --- |
 | `pnpm dev` | Start the web application development server |
 | `pnpm dev:site` | Start the independent landing site |
-| `pnpm --filter @cuepoint/desktop build:frontend` | Build the normal desktop frontend |
+| `pnpm --filter @momoki/desktop build:frontend` | Build the normal desktop frontend |
 | `pnpm agent:build` | Emit the reusable Agent libraries and their declarations |
 | `pnpm agent:example:check` | Offline packed-consumer and durable SQLite conformance outside the workspace (Node ≥24.11) |
 | `pnpm quality` / `pnpm quality:self-test` | Check all owned sources and verify gate failure cases |
@@ -211,7 +211,7 @@ Open the URL printed by Vite, usually `http://localhost:5173`. Basic startup req
 
 ### Docker Compose
 
-Image: `ghcr.io/royians/cuepoint`. See the [GHCR package](https://github.com/ROYIANS/Cuepoint/pkgs/container/cuepoint). Obtain [`docker-compose.yml`](docker-compose.yml) from this repository and run these commands from its directory:
+Image: `ghcr.io/royians/momoki`. See the [GHCR package](https://github.com/ROYIANS/momoki/pkgs/container/momoki). Obtain [`docker-compose.yml`](docker-compose.yml) from this repository and run these commands from its directory:
 
 ```bash
 # Login is only needed if the image package is private.
@@ -228,7 +228,7 @@ Update with `docker compose pull` and `docker compose up -d`. To pin a release, 
 ### Build the image locally
 
 ```bash
-docker build -t ghcr.io/royians/cuepoint:latest .
+docker build -t ghcr.io/royians/momoki:latest .
 docker compose up -d
 ```
 
@@ -277,7 +277,7 @@ Local environment files are excluded from Git and Docker contexts. Pass local Do
 docker build \
   --build-arg VITE_UMAMI_SCRIPT_URL=https://analytics.example.com/script.js \
   --build-arg VITE_UMAMI_WEBSITE_ID=YOUR_WEBSITE_ID \
-  -t ghcr.io/royians/cuepoint:latest .
+  -t ghcr.io/royians/momoki:latest .
 docker compose up -d
 ```
 
@@ -329,7 +329,7 @@ docs/                       # Product and architecture documentation
 
 Each feature owns its models, commands, queries, UI, tests and product tool bindings as needed. For example, Audio editing lives in `packages/studio/src/features/audio/`. The app layer composes features, `platform/storage` supplies storage mechanisms, and `platform/product/store.ts` selects the fixed product store. Packages use declared public exports; features cooperate through concrete command, query or service entries.
 
-[`@cuepoint/agent-core`](packages/agent-core/README.md) owns neutral Agent mechanisms. [`@cuepoint/agent-providers`](packages/agent-providers/README.md) supplies the existing protocols and an explicit public `/http` entry, with emitted ESM and declarations. Studio owns creative tools/prompts, project scope, reference pixels, current credentials, runtime HTTP authorization and product transactions.
+[`@momoki/agent-core`](packages/agent-core/README.md) owns neutral Agent mechanisms. [`@momoki/agent-providers`](packages/agent-providers/README.md) supplies the existing protocols and an explicit public `/http` entry, with emitted ESM and declarations. Studio owns creative tools/prompts, project scope, reference pixels, current credentials, runtime HTTP authorization and product transactions.
 
 [`agent-todo`](examples/agent-todo/README.md) uses its own SQLite tables and business tools to demonstrate approval, rejection, cancellation and explicit recovery after process restart. It calls the same Agent execution implementation and demonstrates the host adapter another project supplies. `agent:example:check` installs local packed artifacts offline outside the workspace before checking the consumer. The example requires Node ≥24.11; shared libraries and web quality checks retain Node 22 support.
 
@@ -394,7 +394,7 @@ The shared product runs as a static browser application and a Tauri desktop appl
 
 ## Acknowledgments
 
-Cuepoint builds on the work of these projects and their contributors:
+Momoki builds on the work of these projects and their contributors:
 
 | Project | Role |
 | --- | --- |
@@ -422,6 +422,6 @@ See [`package.json`](package.json) and the lockfile for dependency versions. Eac
 
 ## License
 
-Cuepoint's original code is licensed under the [MIT License](LICENSE).
+Momoki's original code is licensed under the [MIT License](LICENSE).
 
 Third-party content remains under its original terms; see [Third-party notices](THIRD_PARTY_NOTICES.md).

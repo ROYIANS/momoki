@@ -214,7 +214,7 @@ export async function importProjectZip(file: Blob): Promise<Project> {
     ) as unknown;
     const manifest = manifestSchema.safeParse(manifestJson);
     if (!manifest.success) {
-        throw new PackageError("不是小光点项目包（manifest.format 不匹配）");
+        throw new PackageError("不是默默项目包（manifest.format 不匹配）");
     }
 
     const readJson = async (name: string, required = false) => {

@@ -69,19 +69,19 @@ The runtime wrapper chooses transport; it does not globally replace fetch.
 ### Fixed startup identity and one data owner
 
 Rust installs a nonwritable/nonconfigurable frozen
-`window.__CUEPOINT_PRODUCT_PROFILE__ = {version:1,id,storage}` before frontend
+`window.__MOMOKI_PRODUCT_PROFILE__ = {version:1,id,storage}` before frontend
 module/database construction. Keys are closed. ID matches
 `[A-Za-z0-9][A-Za-z0-9._-]{0,159}`; storage is indexeddb or sqlite. Genuine Tauri
 with missing/invalid profile fails explicitly. Browser ignores any incidental
 profile and keeps `aifenjing`. Normal desktop uses
-`cuepoint-desktop:<profileId>:v1`, snapshots its owner once, and cannot change
+`momoki-desktop:<profileId>:v1`, snapshots its owner once, and cannot change
 owner through later preferences, globals, URLs or failed writes.
 
 On macOS, WKWebView's stable, nonprivate data-store ID is the first 16 SHA-256 bytes of
-`cuepoint-product-profile-v1:<bundle identifier>:<storage>`. Normal and isolated
+`momoki-product-profile-v1:<bundle identifier>:<storage>`. Normal and isolated
 products require distinct bundle/profile IDs **and** distinct WK store IDs/DB
 namespaces. `build-app.mjs --isolated-product` requires
-`CUEPOINT_PRODUCT_IDENTIFIER=dev.cuepoint.review.<validated-suffix>` and uses the
+`MOMOKI_PRODUCT_IDENTIFIER=dev.momoki.review.<validated-suffix>` and uses the
 same normal root frontend, desktop backend/CSP/services. Its archived app receipt
 records identifier/storage/store ID. Historical `--acceptance` remains a separate
 SQLite/probe frontend and cannot substitute for normal product evidence.
@@ -114,7 +114,7 @@ const productSqlite = process.argv.includes('--sqlite-product') || (!acceptance 
 if (productSqlite && acceptance) throw new Error('Full-product SQLite and fixture acceptance are separate build lanes');
 ```
 
-Normal SQLite uses bundle identifier `dev.cuepoint.prototype.offline` and WK
+Normal SQLite uses bundle identifier `design.tulai.momoki` and WK
 store `ed4550f181f509d050d0643fe7cb7ae0`, with server-owned
 `product-workspace-v1/.local/state.sqlite` and internal `assets/`. This new
 identity does not read/copy the previous IndexedDB WK store or schema-4 workspace.
@@ -206,7 +206,7 @@ register_response closes resources immediately for JS null-body statuses
 official. Keep vendor licenses, exact patch, crate checksum/source hashes and
 regressions; a JS rejected read alone is insufficient disconnect proof.
 Provenance is recorded in
-`apps/desktop/src-tauri/vendor/tauri-plugin-http/CUEPOINT-PATCH.md`; task evidence
+`apps/desktop/src-tauri/vendor/tauri-plugin-http/MOMOKI-PATCH.md`; task evidence
 retains `http-cancellation.patch` and `http-upstream-provenance.json`. Update the
 patch and hashes together whenever the vendored source changes.
 

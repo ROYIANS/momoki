@@ -626,7 +626,7 @@ mod tests {
     impl Fixture {
         fn new() -> Self {
             let base = std::env::temp_dir()
-                .join(format!("cuepoint-skill-import-{}", uuid::Uuid::new_v4()));
+                .join(format!("momoki-skill-import-{}", uuid::Uuid::new_v4()));
             let root = base.join("creative-flow");
             fs::create_dir_all(root.join("references")).unwrap();
             fs::write(

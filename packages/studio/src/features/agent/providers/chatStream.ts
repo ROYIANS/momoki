@@ -1,12 +1,12 @@
-import {streamChatCompletions as dispatchChat} from '@cuepoint/agent-providers';
-import type {StreamChatInput as ProviderChatInput, StreamChatHandlers as ProviderChatHandlers} from '@cuepoint/agent-providers';
+import {streamChatCompletions as dispatchChat} from '@momoki/agent-providers';
+import type {StreamChatInput as ProviderChatInput, StreamChatHandlers as ProviderChatHandlers} from '@momoki/agent-providers';
 import type {AgentRequestMessage} from '../models/agent';
 import type {AgentVisionCapability} from '../../references/models/referenceInput';
 import type {ConnectorDefinitionId} from '../../settings/models/connector';
 import {assertReasoningEffort} from '../../settings/models/reasoningPolicy';
 import {runtimeFetchFor} from '../../../platform/runtime/runtimeFetch';
 import {materializeChatMessages} from './referenceWire';
-export type {StreamChatResult} from '@cuepoint/agent-providers';
+export type {StreamChatResult} from '@momoki/agent-providers';
 export type ChatCompletionMessage = AgentRequestMessage;
 
 export type StreamChatInput = Omit<ProviderChatInput, 'messages'> & {

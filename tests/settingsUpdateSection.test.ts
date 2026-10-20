@@ -17,18 +17,18 @@ vi.mock("@/platform/runtime/appVersion", () => ({appVersion: () => "0.1.3"}));
 vi.mock("@tanstack/react-router", () => ({Link: ({to, children}: {to: string; children: ReactNode}) => createElement("a", {href: to}, children)}));
 
 import {UpdateSection} from "@/features/settings/ui/sections/UpdateSection";
-import {classifyUpdate} from "@cuepoint/distribution/version";
-import type {LatestDesktopRelease} from "@cuepoint/distribution/releases";
-import type {AssetChoice} from "@cuepoint/distribution/platform";
+import {classifyUpdate} from "@momoki/distribution/version";
+import type {LatestDesktopRelease} from "@momoki/distribution/releases";
+import type {AssetChoice} from "@momoki/distribution/platform";
 
 function release(version: string): LatestDesktopRelease {
-    return {version, tag: `desktop-v${version}`, htmlUrl: `https://github.com/ROYIANS/Cuepoint/releases/tag/desktop-v${version}`,
+    return {version, tag: `desktop-v${version}`, htmlUrl: `https://github.com/ROYIANS/momoki/releases/tag/desktop-v${version}`,
         publishedAt: "2026-10-14T06:00:00Z", prerelease: false, assets: []};
 }
 const asset: AssetChoice = {
     os: "windows", arch: "x64", format: "exe", label: "Windows", event: "download-windows-x64",
-    asset: {name: "Cuepoint_0.1.4_windows_x64_setup.exe", size: 12 * 1024 * 1024,
-        url: "https://github.com/ROYIANS/Cuepoint/releases/download/desktop-v0.1.4/Cuepoint_0.1.4_windows_x64_setup.exe",
+    asset: {name: "Momoki_0.1.4_windows_x64_setup.exe", size: 12 * 1024 * 1024,
+        url: "https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.4/Momoki_0.1.4_windows_x64_setup.exe",
         sha256: "a".repeat(64)},
 };
 const render = () => renderToStaticMarkup(createElement(UpdateSection));
@@ -84,8 +84,8 @@ describe("update verdict presentation", () => {
         host.state = {kind: "ready", release: release("0.1.4"), verdict: "update-available", asset};
         host.download = {kind: "saved", name: asset.asset.name, format: "exe"};
         const html = render();
-        expect(html).toContain('href="https://github.com/ROYIANS/Cuepoint/releases/tag/desktop-v0.1.4"');
-        expect(html).toContain('href="https://github.com/ROYIANS/Cuepoint/blob/main/docs/desktop-installation.md"');
+        expect(html).toContain('href="https://github.com/ROYIANS/momoki/releases/tag/desktop-v0.1.4"');
+        expect(html).toContain('href="https://github.com/ROYIANS/momoki/blob/main/docs/desktop-installation.md"');
         expect(html).toContain('href="/about"');
     });
 
@@ -121,15 +121,15 @@ describe("update verdict presentation", () => {
     });
 
     it.each([
-        ["dmg", "打开 dmg 后将小光点拖入应用程序文件夹"],
-        ["exe", "先退出小光点，再运行 setup.exe 安装"],
+        ["dmg", "打开 dmg 后将默默拖入应用程序文件夹"],
+        ["exe", "先退出默默，再运行 setup.exe 安装"],
         ["appimage", "先给 AppImage 文件添加执行权限"],
         ["deb", "用系统的软件安装器打开 .deb 文件"],
     ] as const)("shows installation steps for saved %s packages", (format, instructions) => {
-        host.download = {kind: "saved", name: "Cuepoint-install-package", format};
+        host.download = {kind: "saved", name: "Momoki-install-package", format};
         const html = render();
         expect(html).toContain("安装包已保存");
-        expect(html).toContain("Cuepoint-install-package");
+        expect(html).toContain("Momoki-install-package");
         expect(html).toContain(instructions);
         expect(html).toContain("覆盖安装前先导出备份");
     });

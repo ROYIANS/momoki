@@ -1,8 +1,8 @@
 import type {AgentSelectedReferences} from "../../references/models/referenceInput";
 import type {AgentRequestMessage, AgentRun, AgentTokenUsage} from "./agent";
 
-import type {ContextPolicy} from '@cuepoint/agent-core';
-export type {ContextPolicy} from '@cuepoint/agent-core';
+import type {ContextPolicy} from '@momoki/agent-core';
+export type {ContextPolicy} from '@momoki/agent-core';
 
 export interface ContextSource {
     id: string;

@@ -7,15 +7,15 @@ import {GITHUB_URL} from "./brand";
 export const RELEASES_URL = `${GITHUB_URL}/releases`;
 export const INSTALL_GUIDE_URL = `${GITHUB_URL}/blob/main/docs/desktop-installation.md`;
 
-const API_BASE = "https://api.github.com/repos/ROYIANS/Cuepoint";
+const API_BASE = "https://api.github.com/repos/ROYIANS/momoki";
 // Download links are accepted only when they point at this release path (anti-tamper).
 const DOWNLOAD_PREFIX = `${GITHUB_URL}/releases/download/`;
 const TAG_PATTERN = /^desktop-v(\d+)\.(\d+)\.(\d+)$/;
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 8000;
 const MAX_RELEASE_RESPONSE_BYTES = 1024 * 1024;
-const RELEASE_CACHE_KEY = "cuepoint.landing.release";
-const STARS_CACHE_KEY = "cuepoint.landing.stars";
+const RELEASE_CACHE_KEY = "momoki.landing.release";
+const STARS_CACHE_KEY = "momoki.landing.stars";
 
 export type ReleaseAsset = { name: string; size: number; url: string; sha256?: string };
 export type LatestDesktopRelease = {

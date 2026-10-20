@@ -1,12 +1,12 @@
 {
-  "name": "cuepoint",
+  "name": "momoki",
   "private": true,
   "license": "MIT",
   "version": "0.1.6",
   "type": "module",
   "packageManager": "pnpm@10.15.0",
   "scripts": {
-    "dev": "pnpm --filter @cuepoint/web dev",
+    "dev": "pnpm --filter @momoki/web dev",
     "build": "node tooling/build-web.mjs",
     "test": "node tooling/build-agent-packages.mjs && vitest run",
     "preview": "vite preview --outDir dist",
@@ -18,7 +18,7 @@
     "test:storage:native": "node tooling/native-storage-regression.mjs",
     "models-dev:baseline": "node tooling/models-dev-baseline.mjs generate",
     "models-dev:verify": "node tooling/models-dev-baseline.mjs verify",
-    "dev:site": "pnpm --filter @cuepoint/site dev",
+    "dev:site": "pnpm --filter @momoki/site dev",
     "workspace:check": "node tooling/workspace.mjs",
     "agent:build": "node tooling/build-agent-packages.mjs",
     "agent:example:check": "node tooling/agent-example-check.mjs"
@@ -56,10 +56,10 @@
     "typescript-eslint": "8.71.1",
     "vite": "^7.1.5",
     "vitest": "^5.0.1",
-    "@cuepoint/distribution": "workspace:*",
-    "@cuepoint/agent-core": "workspace:*"
+    "@momoki/distribution": "workspace:*",
+    "@momoki/agent-core": "workspace:*"
   },
   "dependencies": {
-    "@cuepoint/agent-providers": "workspace:*"
+    "@momoki/agent-providers": "workspace:*"
   }
 }

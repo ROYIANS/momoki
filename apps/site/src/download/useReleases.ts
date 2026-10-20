@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
-import {type DetectedPlatform, detectPlatform, type NavigatorInfo} from "@cuepoint/distribution/platform";
-import {fetchLatestDesktopRelease, fetchStars, type ReleaseResult} from "@cuepoint/distribution/releases";
+import {type DetectedPlatform, detectPlatform, type NavigatorInfo} from "@momoki/distribution/platform";
+import {fetchLatestDesktopRelease, fetchStars, type ReleaseResult} from "@momoki/distribution/releases";
 
 export type DownloadData = { release?: ReleaseResult; platform?: DetectedPlatform; stars?: number };
 

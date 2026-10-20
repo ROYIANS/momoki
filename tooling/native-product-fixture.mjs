@@ -241,7 +241,7 @@ export async function startNativeProductFixture({port = 0, outputDirectory} = {}
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-    const fixture = await startNativeProductFixture({port: Number(process.env.CUEPOINT_FIXTURE_PORT ?? 0), outputDirectory: process.argv[2]});
+    const fixture = await startNativeProductFixture({port: Number(process.env.MOMOKI_FIXTURE_PORT ?? 0), outputDirectory: process.argv[2]});
     console.log(JSON.stringify({origin: fixture.origin, cors: false, token: 'synthetic-local-only'}));
     for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, () => {void fixture.close().then(() => process.exit(0));});
 }

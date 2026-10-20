@@ -39,9 +39,9 @@ and one DEB. The collector requires four targets and five installers.
 ## 3. Contracts: tools, source, checks and publication
 
 Local Mac mode resolves the user's explicitly approved pnpm path and the
-workspace-local Rust homes. Hosted mode is explicit (`CUEPOINT_TOOL_MODE=hosted`)
-and receives absolute approved `CUEPOINT_CARGO_PATH`, `CUEPOINT_RUSTC_PATH`,
-`CUEPOINT_RUSTUP_PATH`, `CUEPOINT_RUSTFMT_PATH` and `CUEPOINT_PNPM_PATH`.
+workspace-local Rust homes. Hosted mode is explicit (`MOMOKI_TOOL_MODE=hosted`)
+and receives absolute approved `MOMOKI_CARGO_PATH`, `MOMOKI_RUSTC_PATH`,
+`MOMOKI_RUSTUP_PATH`, `MOMOKI_RUSTFMT_PATH` and `MOMOKI_PNPM_PATH`.
 Pinned versions are Node24.11.0, pnpm10.15.0, Rust1.99.0 and TauriCLI2.12.1.
 Reject Codex runtime tool paths. On Windows invoke the pinned pnpm JavaScript
 entry through Node, retaining argument boundaries; do not enable a shell or
@@ -88,8 +88,8 @@ release gate's historical coverage. The native build includes the same directory
 `build.rs`, avoiding a second manually maintained file list or table count.
 See [released upgrades](./native-product-runtime.md#workspace-registry-identity-and-released-upgrades).
 
-Normal product identity is Cuepoint / `dev.cuepoint.prototype.offline` /
-`cuepoint-prototype`, profile normal, storage sqlite, features product-sqlite.
+Normal product identity is Momoki / `design.tulai.momoki` /
+`momoki`, profile normal, storage sqlite, features product-sqlite.
 Visible branding retains the committed cream-tile PNG/ICO/ICNS assets. Versions in root package,
 desktop package, Cargo and Tauri config must match a numeric three-part version;
 a tag must be `desktop-v<that version>`. Mac minimum is14, ad-hoc signing and no

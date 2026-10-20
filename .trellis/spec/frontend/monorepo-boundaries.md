@@ -8,26 +8,26 @@ Read when adding an application/library, changing package exports/dependencies, 
 
 | Owner | Responsibility and entry |
 | --- | --- |
-| `apps/web`, `@cuepoint/web` | Browser HTML, `src/main.tsx`, Vite configuration and package `dev`/`build`/`types`. |
-| `apps/desktop`, `@cuepoint/desktop` | Native entry, Tauri/Rust, native/build/release scripts and explicitly retained reference lanes. |
-| `apps/site`, `@cuepoint/site` | Landing HTML, site source/assets and standalone `dev`/`build`/`types`. |
-| `packages/studio`, `@cuepoint/studio` | One shared product implementation; `./bootstrap` and `./styles.css` exports. |
-| `packages/distribution`, `@cuepoint/distribution` | `./brand`, `./analytics`, `./releases`, `./platform`, `./version` and shared public brand assets. |
-| `packages/agent-core`, `@cuepoint/agent-core` | Runtime-neutral Agent implementation; public root emits ESM and declarations. See [core library](../agent-core/library/index.md). |
-| `packages/agent-providers`, `@cuepoint/agent-providers` | Current Chat Completions/Responses implementation and neutral HTTP mechanisms; emitted root and `./http` exports. See [provider library](../agent-providers/library/index.md). |
-| `examples/agent-todo`, `@cuepoint/agent-todo` | Independent Node >=24.11 CLI, own SQLite business model and typed Agent host; see [durable consumer](../agent-todo/cli/index.md). |
+| `apps/web`, `@momoki/web` | Browser HTML, `src/main.tsx`, Vite configuration and package `dev`/`build`/`types`. |
+| `apps/desktop`, `@momoki/desktop` | Native entry, Tauri/Rust, native/build/release scripts and explicitly retained reference lanes. |
+| `apps/site`, `@momoki/site` | Landing HTML, site source/assets and standalone `dev`/`build`/`types`. |
+| `packages/studio`, `@momoki/studio` | One shared product implementation; `./bootstrap` and `./styles.css` exports. |
+| `packages/distribution`, `@momoki/distribution` | `./brand`, `./analytics`, `./releases`, `./platform`, `./version` and shared public brand assets. |
+| `packages/agent-core`, `@momoki/agent-core` | Runtime-neutral Agent implementation; public root emits ESM and declarations. See [core library](../agent-core/library/index.md). |
+| `packages/agent-providers`, `@momoki/agent-providers` | Current Chat Completions/Responses implementation and neutral HTTP mechanisms; emitted root and `./http` exports. See [provider library](../agent-providers/library/index.md). |
+| `examples/agent-todo`, `@momoki/agent-todo` | Independent Node >=24.11 CLI, own SQLite business model and typed Agent host; see [durable consumer](../agent-todo/cli/index.md). |
 | Root `tooling`, `tests`, `quality`, `deploy` | Repository checks, integration fixtures, policy and assembled web/site delivery. |
 
 Root remains the authoritative app release version; native version/integrity readers must agree. Private workspace manifests do not create independent app release streams. pnpm workspace declarations and package manifests define installation; the quality-owned source/dependency inventory must agree with actual packages.
 
-Root `build` builds web/site and assembles `dist`; `dev` selects web, `dev:site` selects site. Existing root `lint`, `quality`, `quality:self-test`, `test`, `models-dev:verify`, `landing:budget` and native regression commands remain usable. Run package builds via the approved explicit pnpm path and `--filter @cuepoint/<app>`.
+Root `build` builds web/site and assembles `dist`; `dev` selects web, `dev:site` selects site. Existing root `lint`, `quality`, `quality:self-test`, `test`, `models-dev:verify`, `landing:budget` and native regression commands remain usable. Run package builds via the approved explicit pnpm path and `--filter @momoki/<app>`.
 
 `tooling/build-agent-packages.mjs` exports `buildAgentPackages(): Promise<void>`
 and is the root `agent:build` entry. The compiler and actual artifact consumers
 share `captureAgentPackageInputs(root, row, packages)` from
 `tooling/agent-package-inputs.ts`; `assertAgentPackageFreshness(root?)` checks
 the complete current input/output maps against each package's generated
-`dist/.cuepoint-build.json`. This receipt is local build metadata, not a source
+`dist/.momoki-build.json`. This receipt is local build metadata, not a source
 file or package-public execution API.
 
 ## 3. Contracts

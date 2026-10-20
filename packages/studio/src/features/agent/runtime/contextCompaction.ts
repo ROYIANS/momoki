@@ -1,6 +1,6 @@
-import {compactContext,replaceContinuationBase,type CompactionOptions} from '@cuepoint/agent-core';
-import {responseContinuationTokens} from '@cuepoint/agent-providers';
-import {redactCredentials} from "@cuepoint/agent-providers/http";
+import {compactContext,replaceContinuationBase,type CompactionOptions} from '@momoki/agent-core';
+import {responseContinuationTokens} from '@momoki/agent-providers';
+import {redactCredentials} from "@momoki/agent-providers/http";
 import type {ProductStore} from "../../../platform/storage/types";
 import {referenceInputOf} from "../../references/models/referenceInput";
 import {frozenProjectScope} from "./projectScope";

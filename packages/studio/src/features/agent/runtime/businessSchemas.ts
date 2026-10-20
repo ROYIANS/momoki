@@ -1,4 +1,4 @@
-import type {ToolSpec} from "@cuepoint/agent-core";
+import type {ToolSpec} from "@momoki/agent-core";
 import {z} from "zod";
 import {ASPECT_PRESET_IDS} from "../../video/models/format";
 import {SHOT_STATUSES} from "../../video/models/shots";

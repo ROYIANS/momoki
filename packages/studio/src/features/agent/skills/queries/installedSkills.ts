@@ -1,8 +1,8 @@
-import {readSkillTextRange, splitSkillDocument, validateSkillMetadata, validateSkillResourcePath} from "@cuepoint/agent-core";
+import {readSkillTextRange, splitSkillDocument, validateSkillMetadata, validateSkillResourcePath} from "@momoki/agent-core";
 import {db as productDb} from "../../../../platform/product/store";
 import {sha256Bytes} from "../../../../platform/media/sha256";
 import type {ProductStore} from "../../../../platform/storage/types";
-import type {InstalledSkillDescriptor, SkillTextRange} from "@cuepoint/agent-core";
+import type {InstalledSkillDescriptor, SkillTextRange} from "@momoki/agent-core";
 import type {SkillCatalogue, SkillComponent, SkillManifest} from "../models/installedSkill";
 import {parseSkillTextRecord, readSkillCatalogueRecord, readSkillManifestRecord, skillBodyKey, skillResourceKey} from "../runtime/records";
 import {decodeSkillFrontmatter} from "../runtime/package";

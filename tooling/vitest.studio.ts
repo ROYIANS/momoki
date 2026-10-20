@@ -22,10 +22,10 @@ export function createStudioVitestConfig(options: {aliases?: Alias[]; include?: 
       if (!source.includes("?fixture-original") && (source === "@/platform/storage/store" || target === fileURLToPath(new URL("../packages/studio/src/platform/storage/store", import.meta.url)) || target === fileURLToPath(new URL("../packages/studio/src/platform/storage/store.ts", import.meta.url)))) {
         return fileURLToPath(new URL("../tests/fixtures/shared-storage/storeFactory.ts", import.meta.url));
       }
-      if (process.env.CUEPOINT_TOOL_COVERAGE_DIR && !source.includes("?coverage-original") && (source === "@/features/agent/runtime/toolDefinition" || target === fileURLToPath(new URL("../packages/studio/src/features/agent/runtime/toolDefinition", import.meta.url)) || target === fileURLToPath(new URL("../packages/studio/src/features/agent/runtime/toolDefinition.ts", import.meta.url)))) {
+      if (process.env.MOMOKI_TOOL_COVERAGE_DIR && !source.includes("?coverage-original") && (source === "@/features/agent/runtime/toolDefinition" || target === fileURLToPath(new URL("../packages/studio/src/features/agent/runtime/toolDefinition", import.meta.url)) || target === fileURLToPath(new URL("../packages/studio/src/features/agent/runtime/toolDefinition.ts", import.meta.url)))) {
         return fileURLToPath(new URL("../tests/fixtures/shared-storage/toolDefinitionCoverage.ts", import.meta.url));
       }
-      if (process.env.CUEPOINT_STORAGE_TEST_OWNER === "sqlite" && (source === "@/platform/product/store" || target === fileURLToPath(new URL("../packages/studio/src/platform/product/store", import.meta.url)) || target === fileURLToPath(new URL("../packages/studio/src/platform/product/store.ts", import.meta.url)))) {
+      if (process.env.MOMOKI_STORAGE_TEST_OWNER === "sqlite" && (source === "@/platform/product/store" || target === fileURLToPath(new URL("../packages/studio/src/platform/product/store", import.meta.url)) || target === fileURLToPath(new URL("../packages/studio/src/platform/product/store.ts", import.meta.url)))) {
         return fileURLToPath(new URL("../tests/fixtures/shared-storage/nativeDatabase.ts", import.meta.url));
       }
       if ((source === "@/db/materials" || source === fileURLToPath(new URL("../packages/studio/src/db/materials", import.meta.url))) && importer?.replaceAll("\\", "/").endsWith("/tests/fixtures/sourceSnapshots/d05/src/lib/agent/materialTools.ts")) {
@@ -44,7 +44,7 @@ export function createStudioVitestConfig(options: {aliases?: Alias[]; include?: 
     include: options.include ?? ["tests/**/*.test.ts", "packages/studio/src/features/**/*.test.ts", "packages/agent-*/src/**/*.test.ts"],
     setupFiles: ["./tests/setup.ts"],
     clearMocks: true,
-    ...(process.env.CUEPOINT_STORAGE_TEST_OWNER === "sqlite" ? {maxWorkers:2,testTimeout:20000,hookTimeout:20000} : {}),
+    ...(process.env.MOMOKI_STORAGE_TEST_OWNER === "sqlite" ? {maxWorkers:2,testTimeout:20000,hookTimeout:20000} : {}),
   },
   });
 }

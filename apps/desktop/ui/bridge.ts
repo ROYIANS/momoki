@@ -1,8 +1,8 @@
 import {invoke} from "@tauri-apps/api/core";
 import {z} from "zod";
-import {Sha256} from "@cuepoint/studio/reference/lib/sha256";
-import type {NativeAction} from "@cuepoint/studio/reference/lib/nativeWorkspace";
-import {nativeWorkspacePublishedError} from "@cuepoint/studio/reference/lib/nativeWorkspace";
+import {Sha256} from "@momoki/studio/reference/lib/sha256";
+import type {NativeAction} from "@momoki/studio/reference/lib/nativeWorkspace";
+import {nativeWorkspacePublishedError} from "@momoki/studio/reference/lib/nativeWorkspace";
 import {
     nativeAssetSchema as asset,
     nativeAvailabilitySchema as availability,
@@ -17,13 +17,13 @@ import {
     nativeVideoProjectSchema as videoProject,
     nativeVideoStateSchema,
     nativeWorkspaceStateSchema as state,
-} from "@cuepoint/studio/reference/lib/nativeWorkspaceContract";
+} from "@momoki/studio/reference/lib/nativeWorkspaceContract";
 
 const id = z.string().min(1).max(4096);
 const digest = z.string().regex(/^[a-f0-9]{64}$/);
 const backup = z
     .object({
-        format: z.literal("cuepoint.native-backup.v1"),
+        format: z.literal("momoki.native-backup.v1"),
         schema: z.literal(4),
         workspaceId: id,
         databaseBytes: z.number().int().positive(),

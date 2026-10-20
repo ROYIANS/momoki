@@ -1,16 +1,16 @@
 import {afterEach, describe, expect, it, vi} from "vitest";
-import {fetchLatestDesktopRelease, fetchStars, type StorageLike} from "@cuepoint/distribution/releases";
+import {fetchLatestDesktopRelease, fetchStars, type StorageLike} from "@momoki/distribution/releases";
 import {formatBytes, formatPublished, formatStars} from "../apps/site/src/download/format";
 
-const PREFIX = "https://github.com/ROYIANS/Cuepoint/releases/download/";
+const PREFIX = "https://github.com/ROYIANS/momoki/releases/download/";
 const NOW = 1_800_000_000_000;
 const HOUR = 3_600_000;
 const sha = "a".repeat(64);
 
 const asset = (tag: string, name: string, extra: Record<string, unknown> = {}) => ({name, size: 100, browser_download_url: `${PREFIX}${tag}/${name}`, digest: `sha256:${sha}`, ...extra});
 const item = (tag: string, extra: Record<string, unknown> = {}) => ({
-    tag_name: tag, draft: false, prerelease: true, html_url: `https://github.com/ROYIANS/Cuepoint/releases/tag/${tag}`, published_at: "2026-10-13T09:08:10Z",
-    assets: [asset(tag, `Cuepoint_${tag.slice(9)}_windows_x64_setup.exe`)], ...extra,
+    tag_name: tag, draft: false, prerelease: true, html_url: `https://github.com/ROYIANS/momoki/releases/tag/${tag}`, published_at: "2026-10-13T09:08:10Z",
+    assets: [asset(tag, `Momoki_${tag.slice(9)}_windows_x64_setup.exe`)], ...extra,
 });
 const json = (body: unknown, init: ResponseInit = {}) => new Response(JSON.stringify(body), {status: 200, ...init});
 const memory = (seed: Record<string, string> = {}) => {
@@ -31,14 +31,14 @@ describe("fetchLatestDesktopRelease", () => {
         expect(result.kind).toBe("ok");
         if (result.kind !== "ok") return;
         expect(result.release).toMatchObject({tag: "desktop-v0.1.10", version: "0.1.10", prerelease: true, publishedAt: "2026-10-13T09:08:10Z"});
-        expect(result.release.assets[0]).toEqual({name: "Cuepoint_0.1.10_windows_x64_setup.exe", size: 100, url: `${PREFIX}desktop-v0.1.10/Cuepoint_0.1.10_windows_x64_setup.exe`, sha256: sha});
+        expect(result.release.assets[0]).toEqual({name: "Momoki_0.1.10_windows_x64_setup.exe", size: 100, url: `${PREFIX}desktop-v0.1.10/Momoki_0.1.10_windows_x64_setup.exe`, sha256: sha});
     });
 
     it("requests the documented URL without credentials or cache options", async () => {
         const fetchImpl = vi.fn(async () => json([item("desktop-v0.1.1")]));
         await fetchLatestDesktopRelease(deps(fetchImpl as unknown as typeof fetch));
         const [url, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
-        expect(url).toBe("https://api.github.com/repos/ROYIANS/Cuepoint/releases?per_page=30");
+        expect(url).toBe("https://api.github.com/repos/ROYIANS/momoki/releases?per_page=30");
         expect(Object.keys(init).sort()).toEqual(["headers", "signal"]);
         expect(init.headers).toEqual({Accept: "application/vnd.github+json"});
     });
@@ -46,21 +46,21 @@ describe("fetchLatestDesktopRelease", () => {
     it("drops assets whose address is not on the repository's release download path", async () => {
         const tag = "desktop-v0.1.1";
         const tampered = item(tag, {assets: [
-            asset(tag, "Cuepoint_0.1.1_macos_arm64.dmg", {browser_download_url: "https://evil.example/Cuepoint_0.1.1_macos_arm64.dmg"}),
-            asset(tag, "Cuepoint_0.1.1_macos_x64.dmg", {browser_download_url: "https://github.com.evil.example/ROYIANS/Cuepoint/releases/download/x/a.dmg"}),
-            asset(tag, "Cuepoint_0.1.1_linux_x64.deb", {browser_download_url: "http://github.com/ROYIANS/Cuepoint/releases/download/desktop-v0.1.1/a.deb"}),
-            asset(tag, "Cuepoint_0.1.1_windows_x64_setup.exe", {digest: "md5:zz"}),
+            asset(tag, "Momoki_0.1.1_macos_arm64.dmg", {browser_download_url: "https://evil.example/Momoki_0.1.1_macos_arm64.dmg"}),
+            asset(tag, "Momoki_0.1.1_macos_x64.dmg", {browser_download_url: "https://github.com.evil.example/ROYIANS/momoki/releases/download/x/a.dmg"}),
+            asset(tag, "Momoki_0.1.1_linux_x64.deb", {browser_download_url: "http://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.1/a.deb"}),
+            asset(tag, "Momoki_0.1.1_windows_x64_setup.exe", {digest: "md5:zz"}),
         ]});
         const result = await fetchLatestDesktopRelease(deps((async () => json([tampered])) as unknown as typeof fetch));
         if (result.kind !== "ok") throw new Error("expected ok");
-        expect(result.release.assets.map(a => a.name)).toEqual(["Cuepoint_0.1.1_windows_x64_setup.exe"]);
+        expect(result.release.assets.map(a => a.name)).toEqual(["Momoki_0.1.1_windows_x64_setup.exe"]);
         expect(result.release.assets[0].sha256).toBeUndefined();
     });
 
     it("falls back to a constructed release page when html_url is foreign", async () => {
         const result = await fetchLatestDesktopRelease(deps((async () => json([item("desktop-v0.1.1", {html_url: "https://evil.example/x"})])) as unknown as typeof fetch));
         if (result.kind !== "ok") throw new Error("expected ok");
-        expect(result.release.htmlUrl).toBe("https://github.com/ROYIANS/Cuepoint/releases/tag/desktop-v0.1.1");
+        expect(result.release.htmlUrl).toBe("https://github.com/ROYIANS/momoki/releases/tag/desktop-v0.1.1");
     });
 
     it("maps failures to fallback reasons", async () => {
@@ -130,19 +130,19 @@ describe("fetchLatestDesktopRelease", () => {
 
     describe("cache", () => {
         const stored = (at: number, release: unknown, v = 1) => JSON.stringify({v, at, release});
-        const goodRelease = {tag: "desktop-v0.1.1", version: "0.1.1", prerelease: true, htmlUrl: "https://github.com/ROYIANS/Cuepoint/releases/tag/desktop-v0.1.1", assets: [{name: "a", size: 1, url: `${PREFIX}desktop-v0.1.1/a`}]};
+        const goodRelease = {tag: "desktop-v0.1.1", version: "0.1.1", prerelease: true, htmlUrl: "https://github.com/ROYIANS/momoki/releases/tag/desktop-v0.1.1", assets: [{name: "a", size: 1, url: `${PREFIX}desktop-v0.1.1/a`}]};
         const network = () => vi.fn(async () => json([item("desktop-v0.3.0")]));
 
         it("returns a fresh cached release without a request, and writes after a request", async () => {
             const fetchImpl = network();
-            const hit = memory({"cuepoint.landing.release": stored(NOW - HOUR, goodRelease)});
+            const hit = memory({"momoki.landing.release": stored(NOW - HOUR, goodRelease)});
             const result = await fetchLatestDesktopRelease(deps(fetchImpl as unknown as typeof fetch, hit));
             expect(result).toEqual({kind: "ok", release: goodRelease});
             expect(fetchImpl).not.toHaveBeenCalled();
 
             const empty = memory();
             await fetchLatestDesktopRelease(deps(fetchImpl as unknown as typeof fetch, empty));
-            expect(JSON.parse(empty.data.get("cuepoint.landing.release")!)).toMatchObject({v: 1, at: NOW, release: {tag: "desktop-v0.3.0"}});
+            expect(JSON.parse(empty.data.get("momoki.landing.release")!)).toMatchObject({v: 1, at: NOW, release: {tag: "desktop-v0.3.0"}});
         });
 
         it.each([
@@ -151,14 +151,14 @@ describe("fetchLatestDesktopRelease", () => {
             ["wrong envelope version", stored(NOW - HOUR, goodRelease, 2)],
             ["corrupt JSON", "{nope"],
             ["tampered asset url", stored(NOW - HOUR, {...goodRelease, assets: [{name: "a", size: 1, url: "https://evil.example/a"}]})],
-            ["asset url escaping the release path", stored(NOW - HOUR, {...goodRelease, assets: [{name: "a", size: 1, url: "https://github.com/ROYIANS/Cuepoint/releases/download/../../../evil/repo/releases/download/a"}]})],
-            ["release page url escaping the releases path", stored(NOW - HOUR, {...goodRelease, htmlUrl: "https://github.com/ROYIANS/Cuepoint/releases/%2e%2e/%2e%2e/evil"})],
+            ["asset url escaping the release path", stored(NOW - HOUR, {...goodRelease, assets: [{name: "a", size: 1, url: "https://github.com/ROYIANS/momoki/releases/download/../../../evil/repo/releases/download/a"}]})],
+            ["release page url escaping the releases path", stored(NOW - HOUR, {...goodRelease, htmlUrl: "https://github.com/ROYIANS/momoki/releases/%2e%2e/%2e%2e/evil"})],
             ["tampered release page url", stored(NOW - HOUR, {...goodRelease, htmlUrl: "https://evil.example/release"})],
             ["version not matching tag", stored(NOW - HOUR, {...goodRelease, version: "9.9.9"})],
             ["bad shape", stored(NOW - HOUR, {tag: 1})],
         ])("ignores a %s entry and refetches", async (_name, value) => {
             const fetchImpl = network();
-            const result = await fetchLatestDesktopRelease(deps(fetchImpl as unknown as typeof fetch, memory({"cuepoint.landing.release": value})));
+            const result = await fetchLatestDesktopRelease(deps(fetchImpl as unknown as typeof fetch, memory({"momoki.landing.release": value})));
             expect(fetchImpl).toHaveBeenCalledOnce();
             expect(result.kind === "ok" && result.release.tag).toBe("desktop-v0.3.0");
         });
@@ -185,7 +185,7 @@ describe("fetchStars", () => {
         const storage = memory();
         const fetchImpl = repo(42);
         expect(await fetchStars(deps(fetchImpl as unknown as typeof fetch, storage))).toBe(42);
-        expect((fetchImpl.mock.calls[0] as unknown as [string])[0]).toBe("https://api.github.com/repos/ROYIANS/Cuepoint");
+        expect((fetchImpl.mock.calls[0] as unknown as [string])[0]).toBe("https://api.github.com/repos/ROYIANS/momoki");
         const again = repo(1);
         expect(await fetchStars(deps(again as unknown as typeof fetch, storage))).toBe(42);
         expect(again).not.toHaveBeenCalled();
@@ -199,7 +199,7 @@ describe("fetchStars", () => {
     it("returns undefined for failures and an invalid cached value", async () => {
         expect(await fetchStars(deps((async () => new Response("{}", {status: 403})) as unknown as typeof fetch))).toBeUndefined();
         expect(await fetchStars(deps((async () => {throw new Error("x");}) as unknown as typeof fetch))).toBeUndefined();
-        const bad = memory({"cuepoint.landing.stars": JSON.stringify({v: 1, at: NOW, stars: -3})});
+        const bad = memory({"momoki.landing.stars": JSON.stringify({v: 1, at: NOW, stars: -3})});
         expect(await fetchStars(deps(repo(7) as unknown as typeof fetch, bad))).toBe(7);
     });
 

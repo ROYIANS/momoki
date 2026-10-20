@@ -61,7 +61,7 @@ export const SETTINGS_SECTIONS: (SettingsSection & { icon: Icon })[] = [
     },
     {
         id: "update", title: "关于与更新", icon: Info, rows: [
-            {id: "version", title: "当前版本", keywords: "Cuepoint 小光点 version"},
+            {id: "version", title: "当前版本", keywords: "Momoki 默默 version"},
             {
                 id: "check",
                 title: "检查更新",
@@ -70,7 +70,7 @@ export const SETTINGS_SECTIONS: (SettingsSection & { icon: Icon })[] = [
             },
             {id: "release", title: "发布页", description: "所有版本、更新说明与校验文件", keywords: "release GitHub"},
             {id: "privacy", title: "数据与隐私", description: "项目数据本地保存，检查更新仅请求公开发布信息"},
-            {id: "about", title: "更多关于 Cuepoint", description: "关于小光点"},
+            {id: "about", title: "更多关于 Momoki", description: "关于默默"},
         ]
     },
 ];

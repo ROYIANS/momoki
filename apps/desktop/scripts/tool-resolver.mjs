@@ -8,8 +8,8 @@ export const TOOL_VERSIONS = Object.freeze({node:'24.11.0',pnpm:'10.15.0',rust:'
 const localNodeBin = '/Users/xiaomengdao/.nvm/versions/node/v24.11.0/bin';
 
 export function resolveTools(environment=process.env, platform=process.platform) {
-    const mode=environment.CUEPOINT_TOOL_MODE ?? 'local';
-    if (!['local','hosted'].includes(mode)) throw new Error('CUEPOINT_TOOL_MODE must be local or hosted');
+    const mode=environment.MOMOKI_TOOL_MODE ?? 'local';
+    if (!['local','hosted'].includes(mode)) throw new Error('MOMOKI_TOOL_MODE must be local or hosted');
     const suffix=platform === 'win32' ? '.exe' : '';
     let tools,env;
     if (mode === 'local') {
@@ -21,8 +21,8 @@ export function resolveTools(environment=process.env, platform=process.platform)
             CARGO_TARGET_DIR:resolve(desktopRoot,'.tools/target'),PATH:[bin,localNodeBin,environment.PATH ?? ''].join(delimiter)};
     } else {
         tools=Object.fromEntries(['cargo','rustc','rustup','rustfmt','pnpm'].map(name=> {
-            const path=environment[`CUEPOINT_${name.toUpperCase()}_PATH`];
-            if (!path || !isAbsolute(path) || /codex-runtimes/.test(path)) throw new Error(`Provide an explicit approved CUEPOINT_${name.toUpperCase()}_PATH`);
+            const path=environment[`MOMOKI_${name.toUpperCase()}_PATH`];
+            if (!path || !isAbsolute(path) || /codex-runtimes/.test(path)) throw new Error(`Provide an explicit approved MOMOKI_${name.toUpperCase()}_PATH`);
             if (platform === 'win32' && /\.(?:cmd|bat)$/i.test(path)) throw new Error('Use pnpm.cjs or an executable; shell command shims are not accepted');
             return [name,path];
         }));
@@ -56,8 +56,8 @@ export function nativeTargetDirectory({env=process.env,target,profile='debug'}={
 }
 
 export function nativeProbePath(env=process.env) {
-    if (env.CUEPOINT_NATIVE_STORE_PROBE) return resolve(env.CUEPOINT_NATIVE_STORE_PROBE);
-    return nativeProbeOutputPath(resolveTools(env).env.CARGO_TARGET_DIR,env.CUEPOINT_RUST_TARGET);
+    if (env.MOMOKI_NATIVE_STORE_PROBE) return resolve(env.MOMOKI_NATIVE_STORE_PROBE);
+    return nativeProbeOutputPath(resolveTools(env).env.CARGO_TARGET_DIR,env.MOMOKI_RUST_TARGET);
 }
 
 export function nativeProbeOutputPath(targetDirectory,target,platform=process.platform) {

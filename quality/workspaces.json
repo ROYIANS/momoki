@@ -2,50 +2,50 @@
   "packages": [
     {
       "path": "apps/web",
-      "name": "@cuepoint/web",
+      "name": "@momoki/web",
       "sources": [
         "src"
       ],
       "dependencies": [
-        "@cuepoint/studio"
+        "@momoki/studio"
       ]
     },
     {
       "path": "apps/desktop",
-      "name": "@cuepoint/desktop",
+      "name": "@momoki/desktop",
       "sources": [
         "src"
       ],
       "dependencies": [
-        "@cuepoint/studio",
-        "@cuepoint/agent-providers"
+        "@momoki/studio",
+        "@momoki/agent-providers"
       ]
     },
     {
       "path": "apps/site",
-      "name": "@cuepoint/site",
+      "name": "@momoki/site",
       "sources": [
         "src"
       ],
       "dependencies": [
-        "@cuepoint/distribution"
+        "@momoki/distribution"
       ]
     },
     {
       "path": "packages/studio",
-      "name": "@cuepoint/studio",
+      "name": "@momoki/studio",
       "sources": [
         "src"
       ],
       "dependencies": [
-        "@cuepoint/distribution",
-        "@cuepoint/agent-core",
-        "@cuepoint/agent-providers"
+        "@momoki/distribution",
+        "@momoki/agent-core",
+        "@momoki/agent-providers"
       ]
     },
     {
       "path": "packages/distribution",
-      "name": "@cuepoint/distribution",
+      "name": "@momoki/distribution",
       "sources": [
         "src"
       ],
@@ -53,7 +53,7 @@
     },
     {
       "path": "packages/agent-core",
-      "name": "@cuepoint/agent-core",
+      "name": "@momoki/agent-core",
       "sources": [
         "src"
       ],
@@ -64,12 +64,12 @@
     },
     {
       "path": "packages/agent-providers",
-      "name": "@cuepoint/agent-providers",
+      "name": "@momoki/agent-providers",
       "sources": [
         "src"
       ],
       "dependencies": [
-        "@cuepoint/agent-core"
+        "@momoki/agent-core"
       ],
       "publicSources": {
         ".": "src/index.ts",
@@ -78,13 +78,13 @@
     },
     {
       "path": "examples/agent-todo",
-      "name": "@cuepoint/agent-todo",
+      "name": "@momoki/agent-todo",
       "sources": [
         "src"
       ],
       "dependencies": [
-        "@cuepoint/agent-core",
-        "@cuepoint/agent-providers"
+        "@momoki/agent-core",
+        "@momoki/agent-providers"
       ]
     }
   ]

@@ -7,7 +7,7 @@ const sourceRoot = fileURLToPath(new URL("../packages/studio/src", import.meta.u
 const landingRoot = fileURLToPath(new URL("../apps/site/src", import.meta.url));
 const distributionRoot = fileURLToPath(new URL("../packages/distribution/src", import.meta.url));
 // The only application modules the standalone entry may use: dependency-free ones.
-const APP_ALLOWED = new Set(["@cuepoint/distribution/analytics", "@cuepoint/distribution/brand", "@cuepoint/distribution/releases", "@cuepoint/distribution/platform"]);
+const APP_ALLOWED = new Set(["@momoki/distribution/analytics", "@momoki/distribution/brand", "@momoki/distribution/releases", "@momoki/distribution/platform"]);
 const PACKAGE_ALLOWED = /^(react|react-dom|react\/jsx-runtime|react-dom\/client|motion|motion\/.+)$/;
 
 function listFiles(directory: string): string[] {
@@ -24,7 +24,7 @@ function specifiers(source: string): string[] {
 
 function isAllowed(specifier: string): boolean {
     if (specifier.startsWith(".")) return true;
-    if (specifier.startsWith("@cuepoint/")) return APP_ALLOWED.has(specifier);
+    if (specifier.startsWith("@momoki/")) return APP_ALLOWED.has(specifier);
     return PACKAGE_ALLOWED.test(specifier);
 }
 
@@ -52,7 +52,7 @@ describe("landing source boundary", () => {
     // excluded by the allowlist above, so the landing closure cannot grow silently.
     it("keeps the landing-reachable shared release modules free of application, storage, router and Tauri imports", () => {
         const reachable = ["releases.ts", "platform.ts", "version.ts"];
-        const allowed = (item: string) => item.startsWith("./") || item === "@cuepoint/distribution/brand";
+        const allowed = (item: string) => item.startsWith("./") || item === "@momoki/distribution/brand";
         const bad = reachable.flatMap(name => {
             const file = join(distributionRoot, name);
             return specifiers(readFileSync(file, "utf8")).filter(item => !allowed(item)).map(item => `lib/desktopRelease/${name}: ${item}`);
@@ -63,7 +63,7 @@ describe("landing source boundary", () => {
 
     it("never lets the landing entry reach the settings-only download helper", () => {
         const files = listFiles(landingRoot).filter(file => /\.tsx?$/.test(file));
-        const bad = files.flatMap(file => specifiers(readFileSync(file, "utf8")).filter(item => item.includes("desktopRelease/download") || item.includes("@cuepoint/studio")).map(item => `${file}: ${item}`));
+        const bad = files.flatMap(file => specifiers(readFileSync(file, "utf8")).filter(item => item.includes("desktopRelease/download") || item.includes("@momoki/studio")).map(item => `${file}: ${item}`));
         expect(bad).toEqual([]);
         expect(APP_ALLOWED.has("@/lib/desktopRelease/download")).toBe(false);
     });

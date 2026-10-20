@@ -16,7 +16,7 @@ export function canDockPanel(width: number, space: {surfaceWidth: number; naviga
     return space.surfaceWidth >= space.navigationWidth + width + CONTENT_MIN_WIDTH;
 }
 
-const storageKey = (kind: string) => `cuepoint.panel-width.${kind}`;
+const storageKey = (kind: string) => `momoki.panel-width.${kind}`;
 
 /** A per-device convenience only: unavailable storage just means the default width. */
 export function readPanelWidth(kind: string | undefined): number | undefined {

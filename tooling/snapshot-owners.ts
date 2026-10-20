@@ -7,7 +7,7 @@ const studio = join(root, 'packages/studio/src');
 const policy = JSON.parse(readFileSync(join(root, 'quality/studio-ownership.json'), 'utf8')) as {snapshotSplitModules: Record<string, Record<string, string>>; snapshotSourceModules: Record<string, string>};
 const virtualPrefix = '\0snapshot-owner:';
 const actual = (target: string): string => {
-    if (target.startsWith('@cuepoint/')) return fileURLToPath(import.meta.resolve(target));
+    if (target.startsWith('@momoki/')) return fileURLToPath(import.meta.resolve(target));
     const path = join(studio, target.slice(2));
     return [path, path + '.ts', path + '.tsx', path + '.mjs'].find(existsSync) ?? path;
 };

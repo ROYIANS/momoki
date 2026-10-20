@@ -1,7 +1,7 @@
 import type {ContextPolicy} from "../models/context";
 import {type ChatModelMetadata, resolveModelMetadata} from "../../settings/models/modelMetadata";
 
-export {DEFAULT_CONTEXT_POLICY,normalizeContextPolicy} from '@cuepoint/agent-core';
+export {DEFAULT_CONTEXT_POLICY,normalizeContextPolicy} from '@momoki/agent-core';
 
 export function resolveContextCapacity(model: string, metadata?: ChatModelMetadata, providerId?: string, policy?: ContextPolicy) {
     const limit = resolveModelMetadata(model, metadata, providerId).contextWindow;

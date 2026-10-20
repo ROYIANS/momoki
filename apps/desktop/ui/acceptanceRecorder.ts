@@ -1,6 +1,6 @@
-import {MicrophoneRecorder, type RecorderDependencies, type RecordingState} from '@cuepoint/studio/reference/lib/audio/recorder';
-import {decodeAudioBlob} from '@cuepoint/studio/reference/lib/audio/engine';
-import {detectAudioMime} from '@cuepoint/studio/reference/lib/audio/mime';
+import {MicrophoneRecorder, type RecorderDependencies, type RecordingState} from '@momoki/studio/reference/lib/audio/recorder';
+import {decodeAudioBlob} from '@momoki/studio/reference/lib/audio/engine';
+import {detectAudioMime} from '@momoki/studio/reference/lib/audio/mime';
 import {assert, delay, type Evidence} from './acceptanceEvidence';
 
 interface CaptureObservation {

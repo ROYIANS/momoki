@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1040" viewBox="0 0 1600 1040" role="img" aria-labelledby="title desc">
-  <title id="title">Windows 首次打开 Cuepoint 的操作示意</title>
+  <title id="title">Windows 首次打开 Momoki 的操作示意</title>
   <desc id="desc">确认安装包来自官方 Release 后，点击更多信息，核对文件名，愿意继续体验时点击仍要运行。图为操作示意，不是系统截图。</desc>
   <style>
     text { font-family: 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; }
@@ -10,7 +10,7 @@
   </style>
   <rect width="1600" height="1040" fill="#f6f7f3"/>
   <rect x="0" y="0" width="1600" height="12" fill="#2d6654"/>
-  <text x="64" y="78" font-size="23" font-weight="700" letter-spacing="3" fill="#2d6654">CUEPOINT / 安装指南</text>
+  <text x="64" y="78" font-size="23" font-weight="700" letter-spacing="3" fill="#2d6654">MOMOKI / 安装指南</text>
   <rect x="1180" y="43" width="356" height="48" rx="24" fill="#e7ebe5"/>
   <text x="1358" y="74" text-anchor="middle" font-size="20" class="muted">操作示意 · 非系统截图</text>
   <text x="64" y="161" font-size="52" font-weight="700" class="ink">Windows · 首次打开</text>
@@ -38,7 +38,7 @@
   <text x="1500" y="369" text-anchor="middle" font-size="25" class="ui">×</text>
   <text x="862" y="465" font-size="22" class="ui">请核对应用文件名与下载来源</text>
   <text x="862" y="519" font-size="20" class="ui">应用：</text>
-  <text x="862" y="554" font-size="20" class="white">Cuepoint_&lt;版本号&gt;_windows_x64_setup.exe</text>
+  <text x="862" y="554" font-size="20" class="white">Momoki_&lt;版本号&gt;_windows_x64_setup.exe</text>
   <text x="862" y="598" font-size="21" class="ui">发布者：未知发布者</text>
   <rect x="1130" y="679" width="175" height="46" fill="#3584bd" stroke="#97bad5"/>
   <rect x="1120" y="669" width="195" height="66" rx="7" fill="none" stroke="#ffcf91" stroke-width="4"/>

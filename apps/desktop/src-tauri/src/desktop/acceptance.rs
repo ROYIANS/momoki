@@ -24,7 +24,7 @@ pub struct AcceptanceReply {
 }
 
 fn acceptance_root() -> Result<PathBuf> {
-    let root = std::env::var_os("CUEPOINT_ACCEPTANCE_ROOT")
+    let root = std::env::var_os("MOMOKI_ACCEPTANCE_ROOT")
         .ok_or_else(|| Error::new("acceptance", "Launch the finite packaged runner first"))?;
     let root = PathBuf::from(root);
     let canonical = paths::canonical_root(&root)?;

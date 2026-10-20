@@ -72,8 +72,8 @@ export type AssetChoice = {
 };
 
 // Names produced by apps/desktop/scripts/release-policy.mjs assetName():
-// `Cuepoint_${version}_${target.replaceAll('-','_')}${suffix}`, suffix .dmg / _setup.exe / .AppImage / .deb.
-const ASSET_NAME = /^Cuepoint_(\d+\.\d+\.\d+)_(macos_arm64\.dmg|macos_x64\.dmg|windows_x64_setup\.exe|linux_x64\.AppImage|linux_x64\.deb)$/;
+// `Momoki_${version}_${target.replaceAll('-','_')}${suffix}`, suffix .dmg / _setup.exe / .AppImage / .deb.
+const ASSET_NAME = /^Momoki_(\d+\.\d+\.\d+)_(macos_arm64\.dmg|macos_x64\.dmg|windows_x64_setup\.exe|linux_x64\.AppImage|linux_x64\.deb)$/;
 
 const KINDS: Record<string, Omit<AssetChoice, "asset">> = {
     "macos_arm64.dmg": {

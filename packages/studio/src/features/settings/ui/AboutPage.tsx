@@ -11,12 +11,12 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "../../../ui/dialog";
-import {GITHUB_URL, LOGO_SRC, PRODUCT_NAME_EN, PRODUCT_NAME_ZH, PRODUCT_TAGLINE,} from "@cuepoint/distribution/brand";
+import {GITHUB_URL, LOGO_SRC, PRODUCT_NAME_EN, PRODUCT_NAME_ZH, PRODUCT_TAGLINE, STUDIO_NAME_ZH, STUDIO_URL} from "@momoki/distribution/brand";
 import {isTauriRuntime} from "../../../platform/runtime/runtimeIdentity";
 import {downloadBlob, isPublishedSaveError} from "../../../platform/runtime/runtimeSave";
 
 const SPONSOR_IMAGE_SRC = "/brand/sponsor-wechat.jpg";
-const SPONSOR_IMAGE_NAME = "小光点-微信赞赏码.jpg";
+const SPONSOR_IMAGE_NAME = "默默-微信赞赏码.jpg";
 
 export function AboutPage() {
     const native = isTauriRuntime();
@@ -56,6 +56,7 @@ export function AboutPage() {
                 </div>
             </div>
             <p className="text-muted-foreground mt-4 max-w-xl text-sm leading-[22px]">{PRODUCT_TAGLINE}</p>
+            <p className="text-muted-foreground mt-2 text-sm">{PRODUCT_NAME_ZH} · <a href={STUDIO_URL} target="_blank" rel="noreferrer" className="hover:text-foreground underline-offset-4 hover:underline">{STUDIO_NAME_ZH}</a>出品</p>
 
             <a
                 href={GITHUB_URL}
@@ -70,10 +71,10 @@ export function AboutPage() {
             <section className="mt-8 border-y py-6" aria-labelledby="support-heading">
                 <div className="flex items-center gap-2">
                     <Heart className="size-4 text-muted-foreground" aria-hidden/>
-                    <h2 id="support-heading" className="text-base leading-6 font-semibold">支持小光点</h2>
+                    <h2 id="support-heading" className="text-base leading-6 font-semibold">支持默默</h2>
                 </div>
                 <p className="text-muted-foreground mt-3 max-w-xl text-sm leading-6">
-                    如果小光点帮你完成了创作，欢迎请开发者喝杯咖啡，支持项目继续打磨。感谢每一份使用、反馈与支持。
+                    如果默默帮你完成了创作，欢迎请开发者喝杯咖啡，支持项目继续打磨。感谢每一份使用、反馈与支持。
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">
                     <Button asChild>
@@ -88,7 +89,7 @@ export function AboutPage() {
                         </DialogTrigger>
                         <DialogContent className="flex flex-col overflow-hidden">
                             <DialogHeader>
-                                <DialogTitle>感谢支持小光点</DialogTitle>
+                                <DialogTitle>感谢支持默默</DialogTitle>
                                 <DialogDescription>使用微信扫一扫，或保存图片后在微信中识别赞赏码。</DialogDescription>
                             </DialogHeader>
                             <div className="min-h-0 overflow-y-auto">

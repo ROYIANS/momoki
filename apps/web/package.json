@@ -1,5 +1,5 @@
 {
-  "name": "@cuepoint/web",
+  "name": "@momoki/web",
   "version": "0.1.6",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "types": "node ../../tooling/build-agent-packages.mjs && tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@cuepoint/studio": "workspace:*"
+    "@momoki/studio": "workspace:*"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.2",

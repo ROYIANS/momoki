@@ -32,7 +32,7 @@ function browserLocks(): ThreadLockManager {
 
 /** Every audio batch, agent-owned or not, is excluded by its own lock: the conversation stays free to chat. */
 async function ownership<T>(batch: AudioGenerationBatch, action: () => Promise<T>, locks: ThreadLockManager = browserLocks()): Promise<T> {
-    return locks.request(`cuepoint.audio-batch.${batch.id}`, {ifAvailable: true}, async lock => {
+    return locks.request(`momoki.audio-batch.${batch.id}`, {ifAvailable: true}, async lock => {
         if (!lock) throw new Error("此批次正在另一个页面执行");
         return action();
     });

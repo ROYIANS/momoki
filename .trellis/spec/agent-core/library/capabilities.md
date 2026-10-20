@@ -4,7 +4,7 @@
 
 Read before changing the neutral registry, offered definitions, persisted tool
 binding metadata, resource grant ports or an actual host's effect admission.
-The public owner is `@cuepoint/agent-core`; concrete authority, storage,
+The public owner is `@momoki/agent-core`; concrete authority, storage,
 credentials and effects belong to each host. Follow [runtime](./runtime.md) and
 [the independent Todo host](../../agent-todo/cli/durable-host.md).
 

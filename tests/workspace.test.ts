@@ -23,9 +23,9 @@ describe("portable workspace references", () => {
     it("resolves the same identity against each device's own root, including Windows", () => {
         const ref = mediaWorkspaceRef(workspace, "project", "media");
         expect(ref.relativePath).toBe("projects/id-70726f6a656374/assets/id-6d65646961");
-        expect(resolveWorkspaceRef(ref, {workspaceId: workspace, absolutePath: "/first/Cuepoint/"})).toBe(`/first/Cuepoint/${ref.relativePath}`);
-        expect(resolveWorkspaceRef(ref, {workspaceId: workspace, absolutePath: "C:\\Users\\second\\Cuepoint"})).toBe(`C:/Users/second/Cuepoint/${ref.relativePath}`);
-        expect(JSON.stringify(ref)).not.toContain("Cuepoint");
+        expect(resolveWorkspaceRef(ref, {workspaceId: workspace, absolutePath: "/first/Momoki/"})).toBe(`/first/Momoki/${ref.relativePath}`);
+        expect(resolveWorkspaceRef(ref, {workspaceId: workspace, absolutePath: "C:\\Users\\second\\Momoki"})).toBe(`C:/Users/second/Momoki/${ref.relativePath}`);
+        expect(JSON.stringify(ref)).not.toContain("Momoki");
         const studio = mediaWorkspaceRef(workspace, STUDIO_LIBRARY_ID, "media");
         expect(studio.relativePath).toBe("studio/assets/id-6d65646961");
     });

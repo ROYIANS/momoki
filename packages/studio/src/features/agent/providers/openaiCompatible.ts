@@ -1,13 +1,13 @@
-import {authHeaders, chatCompletionsUrl} from '@cuepoint/agent-providers';
-import {readHttpJson} from '@cuepoint/agent-providers/http';
+import {authHeaders, chatCompletionsUrl} from '@momoki/agent-providers';
+import {readHttpJson} from '@momoki/agent-providers/http';
 import {requestOnce} from "../../../platform/http/requestBoundary";
-import {isReadAbort} from "@cuepoint/agent-providers/http";
-import {normalizeBaseUrl} from "@cuepoint/agent-providers/http";
-import {redactCredentials} from "@cuepoint/agent-providers/http";
+import {isReadAbort} from "@momoki/agent-providers/http";
+import {normalizeBaseUrl} from "@momoki/agent-providers/http";
+import {redactCredentials} from "@momoki/agent-providers/http";
 import {type ChatModelMetadata, collectModelMetadata, parseModelMetadata} from "../../settings/models/modelMetadata";
 import {connectorProbeFetch} from "../../../platform/runtime/runtimeFetch";
 
-export {normalizeBaseUrl} from "@cuepoint/agent-providers/http";
+export {normalizeBaseUrl} from "@momoki/agent-providers/http";
 
 export function modelsUrl(baseUrl: string): string {
     return `${normalizeBaseUrl(baseUrl)}/models`;

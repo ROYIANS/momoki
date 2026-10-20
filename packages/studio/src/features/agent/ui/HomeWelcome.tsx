@@ -10,7 +10,7 @@ import {useAgentTopicNavigation} from "./AgentTopicNavigation";
 import {formatRelative} from "./timeGroups";
 import type {ChatThread} from "../models/chat";
 import type {Id} from "../../../platform/identity";
-import {LOGO_SRC} from "@cuepoint/distribution/brand";
+import {LOGO_SRC} from "@momoki/distribution/brand";
 
 /**
  * Functional entry point with the existing composer and recent work.

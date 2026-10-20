@@ -478,7 +478,7 @@ async fn product_binary_write(
     trusted(&window)?;
     let metadata = request
         .headers()
-        .get("x-cuepoint-binary")
+        .get("x-momoki-binary")
         .and_then(|v| v.to_str().ok())
         .ok_or_else(|| Error::new("invalid", "Missing managed byte metadata"))?;
     if metadata.len() > 2048 {
@@ -1334,7 +1334,7 @@ fn handle(
         Action::Create {} | Action::Open {} => {
             let create = matches!(envelope.action, Action::Create {});
             let selection = if create {
-                select_fresh(window, "创建全新工作区目录", "cuepoint-workspace")?
+                select_fresh(window, "创建全新工作区目录", "momoki-workspace")?
             } else {
                 select_path(
                     window
@@ -1382,7 +1382,7 @@ fn handle(
                 return Ok(Value::Canceled);
             };
             checked(bridge, generation, cancel)?;
-            let Some(root) = select_fresh(window, "恢复到全新工作区目录", "cuepoint-restored")?
+            let Some(root) = select_fresh(window, "恢复到全新工作区目录", "momoki-restored")?
             else {
                 return Ok(Value::Canceled);
             };
@@ -1697,7 +1697,7 @@ fn handle(
         )?)),
         Action::Backup {} => {
             let _selected_worker = worker(bridge, generation)?;
-            let Some(destination) = select_fresh(window, "备份到全新目录", "cuepoint-backup")?
+            let Some(destination) = select_fresh(window, "备份到全新目录", "momoki-backup")?
             else {
                 return Ok(Value::Canceled);
             };
@@ -1959,7 +1959,7 @@ pub fn run() {
     use crate::runtime_services::*;
     let context = tauri::generate_context!();
     let singleton = crate::desktop_lifecycle::native::preflight(&context.config().identifier)
-        .expect("Acquire Cuepoint application ownership");
+        .expect("Acquire Momoki application ownership");
     let lifecycle = Arc::new(crate::desktop_lifecycle::Lifecycle::default());
     let services = Arc::new(RuntimeServices::with_gate(lifecycle.effects.clone()));
     let builder = tauri::Builder::default()
@@ -2035,7 +2035,7 @@ pub fn run() {
                     tauri::WindowEvent::CloseRequested { api, .. } => {
                         api.prevent_close();
                         if window.hide().is_err() {
-                            eprintln!("Cuepoint: unable to hide existing window");
+                            eprintln!("Momoki: unable to hide existing window");
                         }
                         crate::desktop_lifecycle::native::window_state(window);
                     }
@@ -2128,14 +2128,14 @@ pub fn run() {
     ]);
     builder
         .build(context)
-        .expect("Build Cuepoint native host")
+        .expect("Build Momoki native host")
         .run(|app, event| match event {
             tauri::RunEvent::ExitRequested { api, code, .. } => {
                 let phase = app
                     .state::<Arc<crate::desktop_lifecycle::Lifecycle>>()
                     .phase();
                 eprintln!(
-                    "Cuepoint lifecycle: native exit requested code={code:?} phase={phase:?}"
+                    "Momoki lifecycle: native exit requested code={code:?} phase={phase:?}"
                 );
                 if phase != crate::desktop_lifecycle::Phase::Exiting {
                     api.prevent_exit();
@@ -2143,7 +2143,7 @@ pub fn run() {
                 }
             }
             tauri::RunEvent::Exit => {
-                eprintln!("Cuepoint lifecycle: native event loop exited");
+                eprintln!("Momoki lifecycle: native event loop exited");
             }
             #[cfg(target_os = "macos")]
             tauri::RunEvent::Reopen { .. } => crate::desktop_lifecycle::native::show(app),
@@ -2159,7 +2159,7 @@ mod tests {
         use crate::desktop_lifecycle::{Action, DrainOutcome, Lifecycle};
         use crate::full_product_store::protocol::{Request, Session};
         let root = std::env::temp_dir().join(format!(
-            "cuepoint-lifecycle-session-{}",
+            "momoki-lifecycle-session-{}",
             uuid::Uuid::new_v4()
         ));
         let worker = StorageWorker::product(&root, true, Hooks::default()).unwrap();
@@ -2231,7 +2231,7 @@ mod tests {
     }
     #[test]
     fn typed_baseline_diagnostic_contains_live_expected_requested_without_writing() {
-        let root = std::env::temp_dir().join(format!("cuepoint-conflict-{}", uuid::Uuid::new_v4()));
+        let root = std::env::temp_dir().join(format!("momoki-conflict-{}", uuid::Uuid::new_v4()));
         let worker = StorageWorker::create(&root, Hooks::default()).unwrap();
         worker
             .run(Job::SaveProject(Project {
@@ -2305,7 +2305,7 @@ mod tests {
     }
     #[test]
     fn exclusive_export_never_overwrites_even_empty_files() {
-        let root = std::env::temp_dir().join(format!("cuepoint-export-{}", uuid::Uuid::new_v4()));
+        let root = std::env::temp_dir().join(format!("momoki-export-{}", uuid::Uuid::new_v4()));
         fs::create_dir(&root).unwrap();
         let path = root.join("output");
         fs::write(&path, []).unwrap();
@@ -2321,7 +2321,7 @@ mod tests {
     }
     #[test]
     fn retained_export_final_flush_failure_preserves_published_file_and_warning() {
-        let root = std::env::temp_dir().join(format!("cuepoint-export-{}", uuid::Uuid::new_v4()));
+        let root = std::env::temp_dir().join(format!("momoki-export-{}", uuid::Uuid::new_v4()));
         fs::create_dir(&root).unwrap();
         let path = root.join("output");
         let error = publish_bytes_with_flush(
@@ -2345,7 +2345,7 @@ mod tests {
     }
     #[test]
     fn retained_export_flush_failure_never_deletes_a_stage_with_unowned_links() {
-        let root = std::env::temp_dir().join(format!("cuepoint-export-{}", uuid::Uuid::new_v4()));
+        let root = std::env::temp_dir().join(format!("momoki-export-{}", uuid::Uuid::new_v4()));
         fs::create_dir(&root).unwrap();
         let path = root.join("output");
         let alias = root.join("unowned-link");
@@ -2433,7 +2433,7 @@ mod tests {
         use std::sync::mpsc;
         use std::time::Duration;
         let root =
-            std::env::temp_dir().join(format!("cuepoint-bridge-close-{}", uuid::Uuid::new_v4()));
+            std::env::temp_dir().join(format!("momoki-bridge-close-{}", uuid::Uuid::new_v4()));
         let (hit_tx, hit_rx) = mpsc::channel();
         let (release_tx, release_rx) = mpsc::channel();
         let release = Mutex::new(release_rx);

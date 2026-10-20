@@ -2,7 +2,7 @@
 
 ## Scope
 
-`packages/studio` owns the shared Cuepoint product used by browser and desktop. Existing canonical product contracts remain under [frontend](../../frontend/index.md); this index selects them without duplicating their content. Application boundaries are established; Studio sources follow [vertical feature ownership](../../frontend/feature-organization.md). Agent execution and protocols use the public [core](../../agent-core/library/index.md) and [provider](../../agent-providers/library/index.md) packages; Studio owns their product bindings and creative behavior.
+`packages/studio` owns the shared Momoki product used by browser and desktop. Existing canonical product contracts remain under [frontend](../../frontend/index.md); this index selects them without duplicating their content. Application boundaries are established; Studio sources follow [vertical feature ownership](../../frontend/feature-organization.md). Agent execution and protocols use the public [core](../../agent-core/library/index.md) and [provider](../../agent-providers/library/index.md) packages; Studio owns their product bindings and creative behavior.
 
 ## Pre-Development Checklist
 

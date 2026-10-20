@@ -2,7 +2,7 @@ import {injectSteerInputs} from "../commands/agentSteer";
 import {prepareThreadActivityKey} from "../commands/threadActivity";
 import {createMcpRunRegistry} from "../mcp/runtime/runRegistry";
 import {createId} from '../../../platform/identity';
-import {executeRun,toolMetadataMatches,type RuntimeHost,type RoundDetail} from '@cuepoint/agent-core';
+import {executeRun,toolMetadataMatches,type RuntimeHost,type RoundDetail} from '@momoki/agent-core';
 import type {ProductStore,StoreTx,TableScope} from '../../../platform/storage/types';
 import {StorageError} from '../../../platform/storage/errors';
 import {getOfferedToolNames,refreshRunToolLoading,toolNamesForCall} from './toolLoading';
@@ -24,7 +24,7 @@ import {checkpointAgentRun,finishAgentRun,recordAgentModelMetrics} from '../comm
 import {streamChatCompletions} from '../providers/chatStream';
 import {withExecutionOwnership,withOwnedExecution,assertThreadOwnership,type ThreadOwnership} from './runOwnership';
 import {createRunCredentials} from './runCredentials';
-import {responseRoundMatches} from '@cuepoint/agent-providers';
+import {responseRoundMatches} from '@momoki/agent-providers';
 import {runtimeFetchFor} from '../../../platform/runtime/runtimeFetch';
 import type {RuntimeExecutionFeedback} from './executionFeedback';
 

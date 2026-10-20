@@ -1,5 +1,5 @@
 import {describe, expect, it, vi} from "vitest";
-import {estimateTokens} from "@cuepoint/agent-core";
+import {estimateTokens} from "@momoki/agent-core";
 import {db} from "@/platform/product/store";
 import {createChatThread} from "@/features/agent/commands/chat";
 import {beginAgentRun} from "@/features/agent/commands/agentRuns";

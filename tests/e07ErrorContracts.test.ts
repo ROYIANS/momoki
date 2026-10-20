@@ -1,6 +1,6 @@
 import {afterEach, describe, expect, it, vi} from "vitest";
 import {DebouncedDraftController, flushPendingDrafts, registerPendingDraft} from "@/platform/product/drafts";
-import {createRunWriter} from "@cuepoint/agent-core";
+import {createRunWriter} from "@momoki/agent-core";
 import {parseReferenceFile} from "@/features/references/documents/import";
 import {streamResponses} from "@/features/agent/providers/responsesStream";
 

@@ -168,7 +168,7 @@ describe("durable reviewed audio batches", () => {
         try {
             await vi.waitFor(() => expect(releases).toHaveLength(2)); releases[0]();
             await vi.waitFor(() => expect(pauseFailed).toBe(true));
-            let acquired = false; await f.locks.request(`cuepoint.audio-batch.${batch.id}`, {ifAvailable: true}, async lock => {acquired = !!lock;});
+            let acquired = false; await f.locks.request(`momoki.audio-batch.${batch.id}`, {ifAvailable: true}, async lock => {acquired = !!lock;});
             expect(acquired).toBe(false); expect(fetchImpl).toHaveBeenCalledTimes(2);
         } finally {releases.forEach(release => release()); await running; spy.mockRestore();}
         expect(fetchImpl).toHaveBeenCalledTimes(2); expect(await db.audioTakes.count()).toBe(1);
@@ -176,7 +176,7 @@ describe("durable reviewed audio batches", () => {
     it("holds an exclusive batch lock and refuses cross-tab duplicate dispatch", async () => {
         const f = await fixture(2), batch = await ready(f), held = f.locks;
         const fetchImpl = vi.fn<typeof fetch>();
-        await held.request(`cuepoint.audio-batch.${batch.id}`, {ifAvailable: true}, async () => {
+        await held.request(`momoki.audio-batch.${batch.id}`, {ifAvailable: true}, async () => {
             await expect(startAudioGenerationBatch(f.project.id, batch.id, {locks: held, fetchImpl, decode})).rejects.toThrow("另一个");
         });
         expect(fetchImpl).not.toHaveBeenCalled();

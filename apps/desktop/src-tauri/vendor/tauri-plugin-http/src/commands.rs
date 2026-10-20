@@ -26,7 +26,7 @@ const HTTP_USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_P
 /// configure `maxRedirections`.
 const DEFAULT_MAX_REDIRECTIONS: usize = 10;
 
-// Cuepoint patch: closing a response must interrupt a body read that holds an Arc.
+// Momoki patch: closing a response must interrupt a body read that holds an Arc.
 // Mutex removes the original unsafe alias; Notify wakes a pending read on close.
 struct ReqwestResponse {
     response: Mutex<Option<reqwest::Response>>,
@@ -780,5 +780,5 @@ mod tests {
 }
 
 #[cfg(test)]
-#[path = "cuepoint_cancel_tests.rs"]
-mod cuepoint_cancel_tests;
+#[path = "momoki_cancel_tests.rs"]
+mod momoki_cancel_tests;

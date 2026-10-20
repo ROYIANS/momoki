@@ -1,7 +1,7 @@
-import type {WorkspaceId, WorkspaceRef} from '@cuepoint/studio/reference/lib/workspace';
-import {mediaWorkspaceRef, resolveWorkspaceRef, workspaceId} from '@cuepoint/studio/reference/lib/workspace';
+import type {WorkspaceId, WorkspaceRef} from '@momoki/studio/reference/lib/workspace';
+import {mediaWorkspaceRef, resolveWorkspaceRef, workspaceId} from '@momoki/studio/reference/lib/workspace';
 
-export const FORMAT = 'cuepoint.native-prototype.v1';
+export const FORMAT = 'momoki.native-prototype.v1';
 export const SCHEMA = 1;
 export const APPLICATION_ID = 0x43555031;
 export const CHUNK = 256 * 1024;
@@ -49,7 +49,7 @@ export interface ImportRequest {
 }
 
 export interface BackupManifest {
-    format: 'cuepoint.native-backup.v1';
+    format: 'momoki.native-backup.v1';
     schema: 1;
     workspaceId: WorkspaceId;
     database: { size: number; hash: string };
@@ -206,7 +206,7 @@ export function parseCommand(value: unknown): Command {
 
 export function parseBackup(value: unknown): BackupManifest {
     const v = record(value, ['format', 'schema', 'workspaceId', 'database', 'assets']);
-    if (v.format !== 'cuepoint.native-backup.v1' || v.schema !== SCHEMA) throw new Error('备份版本不支持');
+    if (v.format !== 'momoki.native-backup.v1' || v.schema !== SCHEMA) throw new Error('备份版本不支持');
     const id = workspaceId(text(v.workspaceId, 100));
     if (id === 'browser-local') throw new Error('备份工作区标识无效');
     const database = record(v.database, ['size', 'hash']);
@@ -223,7 +223,7 @@ export function parseBackup(value: unknown): BackupManifest {
         return {id: assetId, path, size: integer(a.size, true), hash: digest(a.hash)};
     });
     return {
-        format: 'cuepoint.native-backup.v1',
+        format: 'momoki.native-backup.v1',
         schema: 1,
         workspaceId: id,
         database: {size: integer(database.size, true), hash: digest(database.hash)},

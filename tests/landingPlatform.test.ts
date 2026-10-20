@@ -1,14 +1,14 @@
 import {describe, expect, it} from "vitest";
-import {detectPlatform, pickAssets, type DetectedPlatform, type NavigatorInfo} from "@cuepoint/distribution/platform";
-import type {LatestDesktopRelease} from "@cuepoint/distribution/releases";
+import {detectPlatform, pickAssets, type DetectedPlatform, type NavigatorInfo} from "@momoki/distribution/platform";
+import type {LatestDesktopRelease} from "@momoki/distribution/releases";
 
-const BASE = "https://github.com/ROYIANS/Cuepoint/releases/download/desktop-v0.1.1/";
+const BASE = "https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.1/";
 const NAMES = [
-    "Cuepoint_0.1.1_macos_arm64.dmg", "Cuepoint_0.1.1_macos_x64.dmg", "Cuepoint_0.1.1_windows_x64_setup.exe",
-    "Cuepoint_0.1.1_linux_x64.deb", "Cuepoint_0.1.1_linux_x64.AppImage", "SHA256SUMS", "release-manifest.json",
+    "Momoki_0.1.1_macos_arm64.dmg", "Momoki_0.1.1_macos_x64.dmg", "Momoki_0.1.1_windows_x64_setup.exe",
+    "Momoki_0.1.1_linux_x64.deb", "Momoki_0.1.1_linux_x64.AppImage", "SHA256SUMS", "release-manifest.json",
 ];
 const release = (names = NAMES, version = "0.1.1"): LatestDesktopRelease => ({
-    tag: `desktop-v${version}`, version, prerelease: true, htmlUrl: `https://github.com/ROYIANS/Cuepoint/releases/tag/desktop-v${version}`,
+    tag: `desktop-v${version}`, version, prerelease: true, htmlUrl: `https://github.com/ROYIANS/momoki/releases/tag/desktop-v${version}`,
     assets: names.map(name => ({name, size: 10, url: BASE + name})),
 });
 const plat = (os: DetectedPlatform["os"], arch: DetectedPlatform["arch"], mobile = false): DetectedPlatform => ({os, arch, mobile});
@@ -61,39 +61,39 @@ describe("detectPlatform", () => {
 
 describe("pickAssets", () => {
     it("recommends the exact installer per platform", () => {
-        expect(pickAssets(release(), plat("macos", "arm64")).primary?.asset.name).toBe("Cuepoint_0.1.1_macos_arm64.dmg");
-        expect(pickAssets(release(), plat("macos", "x64")).primary?.asset.name).toBe("Cuepoint_0.1.1_macos_x64.dmg");
-        expect(pickAssets(release(), plat("windows", "x64")).primary?.asset.name).toBe("Cuepoint_0.1.1_windows_x64_setup.exe");
+        expect(pickAssets(release(), plat("macos", "arm64")).primary?.asset.name).toBe("Momoki_0.1.1_macos_arm64.dmg");
+        expect(pickAssets(release(), plat("macos", "x64")).primary?.asset.name).toBe("Momoki_0.1.1_macos_x64.dmg");
+        expect(pickAssets(release(), plat("windows", "x64")).primary?.asset.name).toBe("Momoki_0.1.1_windows_x64_setup.exe");
         const linux = pickAssets(release(), plat("linux", "x64"));
-        expect(linux.primary?.asset.name).toBe("Cuepoint_0.1.1_linux_x64.AppImage");
-        expect(names(linux.alternatives)).toContain("Cuepoint_0.1.1_linux_x64.deb");
+        expect(linux.primary?.asset.name).toBe("Momoki_0.1.1_linux_x64.AppImage");
+        expect(names(linux.alternatives)).toContain("Momoki_0.1.1_linux_x64.deb");
         expect(linux.primary?.event).toBe("download-linux-x64-appimage");
     });
 
     it("never treats SHA256SUMS or the manifest as installers", () => {
-        const all = [...names([...pickAssets(release(), plat("windows", "x64")).alternatives]), "Cuepoint_0.1.1_windows_x64_setup.exe"];
+        const all = [...names([...pickAssets(release(), plat("windows", "x64")).alternatives]), "Momoki_0.1.1_windows_x64_setup.exe"];
         expect(all).not.toContain("SHA256SUMS");
         expect(all).not.toContain("release-manifest.json");
     });
 
     it("matches names strictly: version must equal the tag, no extra prefix/suffix, case-sensitive", () => {
         const bad = release([
-            "Cuepoint_0.1.0_macos_arm64.dmg", "xCuepoint_0.1.1_macos_x64.dmg", "Cuepoint_0.1.1_windows_x64_setup.exe.sig",
-            "cuepoint_0.1.1_linux_x64.deb", "Cuepoint_0.1.1_linux_x64.appimage", "Cuepoint_0.1.1_macos_arm64.dmg.zip",
+            "Momoki_0.1.0_macos_arm64.dmg", "xMomoki_0.1.1_macos_x64.dmg", "Momoki_0.1.1_windows_x64_setup.exe.sig",
+            "momoki_0.1.1_linux_x64.deb", "Momoki_0.1.1_linux_x64.appimage", "Momoki_0.1.1_macos_arm64.dmg.zip",
         ]);
         for (const p of [plat("macos", "arm64"), plat("macos", "x64"), plat("windows", "x64"), plat("linux", "x64")]) {
             const pick = pickAssets(bad, p);
             expect(pick.primary).toBeUndefined();
             expect(pick.alternatives).toEqual([]);
         }
-        expect(pickAssets(release(["Cuepoint_0.1.1_macos_arm64.dmg"], "0.1.2"), plat("macos", "arm64")).primary).toBeUndefined();
+        expect(pickAssets(release(["Momoki_0.1.1_macos_arm64.dmg"], "0.1.2"), plat("macos", "arm64")).primary).toBeUndefined();
     });
 
     it("offers both dmg files when the Mac chip is unknown", () => {
         const pick = pickAssets(release(), plat("macos", "unknown"));
         expect(pick.ambiguous).toBe(true);
         expect(pick.primary).toBeUndefined();
-        expect(names(pick.alternatives).slice(0, 2)).toEqual(["Cuepoint_0.1.1_macos_arm64.dmg", "Cuepoint_0.1.1_macos_x64.dmg"]);
+        expect(names(pick.alternatives).slice(0, 2)).toEqual(["Momoki_0.1.1_macos_arm64.dmg", "Momoki_0.1.1_macos_x64.dmg"]);
     });
 
     it("does not recommend x64 packages to ARM Windows or Linux", () => {
@@ -115,9 +115,9 @@ describe("pickAssets", () => {
     });
 
     it("leaves primary empty when that platform's file is missing", () => {
-        const pick = pickAssets(release(["Cuepoint_0.1.1_macos_arm64.dmg"]), plat("windows", "x64"));
+        const pick = pickAssets(release(["Momoki_0.1.1_macos_arm64.dmg"]), plat("windows", "x64"));
         expect(pick.primary).toBeUndefined();
         expect(pick.unsupportedReason).toBeUndefined();
-        expect(names(pick.alternatives)).toEqual(["Cuepoint_0.1.1_macos_arm64.dmg"]);
+        expect(names(pick.alternatives)).toEqual(["Momoki_0.1.1_macos_arm64.dmg"]);
     });
 });

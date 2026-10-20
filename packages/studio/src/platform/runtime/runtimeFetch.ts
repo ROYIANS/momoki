@@ -5,7 +5,7 @@ import {
     type RuntimeHttpPurpose,
     type RuntimeHttpScope
 } from "../product/httpPolicy";
-import {cancelBody, readResponseBytes, utf8Bytes} from "@cuepoint/agent-providers/http";
+import {cancelBody, readResponseBytes, utf8Bytes} from "@momoki/agent-providers/http";
 import type {ClientOptions} from "@tauri-apps/plugin-http";
 
 const MAX_BUFFERED_UPLOAD_BYTES = 20 * 1024 * 1024;

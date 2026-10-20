@@ -42,7 +42,7 @@ async function digest(binary: BinaryContent): Promise<string> {
 
 // The generic browser suite does not claim native proof. Explicit native acceptance
 // requires the actual pinned Rust probe and fails when it is absent.
-describe.skipIf(process.env.CUEPOINT_NATIVE_STORAGE_ACCEPTANCE !== "1")("actual native product binary carriers", () => {
+describe.skipIf(process.env.MOMOKI_NATIVE_STORAGE_ACCEPTANCE !== "1")("actual native product binary carriers", () => {
     beforeAll(() => {expect(existsSync(nativeProbePath), "Build the pinned native product_store_probe before native acceptance").toBe(true);});
     it("persists >32MiB actual bytes, file material and immutable setting snapshots independently of their import source", async () => {
         const native = await createNativeProbe();current = native;

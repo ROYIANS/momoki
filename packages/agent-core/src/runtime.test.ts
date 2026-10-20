@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import {createCapabilityRegistry, executeRun, type RuntimeHost, type RuntimeRun, type RuntimeCall, type ModelResult, type RuntimeEvent } from '@cuepoint/agent-core';
-import type { ToolContext, ToolDefinition } from '@cuepoint/agent-core';
-import type { AgentRunOutput } from '@cuepoint/agent-core';
+import {createCapabilityRegistry, executeRun, type RuntimeHost, type RuntimeRun, type RuntimeCall, type ModelResult, type RuntimeEvent } from '@momoki/agent-core';
+import type { ToolContext, ToolDefinition } from '@momoki/agent-core';
+import type { AgentRunOutput } from '@momoki/agent-core';
 type Run = RuntimeRun & {
     opaque?: string;
 };

@@ -42,7 +42,7 @@ impl NativeSecretStore {
         #[cfg(not(windows))]
         let modifiers: Option<HashMap<&str, &str>> = None;
         self.store
-            .build("dev.cuepoint.mcp.v1", key, modifiers.as_ref())
+            .build("dev.momoki.mcp.v1", key, modifiers.as_ref())
             .map_err(|_| McpError::VaultUnavailable)
     }
 }

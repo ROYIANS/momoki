@@ -6,8 +6,8 @@ afterEach(() => vi.unstubAllGlobals());
 describe("runtime window presentation", () => {
     it("keeps browser layout even with an incidental macOS chrome marker", () => {
         vi.stubGlobal("window", {
-            __CUEPOINT_WINDOW_CHROME__: {version: 1, kind: "macos-overlay"},
-            __CUEPOINT_PRODUCT_PROFILE__: {version: 1, id: "native-looking", storage: "sqlite"},
+            __MOMOKI_WINDOW_CHROME__: {version: 1, kind: "macos-overlay"},
+            __MOMOKI_PRODUCT_PROFILE__: {version: 1, id: "native-looking", storage: "sqlite"},
         });
         expect(getWindowChromeKind()).toBe("browser");
     });
@@ -21,8 +21,8 @@ describe("runtime window presentation", () => {
         const invoke = vi.fn(() => {throw new Error("Unexpected native request");});
         vi.stubGlobal("window", {
             __TAURI_INTERNALS__: {invoke},
-            __CUEPOINT_WINDOW_CHROME__: Object.freeze({version: 1, kind: "macos-overlay"}),
-            __CUEPOINT_PRODUCT_PROFILE__: {version: 1, id: "native", storage},
+            __MOMOKI_WINDOW_CHROME__: Object.freeze({version: 1, kind: "macos-overlay"}),
+            __MOMOKI_PRODUCT_PROFILE__: {version: 1, id: "native", storage},
         });
         expect(getWindowChromeKind()).toBe("macos-overlay");
         expect(invoke).not.toHaveBeenCalled();
@@ -31,7 +31,7 @@ describe("runtime window presentation", () => {
     it.each([undefined, {version: 1, kind: "native"}, {version: 2, kind: "macos-overlay"}])(
         "does not reserve macOS space for ordinary or unknown native chrome (%j)", chrome => {
             const invoke = vi.fn(() => {throw new Error("Unexpected native request");});
-            vi.stubGlobal("window", {__TAURI_INTERNALS__: {invoke}, __CUEPOINT_WINDOW_CHROME__: chrome});
+            vi.stubGlobal("window", {__TAURI_INTERNALS__: {invoke}, __MOMOKI_WINDOW_CHROME__: chrome});
             expect(getWindowChromeKind()).toBe("native");
             expect(invoke).not.toHaveBeenCalled();
         },

@@ -85,7 +85,7 @@ describe("generation batches run beside the conversation", () => {
     it("pause and edits still work while a turn holds the conversation lock", async () => {
         const f = await fixture(), {manager, held} = namedLocks();
         await db.agentGenerationBatches.update(f.id, {status: "running"});
-        held.add(`cuepoint:agent:${f.thread.id}`); // a chat run owns the conversation
+        held.add(`momoki:agent:${f.thread.id}`); // a chat run owns the conversation
         await stopGenerationBatch(f.id, f.thread.id, "pause", manager);
         expect(await status(f.id, f.thread.id)).toBe("paused");
         let wrote = false;

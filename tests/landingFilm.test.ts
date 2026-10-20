@@ -2,7 +2,7 @@
 import {act, createElement, useRef} from "react";
 import {createRoot, type Root} from "react-dom/client";
 import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
-import {GITHUB_URL} from "@cuepoint/distribution/brand";
+import {GITHUB_URL} from "@momoki/distribution/brand";
 import {Landing} from "../apps/site/src/Landing";
 import {SCENE_COPY} from "../apps/site/src/content/copy";
 import {resolveFilmMode, readSkipPreference, writeSkipPreference, SKIP_FILM_KEY} from "../apps/site/src/film/mode";
@@ -82,7 +82,7 @@ describe("film mode", () => {
     it("remembers the skip choice and survives storage failures", () => {
         const data = new Map<string, string>();
         const storage = {getItem: (key: string) => data.get(key) ?? null, setItem: (key: string, value: string) => void data.set(key, value), removeItem: (key: string) => void data.delete(key)};
-        expect(SKIP_FILM_KEY).toBe("cuepoint.landing.skipFilm");
+        expect(SKIP_FILM_KEY).toBe("momoki.landing.skipFilm");
         expect(readSkipPreference(storage)).toBe(false);
         writeSkipPreference(true, storage);
         expect(readSkipPreference(storage)).toBe(true);

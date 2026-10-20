@@ -1,4 +1,4 @@
-import {GITHUB_URL} from "@cuepoint/distribution/brand";
+import {GITHUB_URL} from "@momoki/distribution/brand";
 import {HERO_NOTE, ONLINE_NOTES, OPEN_SOURCE, SCENE_COPY} from "../content/copy";
 import {FAQ} from "../content/faq";
 import {DownloadCard} from "../download/DownloadCard";

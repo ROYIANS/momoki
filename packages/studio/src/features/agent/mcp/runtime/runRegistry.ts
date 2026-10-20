@@ -1,4 +1,4 @@
-import {createCapabilityRegistry, type ToolBindingIdentity, type ToolDefinition} from "@cuepoint/agent-core";
+import {createCapabilityRegistry, type ToolBindingIdentity, type ToolDefinition} from "@momoki/agent-core";
 import type {ProductStore} from "../../../../platform/storage/types";
 import {db as productDb} from "../../../../platform/product/store";
 import type {AgentToolPreview} from "../../models/agent";

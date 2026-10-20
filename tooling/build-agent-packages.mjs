@@ -25,7 +25,7 @@ export async function buildAgentPackages() {
         for (const target of Object.values(manifest.exports)) for (const file of [target.import,target.types]) {
             if (!outputs[`${row.path}/${file.slice(2)}`]) throw new Error(`Missing built public export: ${row.name} ${file}`);
         }
-        await writeFile(join(root,row.path,'dist/.cuepoint-build.json'),JSON.stringify({inputs,outputs},null,2)+'\n');
+        await writeFile(join(root,row.path,'dist/.momoki-build.json'),JSON.stringify({inputs,outputs},null,2)+'\n');
     }
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await buildAgentPackages();

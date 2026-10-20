@@ -1,7 +1,7 @@
 ---
 name: media-intake
 description: Review a user-selected video directory, confirm a bounded selection, and import source videos with thumbnails into the current video project.
-compatibility: Cuepoint desktop on macOS or Windows, a bound video project, and separately enabled desktop-media tools.
+compatibility: Momoki desktop on macOS or Windows, a bound video project, and separately enabled desktop-media tools.
 metadata:
   purpose: video-project-intake
 ---

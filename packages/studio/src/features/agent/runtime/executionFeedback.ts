@@ -1,5 +1,5 @@
 import type {AgentRun, AgentRunOutput} from '../models/agent';
-import type {RuntimeEvent} from '@cuepoint/agent-core';
+import type {RuntimeEvent} from '@momoki/agent-core';
 
 export type ExecutionFeedbackPhase = 'preparing' | 'waiting_model' | 'receiving' | 'working' | 'waiting_approval' | 'stopping';
 type PublicKind = 'content' | 'reasoning';
@@ -212,7 +212,7 @@ export function createExecutionFeedbackController(options: {
     };
     return {
         begin(invocationId: string, threadId?: string): ExecutionFeedbackInvocation {
-            const trace: Trace = {prefix: `cuepoint.agent.${ownerId}-${++invocationSequence}`, marks: new Map(), entries: []};
+            const trace: Trace = {prefix: `momoki.agent.${ownerId}-${++invocationSequence}`, marks: new Map(), entries: []};
             traces.push(trace);
             if (traces.length > 8) clear(traces.shift()!);
             const state: InvocationState = {snapshot: {invocationId, threadId, phase: 'preparing', outputRevision: 0}, trace,

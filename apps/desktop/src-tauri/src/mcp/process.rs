@@ -202,12 +202,12 @@ mod tests {
     #[tokio::test]
     async fn mcp_stdio_child_sees_path_but_not_other_parent_secrets() {
         // SAFETY: test-only variable with a unique name; only read by the child.
-        unsafe { std::env::set_var("CUEPOINT_TEST_PARENT_SECRET", "x") };
+        unsafe { std::env::set_var("MOMOKI_TEST_PARENT_SECRET", "x") };
         let (mut p, mut out, _stdin) = OwnedProcess::spawn(
             Path::new("/bin/sh"),
             &[
                 "-c".into(),
-                "printf '%s|%s|%s' \"${PATH:+path}\" \"${CUEPOINT_TEST_PARENT_SECRET:-none}\" \"$EXPLICIT\"".into(),
+                "printf '%s|%s|%s' \"${PATH:+path}\" \"${MOMOKI_TEST_PARENT_SECRET:-none}\" \"$EXPLICIT\"".into(),
             ],
             None,
             &HashMap::from([("EXPLICIT".to_owned(), "yes".to_owned())]),

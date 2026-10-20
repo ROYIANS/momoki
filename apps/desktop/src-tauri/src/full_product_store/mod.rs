@@ -236,7 +236,7 @@ impl FullProductStore {
             ));
         }
         if marker.is_some_and(|m| {
-            m.format != "cuepoint.product.workspace.ready.v1"
+            m.format != "momoki.product.workspace.ready.v1"
                 || m.schema != SCHEMA
                 || m.workspace_id != id
         }) {
@@ -272,7 +272,7 @@ impl FullProductStore {
                 &store.root,
                 "workspace.ready.json",
                 &Ready {
-                    format: "cuepoint.product.workspace.ready.v1".into(),
+                    format: "momoki.product.workspace.ready.v1".into(),
                     schema: SCHEMA,
                     workspace_id: store.workspace_id.clone(),
                 },
@@ -405,7 +405,7 @@ impl FullProductStore {
                 }
                 let handle = uuid::Uuid::new_v4().to_string();
                 let mut sha = Sha256::new();
-                sha.update(b"cuepoint-batch-v1\n");
+                sha.update(b"momoki-batch-v1\n");
                 self.contexts.insert(
                     handle.clone(),
                     Context {

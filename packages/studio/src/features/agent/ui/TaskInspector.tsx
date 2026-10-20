@@ -249,7 +249,7 @@ function TaskInspectorContent({
                 <ContextPanelHeader className="agent-task-inspector-heading"><span
                     className={`agent-task-status is-${state}`}>{TASK_STATE_LABELS[state]}</span><ContextPanelTitle>{task.title}</ContextPanelTitle><ContextPanelDescription><Sparkles
                     size={14} aria-hidden/>{projectName ?? "项目不可用"} ·
-                    小光点<span>更新于 {dateLabel(task.updatedAt)}</span></ContextPanelDescription></ContextPanelHeader>
+                    默默<span>更新于 {dateLabel(task.updatedAt)}</span></ContextPanelDescription></ContextPanelHeader>
                 {projectUnavailable && <div className="agent-task-notice">所属项目已不可用，历史记录仍可查看。</div>}
                 {busy &&
                     <div className="agent-task-notice">执行尚未结束。请在对话中处理批准、停止或恢复操作，再编辑任务。</div>}

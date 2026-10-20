@@ -45,7 +45,7 @@ export function SettingsPage({section, onSectionChange}: {
             <Search aria-hidden/>
             <input
                 type="search"
-                name="cuepoint-settings-filter"
+                name="momoki-settings-filter"
                 autoComplete="off"
                 disabled={editingConnection}
                 value={query}

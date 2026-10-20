@@ -1,5 +1,5 @@
-import {SKILL_LIMITS, validateSkillResourcePath} from "@cuepoint/agent-core";
-import type {InstalledSkillDescriptor} from "@cuepoint/agent-core";
+import {SKILL_LIMITS, validateSkillResourcePath} from "@momoki/agent-core";
+import type {InstalledSkillDescriptor} from "@momoki/agent-core";
 import {z} from "zod";
 import {executeAtomicTool} from "../../commands/agentTools";
 import type {AgentRun, AgentToolCall} from "../../models/agent";

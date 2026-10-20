@@ -9,11 +9,11 @@ import {createNativeBinaryServices} from "@/platform/storage/nativeBinary";
 import type {NativeSession} from "@/platform/storage/protocol";
 import type {NativeInvoke} from "@/platform/storage/nativeBridge";
 
-if (process.env.CUEPOINT_TOOL_MODE === "hosted" && !process.env.CUEPOINT_NATIVE_STORE_PROBE) throw new Error("Hosted native suites require the runner-resolved probe path");
-export const nativeProbePath=resolve(process.env.CUEPOINT_NATIVE_STORE_PROBE ?? "apps/desktop/.tools/target/debug/product_store_probe");
+if (process.env.MOMOKI_TOOL_MODE === "hosted" && !process.env.MOMOKI_NATIVE_STORE_PROBE) throw new Error("Hosted native suites require the runner-resolved probe path");
+export const nativeProbePath=resolve(process.env.MOMOKI_NATIVE_STORE_PROBE ?? "apps/desktop/.tools/target/debug/product_store_probe");
 
 export async function createNativeProbe(options:{intercept?:(command:string,args:Record<string,unknown>,next:()=>Promise<unknown>)=>Promise<unknown>} = {}) {
-    const temporary=await mkdtemp(join(tmpdir(),"cuepoint-shared-contract-")),root=join(temporary,"fresh-workspace");
+    const temporary=await mkdtemp(join(tmpdir(),"momoki-shared-contract-")),root=join(temporary,"fresh-workspace");
     let processHandle:ChildProcessWithoutNullStreams,stderr="";
     let pending:Array<{resolve:(value:unknown)=>void;reject:(error:unknown)=>void}>=[];
     let ready:Promise<void>;

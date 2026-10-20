@@ -1,4 +1,4 @@
-const UMAMI_SCRIPT_ID = "cuepoint-umami";
+const UMAMI_SCRIPT_ID = "momoki-umami";
 
 export function initUmami(): void {
     if (!import.meta.env.PROD) return;

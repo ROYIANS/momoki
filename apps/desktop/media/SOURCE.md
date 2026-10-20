@@ -40,7 +40,7 @@ and [FFmpeg build script](https://github.com/AtlasYang/ffmpeg-static-builds/blob
 The upstream build reuses dependency caches keyed on its version file. Published
 reports state versions and flags; they are not an independent reproducible-build
 attestation. These materials preserve the reviewed upstream inputs and notices.
-They do not claim that Cuepoint rebuilt the binaries or audited all compiler
+They do not claim that Momoki rebuilt the binaries or audited all compiler
 runtime contributions. The Windows report records GCC 16.2.0/MSYS2 and static
 libgcc. Before public redistribution, confirm the matching compiler/runtime
 source notices and any additional distribution obligations against the actual

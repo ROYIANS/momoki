@@ -1,4 +1,4 @@
-import type {ChatRequestMessage, ChatContentPart, ResponseRequestItem, ResponseInputPart} from '@cuepoint/agent-providers';
+import type {ChatRequestMessage, ChatContentPart, ResponseRequestItem, ResponseInputPart} from '@momoki/agent-providers';
 import {safeHistoricalLookupOutput} from "../../references/agent/referenceEvidence";
 import {resolveMaterialInput} from "../../library/agent/materialImageInput";
 import {db} from "../../../platform/product/store";

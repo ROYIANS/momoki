@@ -2,7 +2,7 @@ import {z} from "zod";
 import {deleteDeviceSetting, DEVICE_SETTING_MAX_BYTES, getDeviceSetting, putDeviceSetting} from "../commands/deviceSettings";
 import {MODEL_CATALOG_URL} from "../../../platform/product/httpPolicy";
 import {requestOnce} from "../../../platform/http/requestBoundary";
-import {isReadAbort, readResponseBytes, ResponseLimitError, utf8Bytes} from "@cuepoint/agent-providers/http";
+import {isReadAbort, readResponseBytes, ResponseLimitError, utf8Bytes} from "@momoki/agent-providers/http";
 import {
     compareEntries,
     originOf,

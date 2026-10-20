@@ -11,7 +11,7 @@ export function readShotDetailTarget(href: string): ShotDetailTarget | undefined
     const path = href.startsWith("#/") ? href.slice(1) : href;
     if (!/^\/(?!\/)/.test(path) || path.includes("#") || path.includes("\\")) return;
     try {
-        const url = new URL(path, "https://cuepoint.invalid");
+        const url = new URL(path, "https://momoki.invalid");
         const match = /^\/p\/([^/]+)\/e\/([^/]+)\/shots$/.exec(path.split("?", 1)[0]);
         // URL normalizes traversal and tolerates malformed query escapes; neither expands this route allowlist.
         decodeURIComponent(url.search.replace(/\+/g, " "));

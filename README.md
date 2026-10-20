@@ -1,10 +1,10 @@
-# 小光点 Cuepoint
+# 默默 Momoki
 
 **本地优先的 AI 创作工作室，让故事、画面、声音和音乐在同一个项目中逐步成形。**
 
 **简体中文** · [English](README.en.md)
 
-小光点将创作助手、影视分镜、音频制作、音乐生成与可复用的 IP／素材库放在共用界面的浏览器与桌面工作室里。你可以手动编辑，也可以让助手结合项目资料拆解任务、调用创作工具，再检查实际保存的成果。
+默默将创作助手、影视分镜、音频制作、音乐生成与可复用的 IP／素材库放在共用界面的浏览器与桌面工作室里。你可以手动编辑，也可以让助手结合项目资料拆解任务、调用创作工具，再检查实际保存的成果。
 
 桌面端把项目数据存入应用内部的 SQLite，并将素材复制到受管理的文件工作区；浏览器端复用同一套界面、业务命令与 Agent，使用 IndexedDB。AI 使用你自己配置的服务和 API Key（BYOK）。浏览器端可以作为静态网站或 Docker 镜像部署，无需配置服务端应用数据库。安装包目标与发布验收流程见 [桌面分发说明](docs/desktop-distribution.md)。
 
@@ -30,7 +30,7 @@
 
 ## 下载与安装
 
-**[下载桌面体验版](https://github.com/ROYIANS/Cuepoint/releases) · [查看图文安装指南](docs/desktop-installation.md)**
+**[下载桌面体验版](https://github.com/ROYIANS/momoki/releases) · [查看图文安装指南](docs/desktop-installation.md)**
 
 在 Release 页面选择标签为 `desktop-v<版本号>` 的桌面版本，展开 **Assets**，下载适合设备的安装包：
 
@@ -43,7 +43,7 @@
 
 **第一次安装时可能出现系统提示。** 当前 Windows 包未进行代码签名，Mac 版本使用临时签名、尚未完成 Apple 公证，系统可能无法验证发布者或软件信誉。先确认文件来自上面的官方 Release，再按 [Windows / Mac 图文步骤](docs/desktop-installation.md) 选择是否继续；无需关闭系统安全功能。
 
-遇到病毒、恶意软件或文件损坏提示时，请停止安装并 [反馈完整提示](https://github.com/ROYIANS/Cuepoint/issues)。Assets 中的 **Source code (zip / tar.gz)** 是源码，不是安装包。当前没有 Windows ARM、Linux ARM 或 Mac 通用安装包。从 0.1.3 起，桌面版可在「设置 → 关于与更新」检查版本、下载并校验安装包，保存后由你完成安装；更新前请导出项目 ZIP 备份。
+遇到病毒、恶意软件或文件损坏提示时，请停止安装并 [反馈完整提示](https://github.com/ROYIANS/momoki/issues)。Assets 中的 **Source code (zip / tar.gz)** 是源码，不是安装包。当前没有 Windows ARM、Linux ARM 或 Mac 通用安装包。从 0.1.3 起，桌面版可在「设置 → 关于与更新」检查版本、下载并校验安装包，保存后由你完成安装；更新前请导出项目 ZIP 备份。
 
 ## 功能概览
 
@@ -82,7 +82,7 @@
 - **制作画面**：通过助手中的生成流程确认供应商、模型、提示词与输出目标；查看候选结果并按需采用到镜头或资产。
 - **检查交付**：在制作页查看资料与媒体缺口，导出当前集的 CSV、可打印分镜板或素材交付 ZIP。
 
-制作交付包用于移交镜头和素材；项目备份 ZIP 用于重新导入 Cuepoint。当前应用不提供完整视频时间线剪辑、转场合成或自动渲染整部影片的能力。
+制作交付包用于移交镜头和素材；项目备份 ZIP 用于重新导入 Momoki。当前应用不提供完整视频时间线剪辑、转场合成或自动渲染整部影片的能力。
 
 ### 音频：稿件 → 声音 → 多轨 → 成品
 
@@ -180,8 +180,8 @@ IP 是长期创作身份或世界设定的组织方式，不是另一种项目�
 浏览器与 GHCR 主质量检查使用 **Node.js 22**；独立 Agent 示例检查与桌面发布流程使用 **Node.js 24.11.0**，详见[桌面打包指南](docs/desktop-distribution.md)。包管理器版本以 [`package.json`](package.json) 的 `packageManager` 为准，当前为 **pnpm 10.15.0**。在已有开发环境中遵循仓库 [`AGENTS.md`](AGENTS.md) 及本机包管理器约定，避免混用版本重建依赖。
 
 ```bash
-git clone https://github.com/ROYIANS/Cuepoint.git
-cd Cuepoint
+git clone https://github.com/ROYIANS/momoki.git
+cd Momoki
 corepack enable
 pnpm install --frozen-lockfile
 pnpm dev
@@ -195,7 +195,7 @@ pnpm dev
 | --- | --- |
 | `pnpm dev` | 启动 Web 应用开发服务 |
 | `pnpm dev:site` | 启动独立官网开发服务 |
-| `pnpm --filter @cuepoint/desktop build:frontend` | 构建正常桌面前端 |
+| `pnpm --filter @momoki/desktop build:frontend` | 构建正常桌面前端 |
 | `pnpm agent:build` | 按依赖顺序构建 Agent 包的 ESM 与类型声明 |
 | `pnpm agent:example:check` | 在仓库外离线安装打包产物，验证独立 SQLite Agent（Node ≥24.11） |
 | `pnpm quality` / `pnpm quality:self-test` | 检查全部源码及门禁失败用例 |
@@ -211,7 +211,7 @@ pnpm dev
 
 ### 使用 Docker Compose
 
-镜像：`ghcr.io/royians/cuepoint`，查看 [GHCR 包页面](https://github.com/ROYIANS/Cuepoint/pkgs/container/cuepoint)。获取仓库中的 [`docker-compose.yml`](docker-compose.yml) 后，在它所在的目录运行：
+镜像：`ghcr.io/royians/momoki`，查看 [GHCR 包页面](https://github.com/ROYIANS/momoki/pkgs/container/momoki)。获取仓库中的 [`docker-compose.yml`](docker-compose.yml) 后，在它所在的目录运行：
 
 ```bash
 # 仅在镜像包为私有时需要登录
@@ -228,7 +228,7 @@ docker compose up -d
 ### 本地构建镜像
 
 ```bash
-docker build -t ghcr.io/royians/cuepoint:latest .
+docker build -t ghcr.io/royians/momoki:latest .
 docker compose up -d
 ```
 
@@ -277,7 +277,7 @@ Fork 到自己的仓库时，需同步修改工作流中的固定镜像地址和
 docker build \
   --build-arg VITE_UMAMI_SCRIPT_URL=https://analytics.example.com/script.js \
   --build-arg VITE_UMAMI_WEBSITE_ID=YOUR_WEBSITE_ID \
-  -t ghcr.io/royians/cuepoint:latest .
+  -t ghcr.io/royians/momoki:latest .
 docker compose up -d
 ```
 
@@ -329,7 +329,7 @@ docs/                       # 产品与架构文档
 
 每个业务 feature 按需要收纳自己的模型、命令、查询、界面、测试和产品工具适配；例如音频编辑相关代码集中在 `packages/studio/src/features/audio/`。`app` 负责组合，`platform/storage` 提供存储机制，`platform/product/store.ts` 选择固定的产品存储实例。跨包通过声明的公有导出调用，跨 feature 通过具体命令、查询或服务入口协作。
 
-Agent 的通用机制由 [`@cuepoint/agent-core`](packages/agent-core/README.md) 承担；[`@cuepoint/agent-providers`](packages/agent-providers/README.md) 提供现有协议与显式的 `/http` 公有入口，使用构建后的 ESM 和类型声明。Studio 负责创作工具、提示、项目范围、资料像素、连接凭据、运行时 HTTP 权限以及产品事务。
+Agent 的通用机制由 [`@momoki/agent-core`](packages/agent-core/README.md) 承担；[`@momoki/agent-providers`](packages/agent-providers/README.md) 提供现有协议与显式的 `/http` 公有入口，使用构建后的 ESM 和类型声明。Studio 负责创作工具、提示、项目范围、资料像素、连接凭据、运行时 HTTP 权限以及产品事务。
 
 [`agent-todo`](examples/agent-todo/README.md) 使用自己的 SQLite 表和业务工具，演示批准、拒绝、停止以及进程重启后的显式恢复。它调用同一套 Agent 执行实现，展示其他项目需要实现的宿主适配。`agent:example:check` 在仓库外离线安装本地打包产物后验证示例；示例需要 Node ≥24.11，通用包和 Web 质量检查保留 Node 22 支持。
 
@@ -394,7 +394,7 @@ pnpm agent:example:check # 此项需要 Node ≥24.11
 
 ## 感谢
 
-感谢以下项目及其贡献者，为小光点提供基础能力与实现参考：
+感谢以下项目及其贡献者，为默默提供基础能力与实现参考：
 
 | 项目 | 使用与参考 |
 | --- | --- |
@@ -422,6 +422,6 @@ pnpm agent:example:check # 此项需要 Node ≥24.11
 
 ## 许可
 
-小光点的原创代码采用 [MIT License](LICENSE)。
+默默的原创代码采用 [MIT License](LICENSE)。
 
 第三方内容遵循各自的原始许可，详见 [第三方声明](THIRD_PARTY_NOTICES.md)。

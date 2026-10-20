@@ -23,7 +23,7 @@ function pad(value: number): string {
 export function diagnosticFilename(date = new Date()): string {
     const day = `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}`;
     const time = `${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
-    return `cuepoint-diagnostic-${day}-${time}.txt`;
+    return `momoki-diagnostic-${day}-${time}.txt`;
 }
 
 /**

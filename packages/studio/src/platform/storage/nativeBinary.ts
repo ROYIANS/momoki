@@ -156,7 +156,7 @@ export function nativeBinaryTransport(getSession: () => Promise<NativeSession>):
             try {
                 return await invoke("product_binary_write", bytes, {
                     headers: {
-                        "x-cuepoint-binary": JSON.stringify({
+                        "x-momoki-binary": JSON.stringify({
                             ...session,
                             stageId,
                             offset

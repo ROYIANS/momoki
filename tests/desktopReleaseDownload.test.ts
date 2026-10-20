@@ -1,13 +1,13 @@
 import {describe, expect, it, vi} from "vitest";
 import {MAX_RELEASE_ASSET_BYTES, downloadAsset} from "@/features/settings/updates/download";
 import {sha256Bytes} from "@/platform/media/sha256";
-import type {ReleaseAsset} from "@cuepoint/distribution/releases";
+import type {ReleaseAsset} from "@momoki/distribution/releases";
 
-const URL_OK = "https://github.com/ROYIANS/Cuepoint/releases/download/desktop-v0.1.3/Cuepoint_0.1.3_windows_x64_setup.exe";
+const URL_OK = "https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.3/Momoki_0.1.3_windows_x64_setup.exe";
 const BODY = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
 const DIGEST = sha256Bytes(BODY);
 
-const asset = (patch: Partial<ReleaseAsset> = {}): ReleaseAsset => ({name: "Cuepoint_0.1.3_windows_x64_setup.exe", size: BODY.byteLength, url: URL_OK, sha256: DIGEST, ...patch});
+const asset = (patch: Partial<ReleaseAsset> = {}): ReleaseAsset => ({name: "Momoki_0.1.3_windows_x64_setup.exe", size: BODY.byteLength, url: URL_OK, sha256: DIGEST, ...patch});
 const respond = (body: Uint8Array, init: ResponseInit = {}) => new Response(new Uint8Array(body), {status: 200, ...init});
 const fetchOf = (impl: () => Promise<Response>) => vi.fn(impl as unknown as typeof fetch);
 

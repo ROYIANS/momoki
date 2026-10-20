@@ -58,13 +58,13 @@
         "@/components/studio/CoverCard": [
           "./packages/studio/src/features/library/ui/CoverCard.tsx"
         ],
-        "@cuepoint/agent-core": [
+        "@momoki/agent-core": [
           "./packages/agent-core/src/index.ts"
         ],
-        "@cuepoint/agent-providers": [
+        "@momoki/agent-providers": [
           "./packages/agent-providers/src/index.ts"
         ],
-        "@cuepoint/agent-providers/http": [
+        "@momoki/agent-providers/http": [
           "./packages/agent-providers/src/http/index.ts"
         ]
       }

@@ -16,7 +16,7 @@ import {normalizeProjectMode} from "../models/format";
 import {flushPendingDrafts} from "../../../platform/product/drafts";
 import {deriveEpisodeDelivery, episodeDeliveryCsv} from "./episodeDelivery";
 
-export const HANDOFF_FORMAT = "cuepoint-handoff-v1" as const;
+export const HANDOFF_FORMAT = "momoki-handoff-v1" as const;
 
 type SlotState = "empty" | "exported" | "placeholder" | "missing" | "foreign" | "wrong-kind" | "empty-file" | "corrupt";
 

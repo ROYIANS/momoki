@@ -15,7 +15,7 @@ export function workspacePolicy(root) {
     for (const row of document.packages) {
         const pkg = JSON.parse(readFileSync(join(root, row.path, 'package.json'), 'utf8'));
         if (pkg.name !== row.name || !row.sources.includes('src') || !existsSync(join(root, row.path, 'src'))) throw new Error(`Missing registered owned source root: ${row.path}/src`);
-        const internal = Object.entries({...pkg.dependencies, ...pkg.devDependencies}).filter(([name]) => name.startsWith('@cuepoint/'));
+        const internal = Object.entries({...pkg.dependencies, ...pkg.devDependencies}).filter(([name]) => name.startsWith('@momoki/'));
         if (internal.some(([name, version]) => !row.dependencies.includes(name) || version !== 'workspace:*')) throw new Error(`Forbidden workspace dependency: ${row.name}`);
         for (const [key, source] of Object.entries(row.publicSources ?? {})) {
             const target = pkg.exports?.[key];
@@ -35,9 +35,9 @@ export function workspacePolicy(root) {
 export function packageBoundary(edge, policy) {
     const owner = file => policy.packages.find(row => file.startsWith(`${row.path}/`));
     const from = owner(edge.from), to = owner(edge.to);
-    if (from && ['@cuepoint/agent-core','@cuepoint/agent-providers'].includes(from.name) && edge.specifier.startsWith('.') && !edge.to.startsWith(`${from.path}/src/`)) return 'reusable-relative-import-escape';
+    if (from && ['@momoki/agent-core','@momoki/agent-providers'].includes(from.name) && edge.specifier.startsWith('.') && !edge.to.startsWith(`${from.path}/src/`)) return 'reusable-relative-import-escape';
     if (!from || !to) return undefined;
-    if (edge.specifier.startsWith('@/') && from.name !== '@cuepoint/studio') return 'foreign-source-alias';
+    if (edge.specifier.startsWith('@/') && from.name !== '@momoki/studio') return 'foreign-source-alias';
     if (from === to) return undefined;
     if (!from.dependencies.includes(to.name)) return 'forbidden-package-edge';
     if (edge.specifier !== to.name && !edge.specifier.startsWith(`${to.name}/`)) return 'cross-package-source-traversal';
@@ -71,10 +71,10 @@ export function importContract(from, specifier, root, policy) {
         return Object.hasOwn(manifest.exports ?? {}, key) ? undefined : 'private-package-import';
     }
     if (specifier === 'vitest' && /\.test\.tsx?$/.test(from) && JSON.parse(readFileSync(join(root,owner.path,'package.json'),'utf8')).devDependencies?.vitest) return undefined;
-    if (owner.name === '@cuepoint/agent-core' && !specifier.startsWith('.')) return 'core-external-import';
-    if (owner.name === '@cuepoint/agent-providers' && !specifier.startsWith('.') && specifier !== '@cuepoint/agent-core') return 'provider-external-import';
-    if (specifier.startsWith('@/') && owner.name !== '@cuepoint/studio') return 'foreign-source-alias';
-    if (!specifier.startsWith('@cuepoint/')) return undefined;
+    if (owner.name === '@momoki/agent-core' && !specifier.startsWith('.')) return 'core-external-import';
+    if (owner.name === '@momoki/agent-providers' && !specifier.startsWith('.') && specifier !== '@momoki/agent-core') return 'provider-external-import';
+    if (specifier.startsWith('@/') && owner.name !== '@momoki/studio') return 'foreign-source-alias';
+    if (!specifier.startsWith('@momoki/')) return undefined;
     const target = policy.packages.find(row => specifier === row.name || specifier.startsWith(`${row.name}/`));
     if (!target || (target !== owner && !owner.dependencies.includes(target.name))) return 'forbidden-package-import';
     const manifest = JSON.parse(readFileSync(join(root, target.path, 'package.json'), 'utf8'));

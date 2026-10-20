@@ -1,11 +1,11 @@
-import {streamResponses as dispatchResponses, toResponseInput as convertMessages} from '@cuepoint/agent-providers';
+import {streamResponses as dispatchResponses, toResponseInput as convertMessages} from '@momoki/agent-providers';
 import type {AgentRequestMessage, AgentResponseItem} from '../models/agent';
 import type {StreamChatInput, StreamChatHandlers} from './chatStream';
 import {assertReasoningEffort} from '../../settings/models/reasoningPolicy';
 import {runtimeFetchFor} from '../../../platform/runtime/runtimeFetch';
 import {materializeResponseItems} from './referenceWire';
-export {decodeResponseOutput} from '@cuepoint/agent-providers';
-export type {ResponsesResult} from '@cuepoint/agent-providers';
+export {decodeResponseOutput} from '@momoki/agent-providers';
+export type {ResponsesResult} from '@momoki/agent-providers';
 
 /** Protocol conversion is shared; provenance stays solely in the product run. */
 export function toResponseInput(messages: readonly AgentRequestMessage[]): AgentResponseItem[] {

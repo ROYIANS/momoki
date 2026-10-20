@@ -8,7 +8,7 @@ import {contained,poll,sha256,smokeArguments,smokeFixture,validateReadOnlyProfil
 import {compatibleDriver,verifyConsumedCrate} from './setup-release-driver.mjs';
 
 test('driver source proof rejects missing, modified and linked consumed Cargo archives',async()=>{
-    const root=await mkdtemp(join(tmpdir(),'cuepoint-driver-crate-'));
+    const root=await mkdtemp(join(tmpdir(),'momoki-driver-crate-'));
     try {
         const cache=join(root,'registry','cache','index.crates.io-fixture');
         await mkdir(cache,{recursive:true});
@@ -83,7 +83,7 @@ test('fixture is deterministic, multi-chunk and has a marker inside the real pre
 });
 
 test('native read-only observation rejects wrong owner, mutable profile and startup error',()=>{
-    const good={origin:'http://tauri.localhost',profile:{version:1,id:'dev.cuepoint.prototype.offline',storage:'sqlite'},
+    const good={origin:'http://tauri.localhost',profile:{version:1,id:'design.tulai.momoki',storage:'sqlite'},
         writable:false,configurable:false,frozen:true,startupError:false};
     assert.doesNotThrow(()=>validateReadOnlyProfile(good,good.profile.id,'win32'));
     for (const patch of [{origin:'http://localhost'},{writable:true},{configurable:true},{frozen:false},{startupError:true},
@@ -93,7 +93,7 @@ test('native read-only observation rejects wrong owner, mutable profile and star
 });
 
 test('installer and installed binary guards detect real bytes, receipt ambiguity and links',async()=>{
-    const root=await mkdtemp(join(tmpdir(),'cuepoint-smoke-support-'));
+    const root=await mkdtemp(join(tmpdir(),'momoki-smoke-support-'));
     try {
         const path=join(root,'fixture.deb'),bytes=Buffer.from('original installer');
         await writeFile(path,bytes);

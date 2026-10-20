@@ -1,4 +1,4 @@
-# @cuepoint/agent-core
+# @momoki/agent-core
 
 Runtime-neutral Agent mechanisms. The package root exports built ESM and TypeScript declarations from `dist`; it has no runtime dependencies. Build with the repository's `agent:build` command before importing it. Normal application, test and native entry points prepare and verify these artifacts automatically.
 

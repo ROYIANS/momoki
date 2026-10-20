@@ -130,7 +130,7 @@ export function verifyPeIcons(pe,ico) {
 
 export function smokeFixture(token) {
     if (!/^[a-f0-9-]{36}$/.test(token)) throw new Error('Invalid smoke fixture identity');
-    const marker=`CUEPOINT_RELEASE_SMOKE_${token}`;
+    const marker=`MOMOKI_RELEASE_SMOKE_${token}`;
     const bytes=Buffer.from(`${marker}\n${'0123456789 release managed fixture\n'.repeat(18000)}`,'utf8');
     return {bytes,marker,sha256:sha256(bytes),filename:`release-smoke-${token}.txt`,projectName:`Release smoke ${token}`};
 }

@@ -1,6 +1,6 @@
 import {randomUUID} from 'node:crypto';
-import {compactContext, estimateTokens, isContextSourcePrefix, replaceContinuationBase, type ContextSource} from '@cuepoint/agent-core';
-import type {ResponseItem} from '@cuepoint/agent-providers';
+import {compactContext, estimateTokens, isContextSourcePrefix, replaceContinuationBase, type ContextSource} from '@momoki/agent-core';
+import type {ResponseItem} from '@momoki/agent-providers';
 import {TodoStore} from './store.js';
 import type {TodoRun, TodoSummary} from './types.js';
 

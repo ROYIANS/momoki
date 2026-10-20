@@ -1,7 +1,7 @@
 import {afterEach, describe, expect, it, vi} from "vitest";
-import {readHttpJson, type HttpJsonReadPolicy} from '@cuepoint/agent-providers/http';
+import {readHttpJson, type HttpJsonReadPolicy} from '@momoki/agent-providers/http';
 import {requestOnce} from "@/platform/http/requestBoundary";
-import * as bounded from "@cuepoint/agent-providers/http";
+import * as bounded from "@momoki/agent-providers/http";
 import {MAX_ERROR_BYTES, MAX_JSON_BYTES} from "@/platform/media/limits";
 import {submitApimartImageGeneration, getApimartTask} from "@/features/video/providers/apimart";
 import {submitAIHubMixImageGeneration, downloadAIHubMixResult, type AIHubMixTask} from "@/features/video/providers/aihubmix";

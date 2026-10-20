@@ -119,7 +119,7 @@ a host transport is missing. Correct: the neutral handler requires a transport;
 Studio chooses its existing authorized transport in the actual composition.
 
 ```ts
-import {streamChatCompletions} from '@cuepoint/agent-providers';
+import {streamChatCompletions} from '@momoki/agent-providers';
 
 await streamChatCompletions(input, {fetchImpl: hostTransport, signal});
 ```

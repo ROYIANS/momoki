@@ -1,4 +1,4 @@
-import {authHeaders, chatCompletionsUrl} from "@cuepoint/agent-providers";
+import {authHeaders, chatCompletionsUrl} from "@momoki/agent-providers";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   maskApiKey,

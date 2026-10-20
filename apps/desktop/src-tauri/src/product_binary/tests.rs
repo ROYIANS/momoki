@@ -22,7 +22,7 @@ struct Fixture {
 impl Fixture {
     fn new() -> Self {
         let root =
-            std::env::temp_dir().join(format!("cuepoint-product-binary-{}", uuid::Uuid::new_v4()));
+            std::env::temp_dir().join(format!("momoki-product-binary-{}", uuid::Uuid::new_v4()));
         fs::create_dir(&root).unwrap();
         let workspace_id = uuid::Uuid::new_v4().to_string();
         let db = Connection::open(root.join("fixture.sqlite")).unwrap();

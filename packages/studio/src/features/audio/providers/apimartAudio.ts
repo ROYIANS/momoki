@@ -1,13 +1,13 @@
-import {readHttpJson} from '@cuepoint/agent-providers/http';
+import {readHttpJson} from '@momoki/agent-providers/http';
 import {requestOnce} from "../../../platform/http/requestBoundary";
-import {isReadAbort, readResponseBlob, ResponseLimitError} from "@cuepoint/agent-providers/http";
+import {isReadAbort, readResponseBlob, ResponseLimitError} from "@momoki/agent-providers/http";
 import {MAX_AUDIO_BYTES, MAX_ERROR_BYTES, MAX_JSON_BYTES} from "../../../platform/media/limits";
 import {canonicalizeAudioTaskIds, isAudioTaskId} from "../generation/taskIds";
 import {z} from "zod";
 import {MUSIC_DURATION_LIMITS} from "../../music/models/music";
 import type {ApimartCredentials, ApimartFailure, ApimartRequestOptions, ApimartResult} from "../../video/providers/apimart";
-import {normalizeBaseUrl} from "@cuepoint/agent-providers/http";
-import {redactCredentials} from "@cuepoint/agent-providers/http";
+import {normalizeBaseUrl} from "@momoki/agent-providers/http";
+import {redactCredentials} from "@momoki/agent-providers/http";
 
 export const SPEECH_VOICES = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"] as const;
 const unicode = (max: number) => z.string().refine(value => [...value].length <= max, `最多 ${max} 个字符`);

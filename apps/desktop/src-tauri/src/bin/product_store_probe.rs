@@ -1,6 +1,6 @@
 //! Disposable JSON-line bridge for exercising shared TypeScript commands against
 //! the actual native engine. This test-hooks executable never selects app data.
-use cuepoint_native_storage::{
+use momoki_native_storage::{
     Hooks, ProductJob, StorageWorker, full_product_store::protocol::Request,
 };
 use serde::Deserialize;
@@ -25,8 +25,8 @@ enum Probe {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct BinaryInput {
-    session: cuepoint_native_storage::full_product_store::protocol::Session,
-    action: cuepoint_native_storage::product_binary::BinaryRequest,
+    session: momoki_native_storage::full_product_store::protocol::Session,
+    action: momoki_native_storage::product_binary::BinaryRequest,
 }
 fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = std::env::args().skip(1);
@@ -88,7 +88,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             return Err("Bounded IPC request exceeded 2MiB serialized transport".into());
         }
         let result = serde_json::from_slice::<Probe>(&line)
-            .map_err(cuepoint_native_storage::Error::from)
+            .map_err(momoki_native_storage::Error::from)
             .and_then(|r| match r {
                 Probe::Store(r) => worker.run_product(ProductJob::Store(r)),
                 Probe::Binary(r) => worker.run_product(ProductJob::Binary {

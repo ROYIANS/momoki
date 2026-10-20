@@ -1,6 +1,6 @@
-import {audioBufferMetadata, AudioPreviewPlayer, decodeAudioBlob, renderAudioMix} from '@cuepoint/studio/reference/lib/audio/engine';
-import {type AudioSchedule, buildAudioSchedule, envelopeGainAt, seekAudioSchedule} from '@cuepoint/studio/reference/lib/audio/schedule';
-import {detectAudioMime} from '@cuepoint/studio/reference/lib/audio/mime';
+import {audioBufferMetadata, AudioPreviewPlayer, decodeAudioBlob, renderAudioMix} from '@momoki/studio/reference/lib/audio/engine';
+import {type AudioSchedule, buildAudioSchedule, envelopeGainAt, seekAudioSchedule} from '@momoki/studio/reference/lib/audio/schedule';
+import {detectAudioMime} from '@momoki/studio/reference/lib/audio/mime';
 import {assert, delay, type Evidence, rejects} from './acceptanceEvidence';
 import {fixture, type FixtureBlobs} from './acceptanceMedia';
 

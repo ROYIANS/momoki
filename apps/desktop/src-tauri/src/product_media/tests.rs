@@ -30,7 +30,7 @@ struct Fixture {
 impl Fixture {
     fn new(length: usize) -> Self {
         let root =
-            std::env::temp_dir().join(format!("cuepoint-media-http-{}", uuid::Uuid::new_v4()));
+            std::env::temp_dir().join(format!("momoki-media-http-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir(&root).unwrap();
         let mut db = rusqlite::Connection::open(root.join("fixture.sqlite")).unwrap();
         db.execute_batch(BINARY_SCHEMA).unwrap();
@@ -457,10 +457,10 @@ fn sixty_five_idle_capabilities_hold_no_file_descriptor_or_reader_slot() {
     // Isolate descriptor accounting from other concurrently running fixture
     // tests. The child executes the same real disk/server test, not a mock.
     #[cfg(unix)]
-    if std::env::var_os("CUEPOINT_MEDIA_FD_CHILD").is_none() {
+    if std::env::var_os("MOMOKI_MEDIA_FD_CHILD").is_none() {
         let result = std::process::Command::new(std::env::current_exe().unwrap())
             .args(["--exact", "product_media::tests::sixty_five_idle_capabilities_hold_no_file_descriptor_or_reader_slot", "--nocapture"])
-            .env("CUEPOINT_MEDIA_FD_CHILD", "1").output().unwrap();
+            .env("MOMOKI_MEDIA_FD_CHILD", "1").output().unwrap();
         assert!(
             result.status.success(),
             "{}",
@@ -604,7 +604,7 @@ fn current_session_revocation_missing_and_symlink_containment_fail_closed() {
     #[cfg(unix)]
     {
         let outside =
-            std::env::temp_dir().join(format!("cuepoint-media-outside-{}", uuid::Uuid::new_v4()));
+            std::env::temp_dir().join(format!("momoki-media-outside-{}", uuid::Uuid::new_v4()));
         std::fs::write(&outside, b"outside unchanged").unwrap();
         std::os::unix::fs::symlink(&outside, &path).unwrap();
         assert_eq!(fixture.request("GET", "").status, 410);

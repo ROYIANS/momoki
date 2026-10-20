@@ -8,7 +8,7 @@ import type {StoreObserver, StoreTx} from "@/platform/storage/types";
 import type {AgentRun} from "@/features/agent/models/agent";
 import type {ChatMessage, ChatThread} from "@/features/agent/models/chat";
 import type {ComposerProps} from "@/features/agent/ui/composerTypes";
-import {DEFAULT_CONTEXT_POLICY} from "@cuepoint/agent-core";
+import {DEFAULT_CONTEXT_POLICY} from "@momoki/agent-core";
 
 const router = vi.hoisted(() => ({navigate: vi.fn(), shouldBlock: (() => false) as () => boolean,
     status: "idle" as "idle" | "blocked", proceed: vi.fn(), reset: vi.fn()}));

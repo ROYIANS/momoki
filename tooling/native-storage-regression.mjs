@@ -88,9 +88,9 @@ await buildAgentPackages();
 await assertAgentPackageFreshness(root);
 const before=await identity(),registry=await currentRegistry();
 const report={schemaVersion:1,startedAt:new Date().toISOString(),suite,tests,registry,node:process.version,commands:[],sourceBefore:before,browserComparators:manifest.browserComparators,ownerAssertions,limitations:'Rust JSON-line process harness exercises the current shared TypeScript/SQLite implementation. It does not measure WKWebView latency or replace packaged macOS acceptance. Postcommit table statistics alone are not proof of complete domain behavior; current command/assertion anchors and passing suite output are required together.'};
-const environment={...process.env,CARGO_INCREMENTAL:'0',CUEPOINT_STORAGE_TEST_OWNER:'sqlite',CUEPOINT_NATIVE_STORAGE_ACCEPTANCE:'1',CUEPOINT_NATIVE_STORE_PROBE:probe,CUEPOINT_TOOL_COVERAGE_DIR:join(evidenceDir,'coverage')};
-await mkdir(environment.CUEPOINT_TOOL_COVERAGE_DIR);
-const buildArgs=[join(root,'apps/desktop/scripts/tools.mjs'),'cargo',...nativeProbeBuildArguments(process.env.CUEPOINT_RUST_TARGET)];
+const environment={...process.env,CARGO_INCREMENTAL:'0',MOMOKI_STORAGE_TEST_OWNER:'sqlite',MOMOKI_NATIVE_STORAGE_ACCEPTANCE:'1',MOMOKI_NATIVE_STORE_PROBE:probe,MOMOKI_TOOL_COVERAGE_DIR:join(evidenceDir,'coverage')};
+await mkdir(environment.MOMOKI_TOOL_COVERAGE_DIR);
+const buildArgs=[join(root,'apps/desktop/scripts/tools.mjs'),'cargo',...nativeProbeBuildArguments(process.env.MOMOKI_RUST_TARGET)];
 report.commands.push({command:node,args:buildArgs,log:'probe-build.log'});
 console.log('Building the current locked Rust probe with the pinned toolchain.');
 report.buildExitCode=await run(node,buildArgs,join(evidenceDir,'probe-build.log'),environment);
@@ -104,10 +104,10 @@ if (report.buildExitCode === 0) {
     for (const [kind,additional] of [['selfHostedNative',manifest.selfHostedNative],['browserOnly',manifest.browserOnly]]) {
         if (!additional.length || (suite === 'business' && kind === 'selfHostedNative') || (suite === 'core' && kind === 'browserOnly')) continue;
         const args=[vitest,'run',...additional];
-        const exitCode=await run(node,args,join(evidenceDir,`${kind}-tests.log`),{...environment,CUEPOINT_STORAGE_TEST_OWNER:'indexeddb'});
+        const exitCode=await run(node,args,join(evidenceDir,`${kind}-tests.log`),{...environment,MOMOKI_STORAGE_TEST_OWNER:'indexeddb'});
         report.additionalCommands.push({kind,command:node,args,exitCode,log:`${kind}-tests.log`,note:kind === 'selfHostedNative' ? 'Suites construct and exercise their own real Rust probe; IndexedDB is only the unrelated global setup.' : 'Explicit browser capability regressions; these are not SQLite business evidence.'});
     }
-    report.coverage=await coverage(environment.CUEPOINT_TOOL_COVERAGE_DIR,registry);
+    report.coverage=await coverage(environment.MOMOKI_TOOL_COVERAGE_DIR,registry);
     report.coverage.missingNativeCommittedTables=currentTables.filter(name=>!report.coverage.tables.some(row=>row.table === name && row.owners.includes('sqlite')));
     report.coverage.missingNativeBusinessTables=currentTables.filter(name=>!report.coverage.tables.some(row=>row.table === name && row.nativeBusinessCommits.length));
     report.coverage.ownerAssertionCommits=ownerAssertions.groups.map(group=> {

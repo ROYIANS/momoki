@@ -1,4 +1,4 @@
-import {GITHUB_URL} from "@cuepoint/distribution/brand";
+import {GITHUB_URL} from "@momoki/distribution/brand";
 import {isTauriRuntime} from "../runtime/runtimeIdentity";
 import {getBreadcrumbs} from "./breadcrumbs";
 import {sanitizePath, sanitizeText} from "./sanitize";
@@ -71,7 +71,7 @@ export function collectDiagnosticContext(): DiagnosticContext {
 /** Plain-text report. Contains no chat, prompt or creative content: only the sanitized error and operation trail. */
 export function buildDiagnosticReport(info: ErrorInfo, context: DiagnosticContext): string {
     const lines = [
-        "Cuepoint 诊断信息",
+        "Momoki 诊断信息",
         `版本: ${context.version}`,
         `环境: ${context.environment}`,
         `平台: ${context.platform}`,

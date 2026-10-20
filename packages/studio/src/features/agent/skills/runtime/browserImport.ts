@@ -1,4 +1,4 @@
-import {SKILL_LIMITS, validateSkillResourcePaths} from "@cuepoint/agent-core";
+import {SKILL_LIMITS, validateSkillResourcePaths} from "@momoki/agent-core";
 import type {SkillImportCandidate} from "../models/installedSkill";
 import {isSupportedSkillResource, prepareSkillImport, validateSkillImportPath} from "./package";
 

@@ -1,7 +1,7 @@
-import {mediaWorkspaceRef, resolveWorkspaceRef, workspaceId} from '@cuepoint/studio/reference/lib/workspace';
-import {Sha256} from '@cuepoint/studio/reference/lib/sha256';
-import {STUDIO_LIBRARY_ID} from "@cuepoint/studio/reference/features/library/models/ownership";
-import type {WorkspaceRef} from '@cuepoint/studio/reference/lib/workspace';
+import {mediaWorkspaceRef, resolveWorkspaceRef, workspaceId} from '@momoki/studio/reference/lib/workspace';
+import {Sha256} from '@momoki/studio/reference/lib/sha256';
+import {STUDIO_LIBRARY_ID} from "@momoki/studio/reference/features/library/models/ownership";
+import type {WorkspaceRef} from '@momoki/studio/reference/lib/workspace';
 
 export function contractCorpus() {
     const id = workspaceId('b844e02c-8e56-4dc0-90e6-ab9d57b27f05');
@@ -34,5 +34,5 @@ export function contractCorpus() {
         hash.update(new Uint8Array());
         return {length, sha256: hash.digest()};
     });
-    return {format: 'cuepoint.native-contract-corpus.v1', workspaceId: id, references, invalid, rejectedIdentities, hashes};
+    return {format: 'momoki.native-contract-corpus.v1', workspaceId: id, references, invalid, rejectedIdentities, hashes};
 }

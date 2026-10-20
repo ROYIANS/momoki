@@ -1,5 +1,5 @@
-import {budgetTokens, estimateTokens} from "@cuepoint/agent-core";
-import {toResponseInput} from "@cuepoint/agent-providers";
+import {budgetTokens, estimateTokens} from "@momoki/agent-core";
+import {toResponseInput} from "@momoki/agent-providers";
 import type {AgentRequestMessage, AgentToolSchema} from "../models/agent";
 import type {AgentImageReference} from "../../references/models/referenceInput";
 import type {ContextAnchor} from "../models/context";

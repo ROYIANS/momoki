@@ -9,7 +9,7 @@ import {releaseSourceFiles,releaseSourceHashes} from './release-source-hashes.mj
 
 const hash=value=>createHash('sha256').update(value).digest('hex');
 async function repository() {
-    const root=await mkdtemp(join(tmpdir(),'cuepoint-source-list-'));
+    const root=await mkdtemp(join(tmpdir(),'momoki-source-list-'));
     const git=(args,options={})=>execFileSync('git',args,{cwd:root,encoding:'utf8',...options});
     git(['init','--quiet']);
     const blob=git(['hash-object','-w','--stdin'],{input:''}).trim();
@@ -78,7 +78,7 @@ test('eligible NUL-framed UTF8 source paths above 1 MiB are all streamed without
 });
 
 test('failed real Git enumeration and missing tracked file reject rather than return partial proof',async ()=> {
-    const outside=await mkdtemp(join(tmpdir(),'cuepoint-source-no-git-'));
+    const outside=await mkdtemp(join(tmpdir(),'momoki-source-no-git-'));
     try {await assert.rejects(releaseSourceHashes(outside),/Git tracked source enumeration failed.*not a git repository/s);} finally {await rm(outside,{recursive:true,force:true});}
     const f=await repository();
     try {

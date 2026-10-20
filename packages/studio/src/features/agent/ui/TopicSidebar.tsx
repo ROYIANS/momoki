@@ -1,6 +1,6 @@
 import {useTopicActivity} from "../queries/threadActivity";
 import {Flexbox, Text} from "@lobehub/ui";
-import {LOGO_SRC, PRODUCT_NAME_ZH} from "@cuepoint/distribution/brand";
+import {LOGO_SRC, PRODUCT_NAME_ZH} from "@momoki/distribution/brand";
 import {
     ChevronDown,
     Filter,

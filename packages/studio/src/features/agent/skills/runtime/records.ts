@@ -1,5 +1,5 @@
-import {formatSkillCatalogue, SKILL_LIMITS, validateSkillMetadata, validateSkillResourcePaths} from "@cuepoint/agent-core";
-import type {SkillMetadata} from "@cuepoint/agent-core";
+import {formatSkillCatalogue, SKILL_LIMITS, validateSkillMetadata, validateSkillResourcePaths} from "@momoki/agent-core";
+import type {SkillMetadata} from "@momoki/agent-core";
 import type {ProductStore} from "../../../../platform/storage/types";
 import type {InstalledSkill, SkillCatalogue, SkillComponent, SkillManifest, SkillMutationReceipt, SkillRetention, SkillTextRecord} from "../models/installedSkill";
 import {skillContentRevision, skillSerializedBytes} from "./package";

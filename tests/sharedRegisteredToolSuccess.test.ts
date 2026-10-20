@@ -23,7 +23,7 @@ import {saveFixtureToolRound} from "./helpers/toolDispatch";
 
 // The permanent native lane aliases only the database owner to the actual Rust
 // process. Every parser, preview and registered execution below stays shared.
-const owner = process.env.CUEPOINT_STORAGE_TEST_OWNER ?? "indexeddb";
+const owner = process.env.MOMOKI_STORAGE_TEST_OWNER ?? "indexeddb";
 const connector: ConnectorConfig = {
     id: "registered-success-provider", definitionId: "apimart",
     baseUrl: "https://provider.fixture.test/v1", apiKey: "disposable-fixture-key", updatedAt: "2026-10-12",

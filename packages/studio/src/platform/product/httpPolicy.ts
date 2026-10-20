@@ -52,8 +52,8 @@ function authorizeModelCatalog(url: URL, method: string, headers: Headers, body:
 }
 
 /** Fixed, public GitHub release listing for the desktop update check. */
-export const RELEASE_CHECK_URL = "https://api.github.com/repos/ROYIANS/Cuepoint/releases?per_page=30";
-const RELEASE_ASSET_PREFIX = "https://github.com/ROYIANS/Cuepoint/releases/download/";
+export const RELEASE_CHECK_URL = "https://api.github.com/repos/ROYIANS/momoki/releases?per_page=30";
+const RELEASE_ASSET_PREFIX = "https://github.com/ROYIANS/momoki/releases/download/";
 const RELEASE_ASSET_REDIRECT_ORIGINS = new Set(["https://objects.githubusercontent.com", "https://release-assets.githubusercontent.com"]);
 
 function assertAnonymousGet(method: string, headers: Headers, body: BodyInit | null | undefined, message: string): void {

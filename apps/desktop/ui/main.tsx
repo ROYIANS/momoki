@@ -1,11 +1,11 @@
 import {lazy, Suspense, useCallback, useEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {getCurrentWebviewWindow} from '@tauri-apps/api/webviewWindow';
-import {Button} from '@cuepoint/studio/reference/components/ui/button';
-import {Input} from '@cuepoint/studio/reference/components/ui/input';
-import {PageHeader} from '@cuepoint/studio/reference/components/layout/PageLayout';
+import {Button} from '@momoki/studio/reference/components/ui/button';
+import {Input} from '@momoki/studio/reference/components/ui/input';
+import {PageHeader} from '@momoki/studio/reference/components/layout/PageLayout';
 import {native, type NativeState} from './bridge';
-import '@cuepoint/studio/reference/styles.css';
+import '@momoki/studio/reference/styles.css';
 import './prototype.css';
 
 const Acceptance = __ACCEPTANCE__ ? lazy(() => import('./acceptance')) : null;
@@ -81,7 +81,7 @@ function App() {
         });
     };
     return <div className="prototype-shell dark">
-        <aside className="prototype-nav"><strong>小光点</strong><span>原生工作区原型</span><p>SQLite · 文件副本</p>
+        <aside className="prototype-nav"><strong>默默</strong><span>原生工作区原型</span><p>SQLite · 文件副本</p>
             <small>{__ACCEPTANCE__ ? '独立验收应用' : '离线应用'}</small></aside>
         <main className="prototype-main">
             <PageHeader title="本地工作区" description="在软件内管理项目和素材，原生层负责持久化与备份。"/>

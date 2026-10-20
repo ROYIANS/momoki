@@ -1,5 +1,5 @@
 import {describe, expect, it, vi} from "vitest";
-import {selectCapabilityGroups} from "@cuepoint/agent-core";
+import {selectCapabilityGroups} from "@momoki/agent-core";
 import {compileMcpInputSchema} from "@/features/agent/mcp/runtime/schema";
 import {collectMcpPages, mcpBindingMatches, mcpPublicToolName, normalizeMcpManifest} from "@/features/agent/mcp/runtime/manifest";
 import {composeMcpRunSnapshot, mcpResourceHelperNames, resolveMcpSnapshotTool} from "@/features/agent/mcp/runtime/snapshot";

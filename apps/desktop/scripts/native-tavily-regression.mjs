@@ -20,7 +20,7 @@ function inspectReport(report,identifier) {
     if(!final)return false;
     if(events.length!==expected.length||events.some((event,index)=>event.name!==expected[index]))throw new Error('Tavily check sequence incomplete');
     const identity=events[0].detail;
-    if(identity?.profileId!==identifier||identity.databaseName!==`cuepoint-desktop:${identifier}:v1`||identity.fixtureOrigin!==new URL(endpoint).origin||identity.paidRequests!==0)throw new Error('Tavily isolation receipt mismatch');
+    if(identity?.profileId!==identifier||identity.databaseName!==`momoki-desktop:${identifier}:v1`||identity.fixtureOrigin!==new URL(endpoint).origin||identity.paidRequests!==0)throw new Error('Tavily isolation receipt mismatch');
     if(events[1].detail?.requests!==1||events[1].detail.method!=='GET'||events[1].detail.path!=='/usage'||
         events[2].detail?.requests!==1||events[2].detail.method!=='POST'||events[2].detail.path!=='/search'||
         events[3].detail?.requests!==1||events[3].detail.method!=='POST'||events[3].detail.path!=='/extract'||
@@ -31,8 +31,8 @@ function inspectReport(report,identifier) {
 }
 
 function checkOracle() {
-    const identifier='dev.cuepoint.review.tavily.oracle';
-    const details=[{profileId:identifier,databaseName:`cuepoint-desktop:${identifier}:v1`,fixtureOrigin:new URL(endpoint).origin,paidRequests:0},
+    const identifier='dev.momoki.review.tavily.oracle';
+    const details=[{profileId:identifier,databaseName:`momoki-desktop:${identifier}:v1`,fixtureOrigin:new URL(endpoint).origin,paidRequests:0},
         {requests:1,method:'GET',path:'/usage'},{requests:1,method:'POST',path:'/search'},{requests:1,method:'POST',path:'/extract'},
         {requests:0},{configurationRemoved:true,requests:3},{passed:true,requests:3,paidRequests:0,liveTavilyAccountVerified:false,wholeProductAcceptanceComplete:false,wholeHistoricalAcceptanceComplete:false}];
     const good={version:1,finishedAt:null,events:expected.map((name,index)=>({name,ok:true,detail:details[index]}))};
@@ -58,13 +58,13 @@ async function run() {
     const launchBuilt=process.argv.includes('--launch-built');
     const buildOnly=process.argv.includes('--build-only');
     if(launchBuilt&&buildOnly)throw new Error('Choose build-only or launch-built');
-    let identifier=`dev.cuepoint.review.tavily.${randomUUID()}`;
-    const appName='Cuepoint Tavily Review';
+    let identifier=`dev.momoki.review.tavily.${randomUUID()}`;
+    const appName='Momoki Tavily Review';
     const frontend=resolve(root,'frontend');
     const configPath=resolve(root,'tavily-config.json');
     const sourcePaths=['ui/tavilyProbeFetch.ts','ui/tavilyProbe.ts','ui/tavilyProbeMain.tsx','ui/tavily-probe/index.html','ui/acceptanceEvidence.ts','scripts/native-tavily-regression.mjs','../../packages/studio/src/features/references/providers/tavily.ts','../../packages/studio/src/platform/runtime/runtimeFetch.ts','../../packages/studio/src/platform/product/httpPolicy.ts','../../packages/studio/src/platform/http/requestBoundary.ts','../../tooling/native-product-fixture.mjs'];
     const sources=async()=>Object.fromEntries(await Promise.all(sourcePaths.map(async path=>[path,createHash('sha256').update(await readFile(resolve(base,path))).digest('hex')])));
-    const before=await sources();const env={...process.env,CUEPOINT_ACCEPTANCE_ROOT:root};
+    const before=await sources();const env={...process.env,MOMOKI_ACCEPTANCE_ROOT:root};
     const deadline=Date.now()+15*60*1000;
     let child,app,bundle,outcome='incomplete',interrupted=false;
     const results=[];
@@ -76,7 +76,7 @@ async function run() {
         await build({configFile:false,root:resolve(base,'ui/tavily-probe'),plugins:[react(),tailwind()],
             define:{__ACCEPTANCE__:'true',__STREAM_ENDPOINT__:JSON.stringify(endpoint),__STREAM_TOKEN__:JSON.stringify('synthetic-tavily-probe-only')},
             build:{outDir:frontend,emptyOutDir:true,assetsInlineLimit:0},worker:{format:'es'}});
-        const config={productName:appName,identifier,mainBinaryName:'cuepoint-prototype',build:{frontendDist:frontend},
+        const config={productName:appName,identifier,mainBinaryName:'momoki',build:{frontendDist:frontend},
             app:{windows:[{label:'main',create:false,title:'Tavily 原生合成接口验收',width:1120,height:780,minWidth:760,minHeight:520}],
                 security:{capabilities:['main',{identifier:'acceptance',windows:['main'],permissions:['allow-acceptance-request']}],
                     csp:"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; media-src 'self' blob:; worker-src 'self' blob:; font-src 'self' data:; connect-src ipc: http://ipc.localhost 'self'; object-src 'none'; frame-src 'none'; base-uri 'none'"}}};
@@ -91,8 +91,8 @@ async function run() {
         if(built.code!==0||interrupted)throw new Error('Tavily probe native build failed/interrupted; raw log retained');
         const archived=resolve(root,`${appName}.app`);
         await cp(resolve(base,'.tools/target/release/bundle/macos',`${appName}.app`),archived,{recursive:true,errorOnExist:true,force:false});
-        const binary=resolve(archived,'Contents/MacOS/cuepoint-prototype');
-        bundle={app:archived,identifier,storage:'sqlite',webkitStoreId:createHash('sha256').update(`cuepoint-product-profile-v1:${identifier}:sqlite`).digest('hex').slice(0,32),binarySha256:createHash('sha256').update(await readFile(binary)).digest('hex')};
+        const binary=resolve(archived,'Contents/MacOS/momoki');
+        bundle={app:archived,identifier,storage:'sqlite',webkitStoreId:createHash('sha256').update(`momoki-product-profile-v1:${identifier}:sqlite`).digest('hex').slice(0,32),binarySha256:createHash('sha256').update(await readFile(binary)).digest('hex')};
         await writeFile(resolve(root,'native-tavily-bundle.json'),JSON.stringify(bundle,null,2)+'\n');
         if(buildOnly){outcome='built';console.log(`Built only; no app launched: ${archived}\nRun root: ${root}`);return;}
         } else {
@@ -100,9 +100,9 @@ async function run() {
             const buildReceipt=JSON.parse(await readFile(resolve(root,'native-tavily-build-receipt.json'),'utf8'));
             identifier=bundle.identifier;
             if(buildReceipt.outcome!=='built'||!buildReceipt.stable||JSON.stringify(before)!==JSON.stringify(buildReceipt.after)||
-                !/^dev\.cuepoint\.review\.tavily\.[a-f0-9-]{36}$/.test(identifier)||bundle.app!==resolve(root,`${appName}.app`))throw new Error('Built probe/source identity changed before launch');
+                !/^dev\.momoki\.review\.tavily\.[a-f0-9-]{36}$/.test(identifier)||bundle.app!==resolve(root,`${appName}.app`))throw new Error('Built probe/source identity changed before launch');
         }
-        const binary=resolve(bundle.app,'Contents/MacOS/cuepoint-prototype');
+        const binary=resolve(bundle.app,'Contents/MacOS/momoki');
         if(createHash('sha256').update(await readFile(binary)).digest('hex')!==bundle.binarySha256)throw new Error('Built probe binary changed');
         const appLog=await open(resolve(root,'tavily-app.log'),'wx');
         try{app=spawn(binary,[],{env,stdio:['ignore',appLog.fd,appLog.fd]});}finally{await appLog.close();}

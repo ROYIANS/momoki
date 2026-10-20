@@ -843,7 +843,7 @@ impl Workspace {
         database::validate_state_closure(&state)?;
         database::validate_receipts(&db, &state.workspace_id)?;
         if let Some(marker) = ready
-            && (marker.format != "cuepoint.workspace.ready.v1"
+            && (marker.format != "momoki.workspace.ready.v1"
                 || marker.schema != SCHEMA
                 || marker.workspace_id != state.workspace_id)
         {
@@ -867,7 +867,7 @@ impl Workspace {
                 &workspace.root,
                 "workspace.ready.json",
                 &ReadyMarker {
-                    format: "cuepoint.workspace.ready.v1".into(),
+                    format: "momoki.workspace.ready.v1".into(),
                     schema: SCHEMA,
                     workspace_id: workspace.id.clone(),
                 },
@@ -1808,7 +1808,7 @@ mod native_boundary_tests {
     impl Fixture {
         fn new() -> Self {
             let path =
-                std::env::temp_dir().join(format!("cuepoint-boundary-{}", uuid::Uuid::new_v4()));
+                std::env::temp_dir().join(format!("momoki-boundary-{}", uuid::Uuid::new_v4()));
             fs::create_dir(&path).unwrap();
             fs::write(path.join("database.sqlite"), b"ordinary database bytes").unwrap();
             fs::write(path.join("writer.sqlite"), b"ordinary writer bytes").unwrap();

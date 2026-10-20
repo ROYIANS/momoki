@@ -2,7 +2,7 @@ import {mkdtemp, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
-import type {ResourceGrantRequest} from '@cuepoint/agent-core';
+import type {ResourceGrantRequest} from '@momoki/agent-core';
 import type {TodoRun, TodoCall, TodoResourceFact, Faults} from '../examples/agent-todo/src/types.js';
 import type {TodoStore as Store} from '../examples/agent-todo/src/store.js';
 
@@ -10,16 +10,16 @@ const [major, minor] = process.versions.node.split('.').map(Number);
 const hasSQLite = major > 24 || major === 24 && minor >= 11;
 let api: typeof import('../examples/agent-todo/src/host.js');
 let storage: typeof import('../examples/agent-todo/src/store.js');
-let core: typeof import('@cuepoint/agent-core');
+let core: typeof import('@momoki/agent-core');
 
 // The ordinary Node22 lane discovers this file without importing node:sqlite.
 // The dedicated source config requires Node24.11+ before any tests may run.
 describe.skipIf(!hasSQLite)('Node24 SQLite actual independent Todo source host', () => {
     beforeAll(async () => {
-        [api, storage, core] = await Promise.all([import('../examples/agent-todo/src/host.js'), import('../examples/agent-todo/src/store.js'), import('@cuepoint/agent-core')]);
+        [api, storage, core] = await Promise.all([import('../examples/agent-todo/src/host.js'), import('../examples/agent-todo/src/store.js'), import('@momoki/agent-core')]);
     });
     async function fixture(faults: Faults = {}, install = true) {
-        const directory = await mkdtemp(join(tmpdir(), 'cuepoint-todo-source-'));
+        const directory = await mkdtemp(join(tmpdir(), 'momoki-todo-source-'));
         let store = new storage.TodoStore(join(directory, 'todo.sqlite'), faults);
         if (install) store.installCreateCapability();
         let effects = 0;

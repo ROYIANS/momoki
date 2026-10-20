@@ -1,4 +1,4 @@
-import {selectHistoryByCount,isContextSourcePrefix} from '@cuepoint/agent-core';
+import {selectHistoryByCount,isContextSourcePrefix} from '@momoki/agent-core';
 import type {AgentSelectedReferences} from "../../references/models/referenceInput";
 import {referenceInputOf} from "../../references/models/referenceInput";
 import type {AgentRequestMessage, AgentRun, AgentToolSchema} from "../models/agent";

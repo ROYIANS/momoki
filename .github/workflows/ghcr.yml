@@ -36,7 +36,7 @@ jobs:
         run: rustup toolchain install 1.99.0 --profile minimal
       - name: Prepare fresh native SQLite test probe
         run: |
-          node tooling/prepare-native-test-probe.mjs --cargo "$(rustup which --toolchain 1.99.0 cargo)" --rustc "$(rustup which --toolchain 1.99.0 rustc)" --target-dir "$RUNNER_TEMP/cuepoint-quality-probe-target" --evidence-dir "$RUNNER_TEMP/native-test-probe" --github-env "$GITHUB_ENV"
+          node tooling/prepare-native-test-probe.mjs --cargo "$(rustup which --toolchain 1.99.0 cargo)" --rustc "$(rustup which --toolchain 1.99.0 rustc)" --target-dir "$RUNNER_TEMP/momoki-quality-probe-target" --evidence-dir "$RUNNER_TEMP/native-test-probe" --github-env "$GITHUB_ENV"
       - name: Verify native probe failure contracts
         run: node --test tooling/prepare-native-test-probe.test.mjs
       - name: Test
@@ -91,7 +91,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/royians/cuepoint
+          images: ghcr.io/royians/momoki
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=semver,pattern={{version}}

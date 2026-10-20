@@ -28,7 +28,7 @@ pub(crate) fn show(app: &AppHandle) {
             .and_then(|_| window.set_focus())
             .is_err()
         {
-            eprintln!("Cuepoint: existing window activation failed");
+            eprintln!("Momoki: existing window activation failed");
         }
         window_state(&window.as_ref().window());
     }
@@ -125,9 +125,9 @@ pub(crate) fn setup(app: &mut tauri::App, lifecycle: Arc<Lifecycle>) -> Result<b
         lifecycle.activation.clone(),
         Arc::new(move || show(&handle)),
     )?;
-    let open = MenuItem::with_id(app, "cuepoint-open", "打开 Cuepoint", true, None::<&str>)
+    let open = MenuItem::with_id(app, "momoki-open", "打开 Momoki", true, None::<&str>)
         .map_err(|_| crate::Error::new("lifecycle", "Unable to create application menu"))?;
-    let quit = MenuItem::with_id(app, "cuepoint-quit", "退出 Cuepoint", true, None::<&str>)
+    let quit = MenuItem::with_id(app, "momoki-quit", "退出 Momoki", true, None::<&str>)
         .map_err(|_| crate::Error::new("lifecycle", "Unable to create application menu"))?;
     let menu = Menu::with_items(app, &[&open, &quit])
         .map_err(|_| crate::Error::new("lifecycle", "Unable to create application menu"))?;
@@ -135,14 +135,14 @@ pub(crate) fn setup(app: &mut tauri::App, lifecycle: Arc<Lifecycle>) -> Result<b
         .default_window_icon()
         .cloned()
         .ok_or_else(|| crate::Error::new("lifecycle", "Application tray icon unavailable"))?;
-    TrayIconBuilder::with_id("cuepoint-main")
+    TrayIconBuilder::with_id("momoki-main")
         .icon(icon)
-        .tooltip("Cuepoint")
+        .tooltip("Momoki")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| match event.id.as_ref() {
-            "cuepoint-open" => show(app),
-            "cuepoint-quit" => request_quit(app),
+            "momoki-open" => show(app),
+            "momoki-quit" => request_quit(app),
             _ => {}
         })
         .on_tray_icon_event(|tray, event| {
@@ -174,7 +174,7 @@ pub(crate) fn request_quit(app: &AppHandle) {
         return;
     };
     let app = app.clone();
-    eprintln!("Cuepoint lifecycle: Quit intent checking drafts");
+    eprintln!("Momoki lifecycle: Quit intent checking drafts");
     emit(&app, &lifecycle);
     tauri::async_runtime::spawn(async move {
         let initial = tokio::time::timeout(Duration::from_secs(1), async {
@@ -204,7 +204,7 @@ pub(crate) fn request_quit(app: &AppHandle) {
         if !lifecycle.quiesce(&intent) {
             return;
         }
-        eprintln!("Cuepoint lifecycle: Quit quiescing");
+        eprintln!("Momoki lifecycle: Quit quiescing");
         let bridge = app.state::<Arc<ProductBridge>>().inner().clone();
         let quiesce = bridge.clone();
         // Blocking owner/fence cleanup lives off the async deadline task.
@@ -224,7 +224,7 @@ pub(crate) fn request_quit(app: &AppHandle) {
         .await;
         if settled.is_err() {
             eprintln!(
-                "Cuepoint: cooperative Quit deadline elapsed; original outcomes remain unconfirmed"
+                "Momoki: cooperative Quit deadline elapsed; original outcomes remain unconfirmed"
             );
         }
         // One shared budget: waits cannot multiply by resource count. If any
@@ -254,11 +254,11 @@ pub(crate) fn request_quit(app: &AppHandle) {
         .await;
         if native.is_err() {
             eprintln!(
-                "Cuepoint: native Quit cleanup deadline elapsed; cleanup remains interrupted"
+                "Momoki: native Quit cleanup deadline elapsed; cleanup remains interrupted"
             );
         }
         lifecycle.exiting();
-        eprintln!("Cuepoint lifecycle: Quit exiting");
+        eprintln!("Momoki lifecycle: Quit exiting");
         emit(&app, &lifecycle);
         app.exit(0);
     });

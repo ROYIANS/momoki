@@ -1,10 +1,10 @@
 # Independent Todo Agent
 
-This Node >=24.11 CLI uses `node:sqlite`, its own tables and typed Todo services. It calls the same emitted `@cuepoint/agent-core` execution loop as Cuepoint and consumes the public provider codec. It imports no Studio source or product schema. The model is deterministic and makes no paid requests.
+This Node >=24.11 CLI uses `node:sqlite`, its own tables and typed Todo services. It calls the same emitted `@momoki/agent-core` execution loop as Momoki and consumes the public provider codec. It imports no Studio source or product schema. The model is deterministic and makes no paid requests.
 
 From the repository root, run `pnpm agent:example:check` with the repository's pinned pnpm. The command builds and packs both libraries, installs their tarballs offline into a temporary consumer with an empty independent package store, compiles copied example sources with strict emitted declarations, then runs every process and SQLite conformance test there. It prints the retained evidence directory. Source aliases and workspace links are absent from that consumer.
 
-For interactive local exploration, build with `pnpm --filter @cuepoint/agent-todo build`, then run:
+For interactive local exploration, build with `pnpm --filter @momoki/agent-todo build`, then run:
 
 ```sh
 node examples/agent-todo/dist/cli.js begin /tmp/todo.sqlite todo

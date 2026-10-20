@@ -401,12 +401,12 @@ mod tests {
     use super::*;
     #[test]
     fn desktop_lifecycle_lock_child() {
-        let Some(path) = std::env::var_os("CUEPOINT_LIFECYCLE_TEST_ROOT") else {
+        let Some(path) = std::env::var_os("MOMOKI_LIFECYCLE_TEST_ROOT") else {
             return;
         };
         let admission = acquire(Path::new(&path)).unwrap();
         let acquired = matches!(admission, Admission::Owner(_));
-        if std::env::var_os("CUEPOINT_LIFECYCLE_RACE").is_some() {
+        if std::env::var_os("MOMOKI_LIFECYCLE_RACE").is_some() {
             if acquired {
                 fs::write(
                     Path::new(&path).join(format!("primary-{}", std::process::id())),
@@ -424,7 +424,7 @@ mod tests {
         }
         assert_eq!(
             acquired,
-            std::env::var_os("CUEPOINT_LIFECYCLE_EXPECT_OWNER").is_some()
+            std::env::var_os("MOMOKI_LIFECYCLE_EXPECT_OWNER").is_some()
         );
     }
     fn child(root: &Path, owner: bool) {
@@ -435,18 +435,18 @@ mod tests {
                 "desktop_lifecycle::singleton::tests::desktop_lifecycle_lock_child",
                 "--nocapture",
             ])
-            .env("CUEPOINT_LIFECYCLE_TEST_ROOT", root);
+            .env("MOMOKI_LIFECYCLE_TEST_ROOT", root);
         if owner {
-            command.env("CUEPOINT_LIFECYCLE_EXPECT_OWNER", "1");
+            command.env("MOMOKI_LIFECYCLE_EXPECT_OWNER", "1");
         } else {
-            command.env_remove("CUEPOINT_LIFECYCLE_EXPECT_OWNER");
+            command.env_remove("MOMOKI_LIFECYCLE_EXPECT_OWNER");
         }
         assert!(command.status().unwrap().success());
     }
     #[tokio::test]
     async fn desktop_lifecycle_real_process_lock_activation_and_release() {
         let root =
-            std::env::temp_dir().join(format!("cuepoint-lifecycle-{}", uuid::Uuid::new_v4()));
+            std::env::temp_dir().join(format!("momoki-lifecycle-{}", uuid::Uuid::new_v4()));
         let Admission::Owner(owner) = acquire(&root).unwrap() else {
             panic!("fresh owner");
         };
@@ -475,7 +475,7 @@ mod tests {
     #[test]
     fn desktop_lifecycle_invalid_lock_fails_closed() {
         let root =
-            std::env::temp_dir().join(format!("cuepoint-lifecycle-{}", uuid::Uuid::new_v4()));
+            std::env::temp_dir().join(format!("momoki-lifecycle-{}", uuid::Uuid::new_v4()));
         fs::create_dir_all(root.join("owner.lock")).unwrap();
         assert!(acquire(&root).is_err());
         fs::remove_dir_all(root).unwrap();
@@ -483,7 +483,7 @@ mod tests {
     #[test]
     fn desktop_lifecycle_simultaneous_processes_and_crash_release() {
         let root =
-            std::env::temp_dir().join(format!("cuepoint-lifecycle-{}", uuid::Uuid::new_v4()));
+            std::env::temp_dir().join(format!("momoki-lifecycle-{}", uuid::Uuid::new_v4()));
         fs::create_dir_all(&root).unwrap();
         let spawn = || {
             std::process::Command::new(std::env::current_exe().unwrap())
@@ -492,8 +492,8 @@ mod tests {
                     "desktop_lifecycle::singleton::tests::desktop_lifecycle_lock_child",
                     "--nocapture",
                 ])
-                .env("CUEPOINT_LIFECYCLE_TEST_ROOT", &root)
-                .env("CUEPOINT_LIFECYCLE_RACE", "1")
+                .env("MOMOKI_LIFECYCLE_TEST_ROOT", &root)
+                .env("MOMOKI_LIFECYCLE_RACE", "1")
                 .spawn()
                 .unwrap()
         };
@@ -548,7 +548,7 @@ mod tests {
     #[tokio::test]
     async fn desktop_lifecycle_activation_readiness_frames_slots_and_owner_drop() {
         let root =
-            std::env::temp_dir().join(format!("cuepoint-lifecycle-{}", uuid::Uuid::new_v4()));
+            std::env::temp_dir().join(format!("momoki-lifecycle-{}", uuid::Uuid::new_v4()));
         let Admission::Owner(owner) = acquire(&root).unwrap() else {
             panic!("owner")
         };

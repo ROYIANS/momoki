@@ -137,7 +137,7 @@ export function TaskBoard({tasks, runs, projects, onOpenTask, onBack}: {
                                         {task.plan.length > 0 && <div className="agent-task-mini-progress"><span
                                             style={{width: `${done / task.plan.length * 100}%`}}/></div>}
                                         <footer><span><Sparkles size={12}
-                                                                aria-hidden/>小光点</span><span>{task.plan.length ? <>
+                                                                aria-hidden/>默默</span><span>{task.plan.length ? <>
                                             <Check
                                                 size={12}
                                                 aria-hidden/>{done}/{task.plan.length}</> : "待拆解步骤"}</span>

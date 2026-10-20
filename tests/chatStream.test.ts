@@ -1,4 +1,4 @@
-import {accumulateStreamDelta, createReasoningAccum, finalizeReasoningAccum} from "@cuepoint/agent-core";
+import {accumulateStreamDelta, createReasoningAccum, finalizeReasoningAccum} from "@momoki/agent-core";
 import { describe, expect, it, vi } from "vitest";
 import {
   streamChatCompletions,

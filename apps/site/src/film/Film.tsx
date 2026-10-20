@@ -1,5 +1,5 @@
 import {type CSSProperties, type ReactNode, useEffect, useRef, useState} from "react";
-import {GITHUB_URL, LOGO_SRC} from "@cuepoint/distribution/brand";
+import {GITHUB_URL, LOGO_SRC, PRODUCT_NAME_ZH, STUDIO_NAME_ZH, STUDIO_URL} from "@momoki/distribution/brand";
 import {PRIVACY} from "../content/copy";
 import {Credits} from "../credits/Credits";
 import type {DownloadData} from "../download/useReleases";
@@ -24,7 +24,7 @@ function Header({toggle}: { toggle: ReactNode }) {
         <header className="lp-header">
             <div className="lp-header-inner">
                 {toggle}
-                <a className="lp-brand" href="/"><img src={LOGO_SRC} alt="" width={28} height={28}/><span>小光点</span></a>
+                <a className="lp-brand" href="/"><img src={LOGO_SRC} alt="" width={28} height={28}/><span>默默</span></a>
                 <nav aria-label="主要"><IconControl icon="enter" label="进入应用" reveal="hover" umami="enter-app"
                                                     href="/agent"/></nav>
             </div>
@@ -37,6 +37,7 @@ function Footer() {
         <footer className="lp-footer">
             <div className="lp-wrap">
                 <p>{PRIVACY.text}</p>
+                <p>{PRODUCT_NAME_ZH} · <a href={STUDIO_URL} rel="noopener noreferrer">{STUDIO_NAME_ZH}</a>出品</p>
                 <p className="lp-links">
                     <a href={GITHUB_URL} rel="noopener noreferrer">GitHub</a>
                     <a href={LICENSE_URL} rel="noopener noreferrer">MIT 协议</a>

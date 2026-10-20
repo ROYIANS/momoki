@@ -53,7 +53,7 @@ impl MediaServer {
         });
         let running = Arc::clone(&state);
         let listener = thread::Builder::new()
-            .name("cuepoint-media-local".into())
+            .name("momoki-media-local".into())
             .spawn(move || {
                 while running.alive.load(Ordering::SeqCst) {
                     match listener.accept() {
@@ -82,7 +82,7 @@ impl MediaServer {
                             }
                             let connection = Connection(Arc::clone(&running));
                             let _ = thread::Builder::new()
-                                .name("cuepoint-media-read".into())
+                                .name("momoki-media-read".into())
                                 .spawn(move || {
                                     let result = serve(&mut stream, &connection.0);
                                     #[cfg(test)]

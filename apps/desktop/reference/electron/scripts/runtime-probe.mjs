@@ -3,7 +3,7 @@ import {DatabaseSync, backup} from 'node:sqlite';
 import {mkdtemp, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-const root = await mkdtemp(join(tmpdir(), 'cuepoint-electron-probe-'));
+const root = await mkdtemp(join(tmpdir(), 'momoki-electron-probe-'));
 app.setPath('userData', join(root, 'profile'));
 try {
   await app.whenReady();

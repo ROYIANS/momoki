@@ -1,6 +1,6 @@
 import {describe, expect, it, vi} from 'vitest';
 import {createCapabilityRegistry, createToolFactory, requiresToolApproval, toolMetadataMatches, type ToolBindingIdentity,
-    type ToolContext, type ToolDefinition, type ToolSpec} from '@cuepoint/agent-core';
+    type ToolContext, type ToolDefinition, type ToolSpec} from '@momoki/agent-core';
 
 type Context = ToolContext<{title: string}>;
 const identity = (registrationId = 'install-1'): ToolBindingIdentity => ({capabilityId: 'example/todo-create', version: '1.0.0', registrationId});

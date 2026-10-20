@@ -8,8 +8,8 @@ import {readFileSync} from 'node:fs';
 const base=fileURLToPath(new URL('../',import.meta.url));
 const projectRoot=resolve(base,'../..');
 const acceptance=process.argv.includes('--acceptance');
-const endpoint=acceptance ? process.env.CUEPOINT_STREAM_ENDPOINT : '';
-const token=acceptance ? process.env.CUEPOINT_STREAM_TOKEN : '';
+const endpoint=acceptance ? process.env.MOMOKI_STREAM_ENDPOINT : '';
+const token=acceptance ? process.env.MOMOKI_STREAM_TOKEN : '';
 if(acceptance && (!endpoint || !/^http:\/\/127\.0\.0\.1:\d+\/v1$/.test(endpoint) || !token)) throw new Error('Acceptance build requires a reserved exact loopback endpoint and test token');
 // The normal bundle is the real product. The historical acceptance harness
 // remains a separate fixture so its locked selectors and evidence do not

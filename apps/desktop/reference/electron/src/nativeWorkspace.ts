@@ -3,8 +3,8 @@ import {backup as sqliteBackup, DatabaseSync} from 'node:sqlite';
 import {lstat, open, unlink} from 'node:fs/promises';
 import {constants} from 'node:fs';
 import {dirname, join} from 'node:path';
-import type {WorkspaceId} from '@cuepoint/studio/reference/lib/workspace';
-import {workspaceId} from '@cuepoint/studio/reference/lib/workspace';
+import type {WorkspaceId} from '@momoki/studio/reference/lib/workspace';
+import {workspaceId} from '@momoki/studio/reference/lib/workspace';
 import type {Asset, AssetReference, BackupManifest, ImportRequest, Project, WorkspaceState} from './contracts';
 import {
     BACKUP_MANIFEST,
@@ -350,7 +350,7 @@ export class NativeWorkspace {
             for (const a of snapshot.assets) sameSizeHash(await copyOwned(this.root, a.ref.relativePath, root, a.ref.relativePath, operationSignal), a);
             const database = await hashFile(root, 'workspace.sqlite', operationSignal);
             const manifest: BackupManifest = {
-                format: 'cuepoint.native-backup.v1', schema: 1, workspaceId: this.id, database,
+                format: 'momoki.native-backup.v1', schema: 1, workspaceId: this.id, database,
                 assets: snapshot.assets.map(a => ({id: a.id, path: a.ref.relativePath, size: a.size, hash: a.hash}))
             };
             await this.point('backupBeforeComplete');

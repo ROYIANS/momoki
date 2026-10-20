@@ -2,7 +2,7 @@
 
 ## 1. Scope / Trigger
 
-`@cuepoint/agent-core` exposes pure helpers for portable, text-only `SKILL.md`
+`@momoki/agent-core` exposes pure helpers for portable, text-only `SKILL.md`
 documents. Installation, YAML decoding, hashes, persistence, model/tool binding
 and filesystem authority remain host responsibilities. Another consumer can use
 these helpers with an ordinary byte map, without Studio, React, Node or a product

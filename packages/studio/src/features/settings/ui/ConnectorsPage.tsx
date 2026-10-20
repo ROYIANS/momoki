@@ -17,7 +17,7 @@ import type {ConnectorConfig, ConnectorDefinitionId} from "../models/connector";
 import {CONNECTOR_CATALOG, type ConnectorDefinition} from "../models/catalog";
 import {maskApiKey} from "../../agent/providers/openaiCompatible";
 import {listConnectorModels, testConnectorConnection} from "../models/connectors";
-import {redactCredentials} from "@cuepoint/agent-providers/http";
+import {redactCredentials} from "@momoki/agent-providers/http";
 
 type EditorState = {
     definition: ConnectorDefinition;

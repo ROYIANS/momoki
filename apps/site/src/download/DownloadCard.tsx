@@ -1,12 +1,12 @@
 import {formatBytes, formatPublished} from "./format";
-import {type AssetChoice, type DetectedPlatform, pickAssets} from "@cuepoint/distribution/platform";
+import {type AssetChoice, type DetectedPlatform, pickAssets} from "@momoki/distribution/platform";
 import {
     type FallbackReason,
     INSTALL_GUIDE_URL,
     type LatestDesktopRelease,
     type ReleaseResult,
     RELEASES_URL
-} from "@cuepoint/distribution/releases";
+} from "@momoki/distribution/releases";
 
 const FALLBACK_TEXT: Record<FallbackReason, string> = {
     network: "暂时无法获取最新版本信息，请直接到 GitHub 查看所有版本。",
@@ -47,7 +47,7 @@ function Ready({release, platform}: { release: LatestDesktopRelease; platform: D
                 {published ? <span>发布于 {published}</span> : null}
             </p>
             {platform.mobile || platform.os === "unknown" ? (
-                <p className="lp-dl-status">{platform.mobile ? "小光点桌面版需要安装在电脑上。你可以先在浏览器中体验，或用电脑打开本页下载。" : "没有识别出你的系统，可在下方选择对应的安装包。"}</p>
+                <p className="lp-dl-status">{platform.mobile ? "默默桌面版需要安装在电脑上。你可以先在浏览器中体验，或用电脑打开本页下载。" : "没有识别出你的系统，可在下方选择对应的安装包。"}</p>
             ) : pick.unsupportedReason ? (
                 <p className="lp-dl-status"><strong>{pick.unsupportedReason}</strong>：目前只提供 x64 安装包，不适用于 ARM
                     设备。可以先在浏览器中体验，或到 GitHub 查看所有版本。</p>

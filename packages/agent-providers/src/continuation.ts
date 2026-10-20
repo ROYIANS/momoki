@@ -1,4 +1,4 @@
-import {estimateTokens, type AgentWireToolCall} from '@cuepoint/agent-core';
+import {estimateTokens, type AgentWireToolCall} from '@momoki/agent-core';
 import type {ResponseItem} from './wire.js';
 
 /** Validate either the ordered received round or the complete durable call ledger. */

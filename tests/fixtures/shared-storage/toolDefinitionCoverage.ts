@@ -8,10 +8,10 @@ import type {Spec} from "@/features/agent/runtime/businessSchemas";
 export * from "../../../packages/studio/src/features/agent/runtime/toolDefinition?coverage-original";
 
 function record(name:string,method:"parse"|"prepare"|"execute",outcome:"fulfilled"|"rejected") {
-    const directory=process.env.CUEPOINT_TOOL_COVERAGE_DIR;
+    const directory=process.env.MOMOKI_TOOL_COVERAGE_DIR;
     if (!directory) return;
     mkdirSync(directory,{recursive:true});
-    appendFileSync(join(directory,`${process.pid}-${process.env.VITEST_POOL_ID ?? "worker"}.jsonl`),JSON.stringify({owner:process.env.CUEPOINT_STORAGE_TEST_OWNER ?? "indexeddb",name,method,outcome,test:expect.getState().currentTestName ?? "unknown"})+"\n");
+    appendFileSync(join(directory,`${process.pid}-${process.env.VITEST_POOL_ID ?? "worker"}.jsonl`),JSON.stringify({owner:process.env.MOMOKI_STORAGE_TEST_OWNER ?? "indexeddb",name,method,outcome,test:expect.getState().currentTestName ?? "unknown"})+"\n");
 }
 
 /** Test-only boundary instrumentation always invokes the current original recipe. */

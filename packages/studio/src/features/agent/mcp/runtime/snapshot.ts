@@ -1,4 +1,4 @@
-import {MAX_LOADED_TOOLS} from "@cuepoint/agent-core";
+import {MAX_LOADED_TOOLS} from "@momoki/agent-core";
 import type {McpHostBinding} from "../../../../platform/runtime/mcp";
 import type {McpRunGeneration, McpRunSnapshot} from "../models/manifest";
 import {MCP_LIMITS} from "./limits";

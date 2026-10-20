@@ -1,5 +1,5 @@
 import {afterEach, describe, expect, it, vi} from "vitest";
-import {replaceContinuationBase} from "@cuepoint/agent-core";
+import {replaceContinuationBase} from "@momoki/agent-core";
 import {db} from "@/platform/product/store";
 import {createChatThread} from "@/features/agent/commands/chat";
 import {beginAgentRun} from "@/features/agent/commands/agentRuns";

@@ -1,9 +1,9 @@
-import {readHttpJson} from '@cuepoint/agent-providers/http';
+import {readHttpJson} from '@momoki/agent-providers/http';
 import {requestOnce} from "../../../platform/http/requestBoundary";
-import {normalizeBaseUrl} from "@cuepoint/agent-providers/http";
-import {isReadAbort, readResponseBlob, ResponseLimitError} from "@cuepoint/agent-providers/http";
+import {normalizeBaseUrl} from "@momoki/agent-providers/http";
+import {isReadAbort, readResponseBlob, ResponseLimitError} from "@momoki/agent-providers/http";
 import {MAX_ERROR_BYTES, MAX_JSON_BYTES, MAX_MEDIA_DOWNLOAD_BYTES} from "../../../platform/media/limits";
-import {redactCredentials} from "@cuepoint/agent-providers/http";
+import {redactCredentials} from "@momoki/agent-providers/http";
 import {type ChatModelMetadata, parseModelMetadata} from "../../settings/models/modelMetadata";
 
 export type AIHubMixCredentials = { baseUrl: string; apiKey: string };

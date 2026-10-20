@@ -12,7 +12,7 @@ export const appVersion = (JSON.parse(readFileSync(join(repositoryRoot, "package
 // verifies collisions before merging the two manifests and module reports.
 export function chunkModuleReport(): Plugin {
     return {
-        name: "cuepoint-chunk-module-report",
+        name: "momoki-chunk-module-report",
         apply: "build",
         generateBundle(_options, bundle) {
             const chunks: Record<string, string[]> = {};
@@ -28,7 +28,7 @@ export function chunkModuleReport(): Plugin {
 
 export function sitePublicFiles(): Plugin {
     return {
-        name: "cuepoint-site-public",
+        name: "momoki-site-public",
         generateBundle() {
             const directory = join(repositoryRoot, "apps/site/public");
             for (const file of readdirSync(directory)) this.emitFile({type: "asset", fileName: file, source: readFileSync(join(directory, file))});

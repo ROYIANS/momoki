@@ -1,4 +1,4 @@
-import type {InstalledSkillDescriptor, SkillMetadata} from "@cuepoint/agent-core";
+import type {InstalledSkillDescriptor, SkillMetadata} from "@momoki/agent-core";
 
 export interface SkillComponent {
     readonly path: string;

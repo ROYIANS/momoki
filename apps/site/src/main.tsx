@@ -1,6 +1,6 @@
 import {type ReactNode, StrictMode, useEffect} from "react";
 import {createRoot} from "react-dom/client";
-import {initUmami} from "@cuepoint/distribution/analytics";
+import {initUmami} from "@momoki/distribution/analytics";
 import {Landing} from "./Landing";
 import "./styles/landing.css";
 

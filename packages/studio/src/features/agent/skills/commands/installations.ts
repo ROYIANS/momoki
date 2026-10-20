@@ -1,4 +1,4 @@
-import {formatSkillCatalogue, SKILL_LIMITS} from "@cuepoint/agent-core";
+import {formatSkillCatalogue, SKILL_LIMITS} from "@momoki/agent-core";
 import {createId, nowIso} from "../../../../platform/identity";
 import {sha256Bytes} from "../../../../platform/media/sha256";
 import {db as productDb} from "../../../../platform/product/store";

@@ -5,7 +5,7 @@ import {mkdtemp,readFile,realpath,rm,writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 
-const marker='\nCUEPOINT_LOGGED_RESULT:';
+const marker='\nMOMOKI_LOGGED_RESULT:';
 const driver=`
 import {readFileSync} from 'node:fs';
 import {runLoggedProcess} from ${JSON.stringify(new URL('./logged-process.mjs',import.meta.url).href)};
@@ -20,7 +20,7 @@ try {
 }
 `;
 async function fixture(source,options={}) {
-    const directory=await mkdtemp(join(tmpdir(),'cuepoint logged process 测试 '));
+    const directory=await mkdtemp(join(tmpdir(),'momoki logged process 测试 '));
     const childPath=join(directory,'actual child.mjs'),driverPath=join(directory,'driver.mjs'),configPath=join(directory,'config.json');
     const config={command:process.execPath,args:[childPath],cwd:directory,env:{},logPath:join(directory,'check.log'),...options};
     await writeFile(childPath,source);await writeFile(driverPath,driver);await writeFile(configPath,JSON.stringify(config));
@@ -67,7 +67,7 @@ test('forwards both live streams and retains all multi-MiB bytes through EOF',{t
 });
 test('preserves cwd, environment and literal argument boundaries without a shell',{timeout:10000},async ()=> {
     const args=['with spaces','中文','$(false)','; exit 0','literal `code`'];
-    const f=await fixture(`process.stdout.write(JSON.stringify({cwd:process.cwd(),value:process.env.CUEPOINT_LOG_FIXTURE,args:process.argv.slice(2)}));`,{env:{CUEPOINT_LOG_FIXTURE:'exact fixture value'}});
+    const f=await fixture(`process.stdout.write(JSON.stringify({cwd:process.cwd(),value:process.env.MOMOKI_LOG_FIXTURE,args:process.argv.slice(2)}));`,{env:{MOMOKI_LOG_FIXTURE:'exact fixture value'}});
     try {
         const configPath=join(f.directory,'config.json'),config=JSON.parse(await readFile(configPath,'utf8'));
         config.args.push(...args);await writeFile(configPath,JSON.stringify(config));
@@ -86,7 +86,7 @@ test('retains a nonzero exit and panic text in both live output and evidence',{t
     } finally {await f.cleanup();}
 });
 test('spawn failure rejects after child close and leaves a closed evidence log',{timeout:10000},async ()=> {
-    const f=await fixture('',{command:join(tmpdir(),'cuepoint-executable-does-not-exist')});
+    const f=await fixture('',{command:join(tmpdir(),'momoki-executable-does-not-exist')});
     try {
         const result=await f.run();assert.equal(result.code,1);assert.equal(result.outcome.error.code,'ENOENT');
         assert.equal((await readFile(f.logPath)).length,0);
@@ -113,7 +113,7 @@ test('an existing log fails before spawning and cannot be overwritten',{timeout:
     } finally {await f.cleanup();}
 });
 test('a missing log directory fails before spawning',{timeout:10000},async ()=> {
-    const f=await fixture('',{logPath:join(tmpdir(),'cuepoint-log-directory-does-not-exist','check.log')});
+    const f=await fixture('',{logPath:join(tmpdir(),'momoki-log-directory-does-not-exist','check.log')});
     try {const result=await f.run();assert.equal(result.code,1);assert.equal(result.outcome.error.code,'ENOENT');}
     finally {await f.cleanup();}
 });

@@ -7,7 +7,7 @@ Trellis task retrospectives or verified cross-task memory. IndexedDB v11 adds
 `contextCompactions` with `id, threadId, runId, status, createdAt` indexes.
 
 ## 2. Signatures
-- `@cuepoint/agent-core` owns `ContextPolicy`, `DEFAULT_CONTEXT_POLICY`, `normalizeContextPolicy(value?)`, `estimateTokens(text)` and `budgetEnvelope(messages, tools, capacity?, hasSummary?, extraTokens?)`; Studio keeps its concrete source/materialization projections.
+- `@momoki/agent-core` owns `ContextPolicy`, `DEFAULT_CONTEXT_POLICY`, `normalizeContextPolicy(value?)`, `estimateTokens(text)` and `budgetEnvelope(messages, tools, capacity?, hasSummary?, extraTokens?)`; Studio keeps its concrete source/materialization projections.
 - `updateContextPolicy(threadId | undefined, policy)` — thread or new-thread defaults.
 - `resetThreadContextPolicy(threadId)` / `saveContextPolicyAsDefault(threadId)`.
 - `selectContextHistory(messages, policy): ContextSource[]`.

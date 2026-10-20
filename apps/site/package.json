@@ -1,5 +1,5 @@
 {
-  "name": "@cuepoint/site",
+  "name": "@momoki/site",
   "version": "0.1.6",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "types": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@cuepoint/distribution": "workspace:*",
+    "@momoki/distribution": "workspace:*",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },

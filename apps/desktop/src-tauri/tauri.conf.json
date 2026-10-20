@@ -1,9 +1,9 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Cuepoint",
-  "mainBinaryName": "cuepoint-prototype",
+  "productName": "Momoki",
+  "mainBinaryName": "momoki",
   "version": "0.1.6",
-  "identifier": "dev.cuepoint.prototype.offline",
+  "identifier": "design.tulai.momoki",
   "build": {
     "frontendDist": "../dist/normal"
   },
@@ -18,7 +18,7 @@
       {
         "label": "main",
         "create": false,
-        "title": "小光点 Cuepoint",
+        "title": "默默 Momoki",
         "width": 1120,
         "height": 780,
         "minWidth": 760,

@@ -8,7 +8,7 @@ import {createChatThread} from "@/features/agent/commands/chat";
 import {deleteChatThread} from "@/features/agent/commands/lifecycle";
 import type {ConnectorConfig} from "@/features/settings/models/connector";
 import {executeChatRun} from "@/features/agent/runtime/runChat";
-import {createRunWriter} from "@cuepoint/agent-core";
+import {createRunWriter} from "@momoki/agent-core";
 import { recoverAbandonedRuns, withThreadRunLock, type ThreadLockManager } from "@/features/agent/runtime/runOwnership";
 
 const connector: ConnectorConfig = { id: "cx", protocol: "openai-compatible", definitionId: "openai-compatible", baseUrl: "https://example.com/v1", apiKey: "secret-test-key", updatedAt: "2026-09-18T00:00:00Z" };

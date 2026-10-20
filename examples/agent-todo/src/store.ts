@@ -2,8 +2,8 @@ import {DatabaseSync} from 'node:sqlite';
 import {randomUUID} from 'node:crypto';
 import {mkdirSync} from 'node:fs';
 import {dirname} from 'node:path';
-import {canSettleRun, createCapabilityLoading, modelStepLimitReached, offeredToolNames, offeredToolNamesForCall, requiresToolApproval, toolMetadataMatches, selectCapabilityGroups, type AgentRunOutput, type AgentRunStatus, type AgentPermissionMode, type ToolBindingIdentity, type ResourceGrantRequest, type ResourceGrantSnapshot, type ResourceGrantRef} from '@cuepoint/agent-core';
-import {appendResponseToolResult} from '@cuepoint/agent-providers';
+import {canSettleRun, createCapabilityLoading, modelStepLimitReached, offeredToolNames, offeredToolNamesForCall, requiresToolApproval, toolMetadataMatches, selectCapabilityGroups, type AgentRunOutput, type AgentRunStatus, type AgentPermissionMode, type ToolBindingIdentity, type ResourceGrantRequest, type ResourceGrantSnapshot, type ResourceGrantRef} from '@momoki/agent-core';
+import {appendResponseToolResult} from '@momoki/agent-providers';
 import {RolledBackError, UnknownOutcomeError, type Faults, type Scenario, type TodoRun, type TodoCall, type TodoSummary, type TodoAuthority, type TodoResourceFact, type TodoAction} from './types.js';
 import {CREATE_CAPABILITY, CREATE_VERSION, actionOf, createTodoToolset, previewTitle, registry, validate} from './tools.js';
 

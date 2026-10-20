@@ -2,7 +2,7 @@ import {createHash} from 'node:crypto';
 
 export const WORKFLOW='.github/workflows/desktop-release.yml';
 const BOOTSTRAP_BRANCH='codex/desktop-release-pipeline';
-export const PRODUCT=Object.freeze({name:'Cuepoint',identifier:'dev.cuepoint.prototype.offline',binary:'cuepoint-prototype',profile:'normal',storage:'sqlite',features:['product-sqlite']});
+export const PRODUCT=Object.freeze({name:'Momoki',identifier:'design.tulai.momoki',binary:'momoki',profile:'normal',storage:'sqlite',features:['product-sqlite']});
 const common=['native-tests','shared-storage-all'];
 export const TARGETS=Object.freeze({
     'macos-arm64':{id:'macos-arm64',platform:'darwin',arch:'arm64',runner:'macos-14',triple:'aarch64-apple-darwin',bundles:['app','dmg'],formats:['dmg'],signing:'ad-hoc',requiredChecks:[...common,'artifact-integrity','process-launch']},
@@ -20,11 +20,11 @@ export function assetName(target,version,format) {
     const policy=getTarget(target);
     if (!/^\d+\.\d+\.\d+$/.test(version) || !policy.formats.includes(format)) throw new Error('Invalid version or bundle format');
     const suffix={dmg:'.dmg',exe:'_setup.exe',appimage:'.AppImage',deb:'.deb'}[format];
-    return `Cuepoint_${version}_${target.replaceAll('-','_')}${suffix}`;
+    return `Momoki_${version}_${target.replaceAll('-','_')}${suffix}`;
 }
 export function runContext(env=process.env) {
-    const sourceSha=env.GITHUB_SHA ?? env.CUEPOINT_SOURCE_SHA;
-    const repository=env.GITHUB_REPOSITORY ?? 'ROYIANS/Cuepoint';
+    const sourceSha=env.GITHUB_SHA ?? env.MOMOKI_SOURCE_SHA;
+    const repository=env.GITHUB_REPOSITORY ?? 'ROYIANS/momoki';
     const event=env.GITHUB_EVENT_NAME ?? 'local';
     const ref=env.GITHUB_REF ?? '';
     let mode='build-only',tag=null;

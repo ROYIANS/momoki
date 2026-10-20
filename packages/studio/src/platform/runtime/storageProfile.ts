@@ -12,7 +12,7 @@ type ProductStorage = Readonly<{
 declare global {
     interface Window {
         /** Installed by the trusted native initialization script before product modules load. */
-        __CUEPOINT_PRODUCT_PROFILE__?: unknown;
+        __MOMOKI_PRODUCT_PROFILE__?: unknown;
     }
 }
 
@@ -31,14 +31,14 @@ export function resolveProductStorage(native: boolean, profile: unknown): Produc
     }
     return Object.freeze({
         runtime: "tauri", storage: profile.storage, profileId: profile.id,
-        databaseName: `cuepoint-desktop:${profile.id}:v1`,
+        databaseName: `momoki-desktop:${profile.id}:v1`,
     });
 }
 
 // One fixed owner per loaded product. No preference, query string or failed-write fallback can switch it.
 const productStorage = resolveProductStorage(
     isTauriRuntime(),
-    typeof window === "undefined" ? undefined : window.__CUEPOINT_PRODUCT_PROFILE__,
+    typeof window === "undefined" ? undefined : window.__MOMOKI_PRODUCT_PROFILE__,
 );
 
 export function getProductStorage(): ProductStorage {

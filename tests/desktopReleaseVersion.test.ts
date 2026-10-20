@@ -1,5 +1,5 @@
 import {describe, expect, it} from "vitest";
-import {classifyUpdate, parseVersion} from "@cuepoint/distribution/version";
+import {classifyUpdate, parseVersion} from "@momoki/distribution/version";
 
 describe("parseVersion", () => {
     it("accepts a strict X.Y.Z string", () => {

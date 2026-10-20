@@ -444,7 +444,7 @@ fn stage(path: &Path, request: &SaveBegin) -> Result<Staged> {
     #[cfg(windows)]
     let directory_guards = paths::pin_ancestors(&parent)?;
     let parent_stat = paths::ordinary_directory(&parent)?.identity();
-    let stage = parent.join(format!(".cuepoint-export-{}.tmp", uuid::Uuid::new_v4()));
+    let stage = parent.join(format!(".momoki-export-{}.tmp", uuid::Uuid::new_v4()));
     let file = paths::exclusive(&stage)?;
     let stage_stat = paths::stat_file(&file)?.identity();
     Ok(Staged {
@@ -470,7 +470,7 @@ mod tests {
     use super::*;
     fn setup(length: u64) -> (Saves, SaveBegin, PathBuf) {
         let root =
-            std::env::temp_dir().join(format!("cuepoint-product-export-{}", uuid::Uuid::new_v4()));
+            std::env::temp_dir().join(format!("momoki-product-export-{}", uuid::Uuid::new_v4()));
         fs::create_dir(&root).unwrap();
         let request = SaveBegin {
             version: 1,

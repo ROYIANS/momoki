@@ -4,13 +4,13 @@ import {createRoot, type Root} from "react-dom/client";
 import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 import {DownloadCard} from "../apps/site/src/download/DownloadCard";
 import {STAR_DISPLAY_THRESHOLD, StarPrompt} from "../apps/site/src/download/StarPrompt";
-import type {DetectedPlatform} from "@cuepoint/distribution/platform";
-import type {LatestDesktopRelease, ReleaseResult} from "@cuepoint/distribution/releases";
+import type {DetectedPlatform} from "@momoki/distribution/platform";
+import type {LatestDesktopRelease, ReleaseResult} from "@momoki/distribution/releases";
 
-const BASE = "https://github.com/ROYIANS/Cuepoint/releases/download/desktop-v0.1.1/";
-const NAMES = ["Cuepoint_0.1.1_macos_arm64.dmg", "Cuepoint_0.1.1_macos_x64.dmg", "Cuepoint_0.1.1_windows_x64_setup.exe", "Cuepoint_0.1.1_linux_x64.deb", "Cuepoint_0.1.1_linux_x64.AppImage"];
+const BASE = "https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.1/";
+const NAMES = ["Momoki_0.1.1_macos_arm64.dmg", "Momoki_0.1.1_macos_x64.dmg", "Momoki_0.1.1_windows_x64_setup.exe", "Momoki_0.1.1_linux_x64.deb", "Momoki_0.1.1_linux_x64.AppImage"];
 const release: LatestDesktopRelease = {
-    tag: "desktop-v0.1.1", version: "0.1.1", prerelease: true, htmlUrl: "https://github.com/ROYIANS/Cuepoint/releases/tag/desktop-v0.1.1", publishedAt: "2026-10-13T09:08:10Z",
+    tag: "desktop-v0.1.1", version: "0.1.1", prerelease: true, htmlUrl: "https://github.com/ROYIANS/momoki/releases/tag/desktop-v0.1.1", publishedAt: "2026-10-13T09:08:10Z",
     assets: NAMES.map(name => ({name, size: 16_198_950, url: BASE + name, sha256: "b".repeat(64)})),
 };
 const ok: ReleaseResult = {kind: "ok", release};
@@ -42,7 +42,7 @@ describe("DownloadCard", () => {
         await card();
         expect(container.querySelector(".lp-download")?.getAttribute("aria-busy")).toBe("true");
         expect(container.textContent).toContain("正在查找最新版本");
-        expect(byText("在 GitHub 查看所有版本")?.getAttribute("href")).toBe("https://github.com/ROYIANS/Cuepoint/releases");
+        expect(byText("在 GitHub 查看所有版本")?.getAttribute("href")).toBe("https://github.com/ROYIANS/momoki/releases");
         await card(ok, undefined); // release ready but platform not yet detected
         expect(container.textContent).toContain("正在查找最新版本");
     });
@@ -50,15 +50,15 @@ describe("DownloadCard", () => {
     it("recommends the matching installer with version, prerelease and unsigned notes", async () => {
         await card(ok, plat("windows", "x64"));
         const primary = byText("下载 Windows 版")!;
-        expect(primary.getAttribute("href")).toBe(BASE + "Cuepoint_0.1.1_windows_x64_setup.exe");
+        expect(primary.getAttribute("href")).toBe(BASE + "Momoki_0.1.1_windows_x64_setup.exe");
         expect(primary.getAttribute("data-umami-event")).toBe("download-windows-x64");
         expect(primary.getAttribute("rel")).toBe("noopener noreferrer");
         expect(container.textContent).toContain("v0.1.1");
         expect(container.textContent).toContain("预发布");
         expect(container.textContent).toContain("2026年10月13日");
-        expect(container.textContent).toContain("Cuepoint_0.1.1_windows_x64_setup.exe · 15.4 MB");
+        expect(container.textContent).toContain("Momoki_0.1.1_windows_x64_setup.exe · 15.4 MB");
         expect(container.textContent).toContain("未签名");
-        expect(byText("查看安装指南")?.getAttribute("href")).toBe("https://github.com/ROYIANS/Cuepoint/blob/main/docs/desktop-installation.md");
+        expect(byText("查看安装指南")?.getAttribute("href")).toBe("https://github.com/ROYIANS/momoki/blob/main/docs/desktop-installation.md");
     });
 
     it("shows both dmg files when the Mac chip is unknown, with a how-to-check hint", async () => {
@@ -66,8 +66,8 @@ describe("DownloadCard", () => {
         expect(byText("下载 ")).toBeUndefined();
         const apple = container.querySelector<HTMLAnchorElement>("a[data-umami-event='download-macos-arm64']")!;
         const intel = container.querySelector<HTMLAnchorElement>("a[data-umami-event='download-macos-x64']")!;
-        expect(apple.getAttribute("href")).toBe(BASE + "Cuepoint_0.1.1_macos_arm64.dmg");
-        expect(intel.getAttribute("href")).toBe(BASE + "Cuepoint_0.1.1_macos_x64.dmg");
+        expect(apple.getAttribute("href")).toBe(BASE + "Momoki_0.1.1_macos_arm64.dmg");
+        expect(intel.getAttribute("href")).toBe(BASE + "Momoki_0.1.1_macos_x64.dmg");
         expect(container.textContent).toContain("关于本机");
     });
 
@@ -92,7 +92,7 @@ describe("DownloadCard", () => {
             await card({kind: "fallback", reason}, plat("windows", "x64"));
             expect(container.querySelector(".lp-download")?.getAttribute("aria-busy")).toBe("false");
             expect(container.querySelector(".lp-dl-buttons")).toBeNull();
-            expect(byText("在 GitHub 查看所有版本")?.getAttribute("href")).toBe("https://github.com/ROYIANS/Cuepoint/releases");
+            expect(byText("在 GitHub 查看所有版本")?.getAttribute("href")).toBe("https://github.com/ROYIANS/momoki/releases");
         }
         await card({kind: "fallback", reason: "rate-limit"}, undefined);
         expect(container.textContent).toContain("限流");
@@ -100,7 +100,7 @@ describe("DownloadCard", () => {
 
     it("collects other packages and SHA256 digests in collapsed details", async () => {
         await card(ok, plat("linux", "x64"));
-        expect(byText("下载 Linux（AppImage） 版")?.getAttribute("href")).toBe(BASE + "Cuepoint_0.1.1_linux_x64.AppImage");
+        expect(byText("下载 Linux（AppImage） 版")?.getAttribute("href")).toBe(BASE + "Momoki_0.1.1_linux_x64.AppImage");
         const [others, sums] = [...container.querySelectorAll("details")];
         expect(others.open).toBe(false);
         expect(others.textContent).toContain("Linux（.deb）");
@@ -130,7 +130,7 @@ describe("StarPrompt", () => {
     it("links to the repository with a formatted count from the display threshold on, and tracks the click", async () => {
         await render(createElement(StarPrompt, {stars: 1234}));
         const link = container.querySelector("a")!;
-        expect(link.getAttribute("href")).toBe("https://github.com/ROYIANS/Cuepoint");
+        expect(link.getAttribute("href")).toBe("https://github.com/ROYIANS/momoki");
         expect(link.getAttribute("data-umami-event")).toBe("star");
         expect(link.getAttribute("rel")).toBe("noopener noreferrer");
         expect(container.textContent).toContain("1.2k");

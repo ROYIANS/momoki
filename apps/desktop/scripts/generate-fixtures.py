@@ -16,6 +16,6 @@ for line in ["第一场：雨夜；角色：林一；保持红色雨伞。", "�
     document.setFont("STSong-Light", 16)
     document.drawString(72, 760, line)
     document.setFont("Helvetica", 12)
-    document.drawString(72, 720, "Cuepoint fixture 2026-10-11")
+    document.drawString(72, 720, "Momoki fixture 2026-10-11")
     document.showPage()
 document.save()

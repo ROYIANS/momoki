@@ -58,7 +58,7 @@ describe("TopicSidebar", () => {
         expect(first.getAttribute("aria-expanded")).toBe("false");
         expect(container.textContent).not.toContain("甲话题");
         await act(async () => root.unmount());
-        localStorage.setItem("cuepoint.agent.topicGrouping", "time");
+        localStorage.setItem("momoki.agent.topicGrouping", "time");
         root = createRoot(container);
         await render();
         expect(groupLabels()).not.toContain("项目甲");
@@ -112,7 +112,7 @@ describe("TopicSidebar", () => {
         await act(async () => {
             items[1]!.click();
         });
-        expect(localStorage.getItem("cuepoint.agent.topicGrouping")).toBe("time");
+        expect(localStorage.getItem("momoki.agent.topicGrouping")).toBe("time");
         expect(groupLabels()).not.toContain("项目甲");
     });
 

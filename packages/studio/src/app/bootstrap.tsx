@@ -2,7 +2,7 @@ import {StrictMode} from "react";
 import {createRoot} from "react-dom/client";
 import {createRouter, RouterProvider} from "@tanstack/react-router";
 import {routeTree} from "./routeTree.gen";
-import {initUmami} from "@cuepoint/distribution/analytics";
+import {initUmami} from "@momoki/distribution/analytics";
 import {getHistoryNavigation} from "./navigation/historyNavigation";
 import {createProductRouterHistory} from "./navigation/productRouterHistory";
 import {installNativeExternalLinks} from "../platform/runtime/runtimeExternalLinks";

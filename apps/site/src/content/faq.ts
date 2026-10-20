@@ -27,7 +27,7 @@ export const FAQ: readonly FaqItem[] = [
     {
         question: "收费吗？用什么协议？",
         answer: {
-            text: "应用本身开源，采用 MIT 协议。小光点不提供模型服务，模型调用的额度与费用由你所选的供应商决定。",
+            text: "应用本身开源，采用 MIT 协议。默默不提供模型服务，模型调用的额度与费用由你所选的供应商决定。",
             evidence: "README.md「许可」；README.md「音乐」供应商额度说明",
         },
     },

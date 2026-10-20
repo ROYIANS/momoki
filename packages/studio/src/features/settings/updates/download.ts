@@ -1,6 +1,6 @@
-import {cancelBody, isReadAbort} from "@cuepoint/agent-providers/http";
+import {cancelBody, isReadAbort} from "@momoki/agent-providers/http";
 import {sha256Bytes} from "../../../platform/media/sha256";
-import type {ReleaseAsset} from "@cuepoint/distribution/releases";
+import type {ReleaseAsset} from "@momoki/distribution/releases";
 
 // In-app installer download: one anonymous GET through the release-asset purpose,
 // a bounded read, then a SHA-256 check against the digest GitHub published.

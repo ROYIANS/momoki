@@ -1,7 +1,7 @@
-import {readSseEvents} from "@cuepoint/agent-providers/http";
-import {streamChatCompletions, type StreamChatInput, type StreamChatResult} from '@cuepoint/studio/reference/lib/ai/chatStream';
-import {streamResponses} from '@cuepoint/studio/reference/lib/ai/responsesStream';
-import {MAX_JSON_BYTES} from '@cuepoint/studio/reference/lib/resource/limits';
+import {readSseEvents} from "@momoki/agent-providers/http";
+import {streamChatCompletions, type StreamChatInput, type StreamChatResult} from '@momoki/studio/reference/lib/ai/chatStream';
+import {streamResponses} from '@momoki/studio/reference/lib/ai/responsesStream';
+import {MAX_JSON_BYTES} from '@momoki/studio/reference/lib/resource/limits';
 import {assert, type Evidence} from './acceptanceEvidence';
 
 export async function checkStreaming(evidence: Evidence) {

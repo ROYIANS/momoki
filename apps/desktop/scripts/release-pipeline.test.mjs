@@ -11,10 +11,10 @@ import {selectArtifacts} from './select-release-artifacts.mjs';
 import {releaseBuildArguments} from './build-release.mjs';
 import {mediaReleaseIdentity} from './media-resources.mjs';
 
-const context={repository:'ROYIANS/Cuepoint',workflow:WORKFLOW,sourceSha:'a'.repeat(40),event:'push',mode:'draft',tag:'desktop-v0.1.0',runId:'42',attempt:2,version:'0.1.0'};
+const context={repository:'ROYIANS/momoki',workflow:WORKFLOW,sourceSha:'a'.repeat(40),event:'push',mode:'draft',tag:'desktop-v0.1.0',runId:'42',attempt:2,version:'0.1.0'};
 const clone=value=>JSON.parse(JSON.stringify(value));
 async function fixture({state='packaged'}={}) {
-    const root=await mkdtemp(join(tmpdir(),'cuepoint-release-tests-')),directories=[],selections=[];
+    const root=await mkdtemp(join(tmpdir(),'momoki-release-tests-')),directories=[],selections=[];
     for (const [index,target] of Object.values(TARGETS).entries()) {
         const path=join(root,target.id);await mkdir(path);await mkdir(join(path,'assets'));
         const assets=[];
@@ -45,7 +45,7 @@ test('closed event policy makes bootstrap and manual runs build-only',()=> {
 test('portable tools retain local lane and reject Windows shell shims',()=> {
     assert.equal(resolveTools({},'darwin').tools.pnpm,'/Users/xiaomengdao/.nvm/versions/node/v24.11.0/bin/pnpm');
     assert.throws(()=>resolveTools({},'win32'));
-    const env={CUEPOINT_TOOL_MODE:'hosted',CUEPOINT_CARGO_PATH:'C:\\tools\\cargo.exe',CUEPOINT_RUSTC_PATH:'C:\\tools\\rustc.exe',CUEPOINT_RUSTUP_PATH:'C:\\tools\\rustup.exe',CUEPOINT_RUSTFMT_PATH:'C:\\tools\\rustfmt.exe',CUEPOINT_PNPM_PATH:'C:\\tools\\pnpm.cmd'};
+    const env={MOMOKI_TOOL_MODE:'hosted',MOMOKI_CARGO_PATH:'C:\\tools\\cargo.exe',MOMOKI_RUSTC_PATH:'C:\\tools\\rustc.exe',MOMOKI_RUSTUP_PATH:'C:\\tools\\rustup.exe',MOMOKI_RUSTFMT_PATH:'C:\\tools\\rustfmt.exe',MOMOKI_PNPM_PATH:'C:\\tools\\pnpm.cmd'};
     // Host path syntax is OS dependent, but either rejection keeps the shim
     // from being interpolated into a shell on this platform.
     assert.throws(()=>resolveTools(env,'win32'));
@@ -185,8 +185,8 @@ function fakeApi({failUploadAt=0,published=false,wrongTag=false,resetMissingDraf
             state.gets.push({method,path});
             if (path.includes('/git/ref/')) return {object:{type:'commit',sha:wrongTag ? 'b'.repeat(40) : context.sourceSha}};
             if (method === 'GET' && /\/releases\?/.test(path)) return path.includes('page=1') ? state.releases : [];
-            if (method === 'POST' && path.endsWith('/releases')) {const release={...body,id:next++,draft:!published,upload_url:'https://uploads.github.com/repos/ROYIANS/Cuepoint/releases/1/assets{?name,label}',html_url:'https://github.com/ROYIANS/Cuepoint/releases/tag/desktop-v0.1.0'};state.releases.push(release);return clone(release);}
-            if (method === 'GET' && path.includes('/assets?')) return state.assets.map(asset=>({...asset,url:`https://api.github.com/repos/ROYIANS/Cuepoint/releases/assets/${asset.id}`}));
+            if (method === 'POST' && path.endsWith('/releases')) {const release={...body,id:next++,draft:!published,upload_url:'https://uploads.github.com/repos/ROYIANS/momoki/releases/1/assets{?name,label}',html_url:'https://github.com/ROYIANS/momoki/releases/tag/desktop-v0.1.0'};state.releases.push(release);return clone(release);}
+            if (method === 'GET' && path.includes('/assets?')) return state.assets.map(asset=>({...asset,url:`https://api.github.com/repos/ROYIANS/momoki/releases/assets/${asset.id}`}));
             if (method === 'GET' && /\/releases\/\d+$/.test(path)) return clone(state.releases[0]);
             if (method === 'PATCH') {
                 state.patches.push(body);Object.assign(state.releases[0],body);
@@ -216,7 +216,7 @@ test('completion explicitly retains tag and source when a draft PATCH would rese
         assert.equal(patch.tag_name,context.tag);assert.equal(patch.target_commitish,context.sourceSha);
         assert.equal(patch.draft,true);assert.equal(patch.prerelease,true);assert.equal(patch.make_latest,'false');
         assert.match(patch.body,/UPLOAD COMPLETE/);assert.doesNotMatch(patch.body,/UPLOAD INCOMPLETE/);
-        const marker=JSON.parse(patch.body.match(/<!-- cuepoint-desktop-release:(.*?) -->/)[1]);
+        const marker=JSON.parse(patch.body.match(/<!-- momoki-desktop-release:(.*?) -->/)[1]);
         assert.equal(marker.tag,context.tag);assert.equal(marker.sourceSha,context.sourceSha);
         assert.equal(marker.payloadDigest,result.payloadDigest);assert.equal(marker.status,'complete');
         const assets=clone(state.assets),uploads=state.uploads;

@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState} from "react";
-import type {SkillMetadata, SkillTextRange} from "@cuepoint/agent-core";
+import type {SkillMetadata, SkillTextRange} from "@momoki/agent-core";
 import {useProductQueryState} from "../../../platform/product/queries";
 import {Button} from "../../../ui/button";
 import {loadInstalledSkill, readInstalledSkillResource} from "../skills/queries/installedSkills";

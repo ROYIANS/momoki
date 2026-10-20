@@ -1,4 +1,4 @@
-import {parseReferenceFile} from '@cuepoint/studio/reference/lib/references/import';
+import {parseReferenceFile} from '@momoki/studio/reference/lib/references/import';
 import {native} from './bridge';
 import {assert, delay, type Evidence, rejects} from './acceptanceEvidence';
 
@@ -63,7 +63,7 @@ export async function checkDocuments(blobs: FixtureBlobs, evidence: Evidence) {
         })();
         const text = parsed.chunks.map(chunk => chunk.text).join('\n');
         assert(parsed.coverage.totalUnits === 2 && parsed.coverage.processedUnits === 2, 'PDF 页数不符');
-        assert(text.includes('第一场：雨夜；角色：林一；保持红色雨伞。') && text.includes('第二场：清晨；素材属于工作区。') && text.includes('Cuepoint fixture 2026-10-11'), 'PDF 中文提取不符');
+        assert(text.includes('第一场：雨夜；角色：林一；保持红色雨伞。') && text.includes('第二场：清晨；素材属于工作区。') && text.includes('Momoki fixture 2026-10-11'), 'PDF 中文提取不符');
         const resources = fetched.map(entry => entry.url);
         const cMaps = resources.filter(name => /UniGB-UCS2-H|Adobe-GB1-UCS2/.test(name));
         const fonts = resources.filter(name => /LiberationSans-Regular/.test(name));

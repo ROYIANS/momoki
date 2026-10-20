@@ -125,11 +125,11 @@ describe('invocation-owned execution feedback', () => {
             invocation.release();
             expect(sink.entries.size - 1).toBeLessThanOrEqual(136);
         }
-        const traceNames = new Set([...sink.entries.keys()].filter(name => name.startsWith('cuepoint.agent.')).map(name => name.split('.')[2]));
+        const traceNames = new Set([...sink.entries.keys()].filter(name => name.startsWith('momoki.agent.')).map(name => name.split('.')[2]));
         expect(traceNames.size).toBe(8);
         owner.dispose();
         expect([...sink.entries.keys()]).toEqual(['other-owner.mark']);
-        for (const [name] of [...sink.clearMarks.mock.calls, ...sink.clearMeasures.mock.calls]) expect(name?.startsWith('cuepoint.agent.')).toBe(true);
+        for (const [name] of [...sink.clearMarks.mock.calls, ...sink.clearMeasures.mock.calls]) expect(name?.startsWith('momoki.agent.')).toBe(true);
     });
 
     it('isolates clock, timing and notification failures and invalidates disposed handles', () => {

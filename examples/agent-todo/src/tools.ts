@@ -1,4 +1,4 @@
-import {createCapabilityRegistry, createToolFactory, validateToolInput, type ToolBindingIdentity, type ToolDefinition, type ToolSpec} from '@cuepoint/agent-core';
+import {createCapabilityRegistry, createToolFactory, validateToolInput, type ToolBindingIdentity, type ToolDefinition, type ToolSpec} from '@momoki/agent-core';
 import type {Preview, TodoAction, TodoContext} from './types.js';
 
 function object(raw: unknown): Record<string, unknown> {if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('Expected object'); return raw as Record<string, unknown>;}

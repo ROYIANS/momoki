@@ -5,8 +5,8 @@ import {authorizeRuntimeHttp} from "@/platform/product/httpPolicy";
 
 afterEach(() => vi.restoreAllMocks());
 
-const ASSET = "https://github.com/ROYIANS/Cuepoint/releases/download/desktop-v0.1.3/Cuepoint_0.1.3_windows_x64_setup.exe";
-const OBJECTS = "https://objects.githubusercontent.com/github-production-release-asset/1/Cuepoint_0.1.3_windows_x64_setup.exe?sig=x";
+const ASSET = "https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.3/Momoki_0.1.3_windows_x64_setup.exe";
+const OBJECTS = "https://objects.githubusercontent.com/github-production-release-asset/1/Momoki_0.1.3_windows_x64_setup.exe?sig=x";
 const RELEASE_ASSETS = "https://release-assets.githubusercontent.com/github-production-release-asset/2/file?sig=y";
 
 function services() {
@@ -31,16 +31,16 @@ describe("release-asset purpose", () => {
     });
 
     it.each([
-        ["%2e%2e escape", "https://github.com/ROYIANS/Cuepoint/releases/download/%2e%2e/%2e%2e/evil/Cuepoint_0.1.3_windows_x64_setup.exe"],
-        ["dot-segment escape", "https://github.com/ROYIANS/Cuepoint/releases/download/../../evil/Cuepoint_0.1.3_windows_x64_setup.exe"],
-        ["other repository path", "https://github.com/ROYIANS/Cuepoint/archive/refs/heads/main.zip"],
-        ["the releases list page", "https://github.com/ROYIANS/Cuepoint/releases"],
+        ["%2e%2e escape", "https://github.com/ROYIANS/momoki/releases/download/%2e%2e/%2e%2e/evil/Momoki_0.1.3_windows_x64_setup.exe"],
+        ["dot-segment escape", "https://github.com/ROYIANS/momoki/releases/download/../../evil/Momoki_0.1.3_windows_x64_setup.exe"],
+        ["other repository path", "https://github.com/ROYIANS/momoki/archive/refs/heads/main.zip"],
+        ["the releases list page", "https://github.com/ROYIANS/momoki/releases"],
         ["another repository", "https://github.com/other/repo/releases/download/desktop-v0.1.3/a.dmg"],
-        ["a lookalike host", "https://github.com.evil.example/ROYIANS/Cuepoint/releases/download/desktop-v0.1.3/a.dmg"],
-        ["downgraded to http", "http://github.com/ROYIANS/Cuepoint/releases/download/desktop-v0.1.3/a.dmg"],
+        ["a lookalike host", "https://github.com.evil.example/ROYIANS/momoki/releases/download/desktop-v0.1.3/a.dmg"],
+        ["downgraded to http", "http://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.3/a.dmg"],
         ["the CDN host as the first request", OBJECTS],
         ["the release-assets host as the first request", RELEASE_ASSETS],
-        ["an unrelated host", "https://evil.example/Cuepoint_0.1.3_windows_x64_setup.exe"],
+        ["an unrelated host", "https://evil.example/Momoki_0.1.3_windows_x64_setup.exe"],
     ])("rejects %s before any native traffic", async (_name, target) => {
         const deps = services();
         await expect(assetFetch(deps)(target)).rejects.toThrow();
@@ -50,7 +50,7 @@ describe("release-asset purpose", () => {
 
     it("rejects a URL carrying credentials even on the allowed path", async () => {
         const deps = services();
-        await expect(assetFetch(deps)("https://user:pass@github.com/ROYIANS/Cuepoint/releases/download/desktop-v0.1.3/a.dmg")).rejects.toThrow("不含账号信息");
+        await expect(assetFetch(deps)("https://user:pass@github.com/ROYIANS/momoki/releases/download/desktop-v0.1.3/a.dmg")).rejects.toThrow("不含账号信息");
         expect(deps.nativeFetch).not.toHaveBeenCalled();
     });
 

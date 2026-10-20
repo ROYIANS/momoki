@@ -22,7 +22,7 @@ Required gates include TypeScript, full Vitest, formal `quality`, its self-test,
 | `pnpm quality:self-test` | Regression of the quality gate and evidence identities |
 | `pnpm dev` | Vite dev server |
 
-Use the explicit approved machine pnpm path from AGENTS.md. Vitest defaults to the shared browser adapter and fresh `fake-indexeddb` lifecycle. The explicit `CUEPOINT_STORAGE_TEST_OWNER=sqlite` lane resolves both alias and relative database imports to an actual disposable Rust probe facade and resets its workspace per test. An explicit native acceptance run must fail when the real executable is missing. Historical original/current comparisons select an isolated raw browser comparator; immutable snapshot bytes must remain unchanged.
+Use the explicit approved machine pnpm path from AGENTS.md. Vitest defaults to the shared browser adapter and fresh `fake-indexeddb` lifecycle. The explicit `MOMOKI_STORAGE_TEST_OWNER=sqlite` lane resolves both alias and relative database imports to an actual disposable Rust probe facade and resets its workspace per test. An explicit native acceptance run must fail when the real executable is missing. Historical original/current comparisons select an isolated raw browser comparator; immutable snapshot bytes must remain unchanged.
 
 The permanent native runner supports `--suite core|business|all`; `all` is the complete gate. It rejects a nonempty evidence directory, forces actual native capabilities, verifies unchanged source identities and records the current probe hash. Tool instrumentation calls the original recipes and records method/test outcomes; table instrumentation records confirmed commits without row values or tool arguments. Counts alone do not replace the assertions in those suites or actual packaged acceptance.
 
@@ -205,7 +205,7 @@ Install fixed Rust1.99.0 and pass actual Cargo and rustc executable paths. Verif
 both versions, bind `RUSTC` explicitly and reject compiler wrappers. Build in a
 fresh target directory with `--locked --no-default-features --features test-hooks
 --bin product_store_probe`. This needs no desktop/product-sqlite feature,
-frontend or GTK. Before appending `CUEPOINT_NATIVE_STORE_PROBE` to `GITHUB_ENV`,
+frontend or GTK. Before appending `MOMOKI_NATIVE_STORE_PROBE` to `GITHUB_ENV`,
 the produced binary must acknowledge ready and close in a disposable workspace
 and exit successfully. Keep finite build/readiness evidence. Tests receive the
 exact just-built path; a stale local default cannot count as proof.
@@ -213,8 +213,8 @@ exact just-built path; a stale local default cannot count as proof.
 GHCR retains its Node22 contract; explicit standalone desktop checks retain
 their pinned Node24.11.0 lane.
 Do not loosen the release hosted-tool validation to prepare the GHCR probe.
-Do not set `CUEPOINT_STORAGE_TEST_OWNER=sqlite` or
-`CUEPOINT_NATIVE_STORAGE_ACCEPTANCE=1` for ordinary root tests. Existing opt-in
+Do not set `MOMOKI_STORAGE_TEST_OWNER=sqlite` or
+`MOMOKI_NATIVE_STORAGE_ACCEPTANCE=1` for ordinary root tests. Existing opt-in
 binary acceptance and its skip behavior remain separate.
 
 ### 4. Validation / Error Matrix

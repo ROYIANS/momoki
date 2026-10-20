@@ -24,11 +24,11 @@ import {toolArgumentError, ToolUnavailableError, ToolValidationError} from "./to
 import {db as productDb} from "../../../platform/product/store";
 import {updateRunPlanAndComplete} from "../commands/agentTools";
 import type {AgentToolCall, AgentToolSchema} from "../models/agent";
-import {validateToolInput} from '@cuepoint/agent-core';
+import {validateToolInput} from '@momoki/agent-core';
 
 export type {AgentToolContext, AgentToolDefinition} from './toolDefinition';
 
-export {requiresToolApproval} from '@cuepoint/agent-core';
+export {requiresToolApproval} from '@momoki/agent-core';
 
 export const planSchema = z.object({
     reason: z.string().trim().min(1).max(1000).optional(),

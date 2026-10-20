@@ -11,7 +11,7 @@ function singleUseBody(body: BodyInit | null | undefined): {body: ReadableStream
     let duplexRead = false;
     const probeBody = new ReadableStream<Uint8Array>({start(stream) {stream.close();}});
     const probeInit: RequestInit & {readonly duplex: string} = {method: "POST", body: probeBody, get duplex() {duplexRead = true; return "half";}};
-    const probe = new Request("https://cuepoint.invalid/", probeInit);
+    const probe = new Request("https://momoki.invalid/", probeInit);
     if (!duplexRead || probe.headers.has("Content-Type")) throw new McpHostError("unsupported", "not_started", "browser_fetch");
     const bytes = new TextEncoder().encode(body.toString());
     // A streaming Request has no replayable body source. Never fall back to a string.

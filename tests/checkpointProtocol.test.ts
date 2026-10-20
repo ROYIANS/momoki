@@ -57,7 +57,7 @@ describe("strict partial checkpoint manifest", () => {
     });
 
     it.each([
-        ["unknown format", (raw: Record<string, unknown>) => { raw.format = "cuepoint.production.v1"; }],
+        ["unknown format", (raw: Record<string, unknown>) => { raw.format = "momoki.production.v1"; }],
         ["unknown schema", (raw: Record<string, unknown>) => { raw.schemaVersion = 2; }],
         ["unknown manifest field", (raw: Record<string, unknown>) => { raw.credential = "private"; }],
         ["browser-local", (raw: Record<string, unknown>) => { raw.workspaceId = "browser-local"; }],

@@ -6,7 +6,7 @@ import {runCommand} from './quality/unused.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 export async function workspaceFixture() {
-    const directory = await mkdtemp(join(tmpdir(), 'cuepoint-workspace-gate-'));
+    const directory = await mkdtemp(join(tmpdir(), 'momoki-workspace-gate-'));
     const write = async (file, value) => {await mkdir(dirname(join(directory, file)), {recursive: true}); await writeFile(join(directory, file), typeof value === 'string' ? value : JSON.stringify(value));};
     await symlink(join(root, 'node_modules'), join(directory, 'node_modules'), 'dir');
     const policy = JSON.parse(await readFile(join(root, 'quality/workspaces.json'), 'utf8'));

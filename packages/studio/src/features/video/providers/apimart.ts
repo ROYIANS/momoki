@@ -1,9 +1,9 @@
-import {readHttpJson} from '@cuepoint/agent-providers/http';
+import {readHttpJson} from '@momoki/agent-providers/http';
 import {requestOnce} from "../../../platform/http/requestBoundary";
-import {isReadAbort} from "@cuepoint/agent-providers/http";
-import {redactCredentials} from "@cuepoint/agent-providers/http";
+import {isReadAbort} from "@momoki/agent-providers/http";
+import {redactCredentials} from "@momoki/agent-providers/http";
 import {type ChatModelMetadata, parseModelMetadata} from "../../settings/models/modelMetadata";
-import {normalizeBaseUrl} from "@cuepoint/agent-providers/http";
+import {normalizeBaseUrl} from "@momoki/agent-providers/http";
 
 export type ApimartCredentials = { baseUrl: string; apiKey: string };
 export type ApimartRequestOptions = { signal?: AbortSignal; fetchImpl?: typeof fetch; idempotencyKey?: string };

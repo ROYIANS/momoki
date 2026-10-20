@@ -1,5 +1,5 @@
 {
-  "name": "@cuepoint/agent-todo",
+  "name": "@momoki/agent-todo",
   "private": true,
   "version": "0.1.6",
   "type": "module",
@@ -9,6 +9,6 @@
     "types": "node ../../tooling/build-agent-packages.mjs && tsc -p tsconfig.json --noEmit",
     "test": "node ../../tooling/agent-example-check.mjs"
   },
-  "dependencies": {"@cuepoint/agent-core": "workspace:*", "@cuepoint/agent-providers": "workspace:*"},
+  "dependencies": {"@momoki/agent-core": "workspace:*", "@momoki/agent-providers": "workspace:*"},
   "devDependencies": {"typescript": "^5.9.2", "@types/node": "^22.20.3"}
 }

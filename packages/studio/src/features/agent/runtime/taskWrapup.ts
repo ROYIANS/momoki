@@ -92,7 +92,7 @@ export async function recoverTaskWrapups(threadId: string, locks?: ThreadLockMan
     const db = store ?? productDb;
     const manager: ThreadLockManager | undefined = locks ?? (typeof navigator !== 'undefined' ? navigator.locks : undefined);
     if (!manager) return;
-    await manager.request(`cuepoint:agent:${threadId}`, {ifAvailable: true}, async (lock) => {
+    await manager.request(`momoki:agent:${threadId}`, {ifAvailable: true}, async (lock) => {
         if (!lock) return;
         for (const record of await db.agentTaskWrapups.where('threadId').equals(threadId).filter(r => r.status === 'preparing').toArray()) await stopTaskWrapup(record.taskId, record.id, 'interrupted', '上次整理已中断，原有总结仍保留。需要重新整理时请明确操作。', db);
     });

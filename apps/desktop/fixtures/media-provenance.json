@@ -1,5 +1,5 @@
 {
-  "format": "cuepoint.synthetic-fixtures.v1",
+  "format": "momoki.synthetic-fixtures.v1",
   "encoder": {
     "package": "lamejs",
     "version": "1.2.1",

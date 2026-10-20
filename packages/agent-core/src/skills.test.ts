@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {SKILL_LIMITS, formatSkillCatalogue, readSkillTextRange, splitSkillDocument, validateSkillMetadata,
     validateSkillResourcePath, validateSkillResourcePaths,
-    type InstalledSkillDescriptor, type SkillMetadata} from '@cuepoint/agent-core';
+    type InstalledSkillDescriptor, type SkillMetadata} from '@momoki/agent-core';
 
 const metadata = (name = 'media-notes', description = '整理素材，读取参考后再行动。'): SkillMetadata =>
     validateSkillMetadata({name, description}, name);

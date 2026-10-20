@@ -20,7 +20,7 @@ AppFrame({children, onImport?, contentScroll = "auto"}: {
 
 `packages/studio/src/app/layout/AppHeaderPortal.tsx` exports `AppHeaderPortal({children}: {children: ReactNode})`. It portals actual feature-header presentation into AppFrame's stable DOM target while preserving the original React providers and callbacks. The target owns no business/query state; responsiveness changes CSS, not the target or feature owner tree. A custom header suppresses the fallback section label.
 
-`packages/studio/src/platform/runtime/windowChrome.ts` exports `getWindowChromeKind(): "macos-overlay" | "native" | "browser"`. Genuine runtime detection precedes the frozen Rust-injected `window.__CUEPOINT_WINDOW_CHROME__ = {version:1,kind}` presentation marker. Browser ignores incidental markers; unknown native chrome does not reserve macOS traffic-light space. It calls no IPC and is separate from storage-profile selection.
+`packages/studio/src/platform/runtime/windowChrome.ts` exports `getWindowChromeKind(): "macos-overlay" | "native" | "browser"`. Genuine runtime detection precedes the frozen Rust-injected `window.__MOMOKI_WINDOW_CHROME__ = {version:1,kind}` presentation marker. Browser ignores incidental markers; unknown native chrome does not reserve macOS traffic-light space. It calls no IPC and is separate from storage-profile selection.
 
 `packages/studio/src/app/layout/PageLayout.tsx` exports:
 

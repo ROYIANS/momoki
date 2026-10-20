@@ -1,5 +1,5 @@
 import {requestOnce} from "../../../platform/http/requestBoundary";
-import {readResponseJson, ResponseLimitError} from "@cuepoint/agent-providers/http";
+import {readResponseJson, ResponseLimitError} from "@momoki/agent-providers/http";
 import {db} from '../../../platform/product/store';
 import {publicWebUrl, type WebFailure, type WebFailureCode, type WebResult, type WebSource} from '../../settings/models/search';
 import {nowIso} from '../../../platform/identity';

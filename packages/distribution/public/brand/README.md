@@ -1,4 +1,4 @@
-# Cuepoint brand assets
+# Momoki brand assets
 
 Frog-hat mark (black stencil disc with the character cut out), approved 2026-10-17.
 The colour mark works on light and dark surfaces, so in-app placements use it on

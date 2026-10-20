@@ -1,4 +1,4 @@
-import {createCapabilityLoading,selectCapabilityGroups,MAX_LOADED_TOOLS} from '@cuepoint/agent-core';
+import {createCapabilityLoading,selectCapabilityGroups,MAX_LOADED_TOOLS} from '@momoki/agent-core';
 import type {ProductStore} from "../../../platform/storage/types";
 import {defineTool} from './toolDefinition';
 import {DISCOVERY_TOOL_NAME, toolNamesForCall} from "../models/agentToolSelection";

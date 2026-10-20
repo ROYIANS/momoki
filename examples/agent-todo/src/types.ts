@@ -1,5 +1,5 @@
-import type {RuntimeRun, RuntimeCall, ToolContext, AgentToolLoading, ContextSource, SummaryRecord, ToolBindingIdentity, ResourceGrantSnapshot, ResourceGrantRef} from '@cuepoint/agent-core';
-import type {ResponseItem} from '@cuepoint/agent-providers';
+import type {RuntimeRun, RuntimeCall, ToolContext, AgentToolLoading, ContextSource, SummaryRecord, ToolBindingIdentity, ResourceGrantSnapshot, ResourceGrantRef} from '@momoki/agent-core';
+import type {ResponseItem} from '@momoki/agent-providers';
 
 export type Scenario = 'todo' | 'update' | 'pair' | 'restart' | 'committed' | 'stream' | 'budget' | 'external' | 'load' | 'summary';
 export interface TodoRun extends RuntimeRun {

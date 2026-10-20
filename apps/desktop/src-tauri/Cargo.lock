@@ -727,40 +727,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "914a755b7c2d4af2bdcff7ce1739e2db9a1b81a9b07123d8015786ae03c0980d"
 
 [[package]]
-name = "cuepoint-prototype"
-version = "0.1.6"
-dependencies = [
- "apple-native-keyring-store",
- "async-trait",
- "base64 0.22.1",
- "futures",
- "http",
- "keyring-core",
- "objc2",
- "objc2-app-kit",
- "objc2-foundation",
- "objc2-web-kit",
- "process-wrap",
- "reqwest 0.13.5",
- "rmcp",
- "rusqlite",
- "serde",
- "serde_json",
- "sha2 0.11.0",
- "sse-stream",
- "tauri",
- "tauri-build",
- "tauri-plugin-dialog",
- "tauri-plugin-http",
- "tauri-plugin-opener",
- "tokio",
- "tokio-util",
- "uuid",
- "windows-native-keyring-store",
- "windows-sys 0.61.2",
-]
-
-[[package]]
 name = "darling"
 version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2382,6 +2348,40 @@ checksum = "1788edb87fdc09c7e26304471e2f5be8cdefb1b6930d6e3985fc02ff53bf86ee"
 dependencies = [
  "libc",
  "wasi",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "momoki"
+version = "0.1.6"
+dependencies = [
+ "apple-native-keyring-store",
+ "async-trait",
+ "base64 0.22.1",
+ "futures",
+ "http",
+ "keyring-core",
+ "objc2",
+ "objc2-app-kit",
+ "objc2-foundation",
+ "objc2-web-kit",
+ "process-wrap",
+ "reqwest 0.13.5",
+ "rmcp",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "sha2 0.11.0",
+ "sse-stream",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-dialog",
+ "tauri-plugin-http",
+ "tauri-plugin-opener",
+ "tokio",
+ "tokio-util",
+ "uuid",
+ "windows-native-keyring-store",
  "windows-sys 0.61.2",
 ]
 

@@ -1,6 +1,6 @@
 import {useProductQueryState} from "../../../../platform/product/queries";
 import type {StoreTx} from "../../../../platform/storage/types";
-import {INSTALL_GUIDE_URL} from "@cuepoint/distribution/releases";
+import {INSTALL_GUIDE_URL} from "@momoki/distribution/releases";
 import {ExternalLink} from "../../../../ui/icons";
 import {isTauriRuntime} from "../../../../platform/runtime/runtimeIdentity";
 import {SettingsGroup, SettingsRow} from "../SettingsCard";

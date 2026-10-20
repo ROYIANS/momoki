@@ -1,9 +1,9 @@
 import type {McpRunSnapshot} from "../mcp/models/manifest";
 import type {McpToolPreviewFacts} from "../mcp/models/execution";
-import type {AgentReasoningEffort, AgentRunStatus, AgentPermissionMode, AgentInteractionMode, AgentToolCallStatus, ToolMetadata, AgentModelMetrics, AgentActivityStep, AgentToolLoading, AgentTokenUsage} from "@cuepoint/agent-core";
-import type {ChatMessage, ResponseItem} from '@cuepoint/agent-providers';
-export type {AgentReasoningEffort, AgentRunStatus, AgentPermissionMode, AgentInteractionMode, AgentWireToolCall, AgentToolSchema, AgentToolCallStatus, AgentToolEffect, AgentModelMetrics, AgentActivityStep, AgentToolLoading, AgentTokenUsage, AgentRunOutput} from "@cuepoint/agent-core";
-export {MODEL_STEPS_PER_SEGMENT} from "@cuepoint/agent-core";
+import type {AgentReasoningEffort, AgentRunStatus, AgentPermissionMode, AgentInteractionMode, AgentToolCallStatus, ToolMetadata, AgentModelMetrics, AgentActivityStep, AgentToolLoading, AgentTokenUsage} from "@momoki/agent-core";
+import type {ChatMessage, ResponseItem} from '@momoki/agent-providers';
+export type {AgentReasoningEffort, AgentRunStatus, AgentPermissionMode, AgentInteractionMode, AgentWireToolCall, AgentToolSchema, AgentToolCallStatus, AgentToolEffect, AgentModelMetrics, AgentActivityStep, AgentToolLoading, AgentTokenUsage, AgentRunOutput} from "@momoki/agent-core";
+export {MODEL_STEPS_PER_SEGMENT} from "@momoki/agent-core";
 export const GENERAL_AGENT_ID = "agent_general";
 import type {AgentReferenceAudit, AgentReferenceInput, AgentVisionCapability} from "../../references/models/referenceInput";
 import type {MemoryDispatchAudit, MemorySelection} from "../../memory/models/memoryRetrieval";

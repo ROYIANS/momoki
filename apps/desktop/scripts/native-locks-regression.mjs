@@ -50,7 +50,7 @@ async function run() {
     try{await stat(resolve(root,'report.json'));throw new Error('Existing report root is not a fresh lock-probe run');}catch(error){if(error.code!=='ENOENT')throw error;}
     const token=randomBytes(32).toString('hex');
     const server=await reserveStreamServer(root,token);
-    const env={...process.env,CUEPOINT_STREAM_ENDPOINT:server.endpoint,CUEPOINT_STREAM_TOKEN:token,CUEPOINT_ACCEPTANCE_ROOT:root};
+    const env={...process.env,MOMOKI_STREAM_ENDPOINT:server.endpoint,MOMOKI_STREAM_TOKEN:token,MOMOKI_ACCEPTANCE_ROOT:root};
     const sourcePaths=['ui/acceptanceLocks.ts','ui/acceptance.tsx','ui/acceptanceEvidence.ts','scripts/native-locks-regression.mjs','../../packages/studio/src/features/agent/runtime/runOwnership.ts','../../packages/studio/src/features/audio/generation/batchRuntime.ts','../../packages/studio/src/features/agent/runtime/taskWrapup.ts'];
     const sources=async()=>Object.fromEntries(await Promise.all(sourcePaths.map(async path=>[path,createHash('sha256').update(await readFile(resolve(base,path))).digest('hex')])));
     const before=await sources();
@@ -70,7 +70,7 @@ async function run() {
         results.push({type:'build',...built});
         if(built.code!==0||interrupted)throw new Error(`Lock-probe acceptance build failed/interrupted; raw log ${root}/locks-build.log`);
         bundle=JSON.parse(await readFile(resolve(base,'.acceptance/acceptance-bundle.json'),'utf8'));
-        const binary=resolve(bundle.app,'Contents/MacOS/cuepoint-prototype');
+        const binary=resolve(bundle.app,'Contents/MacOS/momoki');
         const binarySha256=createHash('sha256').update(await readFile(binary)).digest('hex');
         const appLog=await open(resolve(root,'locks-app.log'),'wx');
         try{app=spawn(binary,[],{env,stdio:['ignore',appLog.fd,appLog.fd]});}finally{await appLog.close();}

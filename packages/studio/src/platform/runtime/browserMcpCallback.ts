@@ -1,5 +1,5 @@
 export const BROWSER_MCP_CALLBACK_PATH = "/mcp/oauth/callback";
-export const BROWSER_MCP_CALLBACK_KIND = "cuepoint_mcp_oauth_callback";
+export const BROWSER_MCP_CALLBACK_KIND = "momoki_mcp_oauth_callback";
 
 /** Run before router, analytics and diagnostic initialization; the parent owns all credentials. */
 export function handleBrowserMcpCallback(target: Window): boolean {

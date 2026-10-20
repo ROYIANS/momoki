@@ -132,7 +132,7 @@ Native reads use short SQLite operations with point/absence and predicate
 guards. The renderer maintains a transaction-local overlay for read-your-writes.
 Indexed pages are epoch checked. A sealed prepared batch contains ordered
 mutation/claim entries, bounded 262144-byte UTF-8 chunks and a SHA-256 fingerprint
-of `cuepoint-batch-v1\n` plus the exact JSON lines. The final SQLite transaction
+of `momoki-batch-v1\n` plus the exact JSON lines. The final SQLite transaction
 commits rows, projections, binary claims, revision/change sequence and durable
 operation receipt together. Supplier IO does not hold a SQLite writer lock.
 Individual large metadata rows/change records use bounded transfers rather than

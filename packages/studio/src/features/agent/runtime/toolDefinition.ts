@@ -1,4 +1,4 @@
-import {createToolFactory, type ToolContext, type ToolDefinition} from "@cuepoint/agent-core";
+import {createToolFactory, type ToolContext, type ToolDefinition} from "@momoki/agent-core";
 import type {AgentToolPreview} from '../models/agent';
 import type {Spec} from './businessSchemas';
 import type {ProductStore} from "../../../platform/storage/types";
@@ -23,4 +23,4 @@ const defineHostTool = createToolFactory<AgentToolContext, AgentToolPreview>();
 export function defineTool<Args, const Name extends string>(spec: Spec<Args>, body: ToolBody<NoInfer<Args>, Name>): TypedToolDefinition<Args, Name> {
     return {...defineHostTool(spec, body), recovery: body.recovery};
 }
-export {assertUniqueToolNames, toolMetadataMatches} from "@cuepoint/agent-core";
+export {assertUniqueToolNames, toolMetadataMatches} from "@momoki/agent-core";

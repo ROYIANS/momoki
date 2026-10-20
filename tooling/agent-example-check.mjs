@@ -19,12 +19,12 @@ async function checkAgentExample() {
     if (major < 24 || major === 24 && minor < 11) throw new Error('agent:example:check requires Node >=24.11');
     const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
     const pinned = manifest.packageManager.split('@').at(-1);
-    const evidence = await realpath(await mkdtemp(join(tmpdir(), 'cuepoint-agent-example-')));
+    const evidence = await realpath(await mkdtemp(join(tmpdir(), 'momoki-agent-example-')));
     const artifacts = join(evidence, 'artifacts'), consumer = join(evidence, 'consumer'), store = join(evidence, 'empty-offline-store');
     await mkdir(artifacts); await mkdir(consumer);
     const env = {...process.env, COREPACK_ENABLE_NETWORK: '0', npm_config_registry: 'http://127.0.0.1:9', npm_config_manage_package_manager_versions: 'true', npm_config_package_manager_strict_version: 'true'};
     // Local development uses the explicitly approved machine pnpm; CI supplies its pinned runner path.
-    const pnpm = process.env.CUEPOINT_PNPM_PATH ?? (process.platform === 'darwin' ? machinePnpm : 'pnpm');
+    const pnpm = process.env.MOMOKI_PNPM_PATH ?? (process.platform === 'darwin' ? machinePnpm : 'pnpm');
     const commands = [];
     async function run(label, command, args, cwd = root) {
         const result = spawnSync(command, args, {cwd, env, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024});
@@ -49,7 +49,7 @@ async function checkAgentExample() {
         const archives = {};
         for (const part of ['agent-core', 'agent-providers']) {
             await run(`pack-${part}`, pnpm, ['pack', '--pack-destination', artifacts], join(root, 'packages', part));
-            const files = await readdir(artifacts); const archive = files.find(file => file.startsWith(`cuepoint-${part}-`) && file.endsWith('.tgz'));
+            const files = await readdir(artifacts); const archive = files.find(file => file.startsWith(`momoki-${part}-`) && file.endsWith('.tgz'));
             assert.ok(archive); archives[part] = join(artifacts, archive);
             const contents = await run(`archive-${part}`, 'tar', ['-tzf', archives[part]], evidence);
             assert.equal(contents.split('\n').some(file => file.startsWith('package/src/')), false);
@@ -57,10 +57,10 @@ async function checkAgentExample() {
         const core = JSON.parse(await run('manifest-core', 'tar', ['-xOf', archives['agent-core'], 'package/package.json'], evidence));
         const providers = JSON.parse(await run('manifest-providers', 'tar', ['-xOf', archives['agent-providers'], 'package/package.json'], evidence));
         assert.deepEqual(Object.keys(core.dependencies ?? {}), []);
-        assert.deepEqual(providers.dependencies, {'@cuepoint/agent-core': core.version});
+        assert.deepEqual(providers.dependencies, {'@momoki/agent-core': core.version});
         const coreFile = `file:${relative(consumer, archives['agent-core'])}`, providerFile = `file:${relative(consumer, archives['agent-providers'])}`;
-        await writeFile(join(consumer, 'package.json'), JSON.stringify({name: 'cuepoint-independent-agent-acceptance', private: true, type: 'module', packageManager: manifest.packageManager,
-            dependencies: {'@cuepoint/agent-core': coreFile, '@cuepoint/agent-providers': providerFile}, pnpm: {overrides: {'@cuepoint/agent-core': coreFile}}}, null, 2));
+        await writeFile(join(consumer, 'package.json'), JSON.stringify({name: 'momoki-independent-agent-acceptance', private: true, type: 'module', packageManager: manifest.packageManager,
+            dependencies: {'@momoki/agent-core': coreFile, '@momoki/agent-providers': providerFile}, pnpm: {overrides: {'@momoki/agent-core': coreFile}}}, null, 2));
         await run('outside-pnpm-version', pnpm, ['--version'], consumer);
         await run('offline-install', pnpm, ['install', '--offline', '--ignore-scripts', '--no-frozen-lockfile', '--store-dir', store], consumer);
         await run('offline-frozen-reinstall', pnpm, ['install', '--offline', '--ignore-scripts', '--frozen-lockfile', '--store-dir', store], consumer);
@@ -75,8 +75,8 @@ async function checkAgentExample() {
         await cp(undiciTypes, join(consumer, 'node_modules/undici-types'), {recursive: true, dereference: true});
         await cp(join(root, 'examples/agent-todo/src'), join(consumer, 'src'), {recursive: true});
         await cp(join(root, 'examples/agent-todo/tsconfig.json'), join(consumer, 'tsconfig.json'));
-        await writeFile(join(consumer, 'src/public-types.ts'), `import {createToolFactory, type ToolContext} from '@cuepoint/agent-core';
-import type {ResponseItem} from '@cuepoint/agent-providers';
+        await writeFile(join(consumer, 'src/public-types.ts'), `import {createToolFactory, type ToolContext} from '@momoki/agent-core';
+import type {ResponseItem} from '@momoki/agent-providers';
 interface Context extends ToolContext<{title:string}> {services:{add:(title:string)=>number}}
 const define=createToolFactory<Context,{title:string}>();
 const spec={schema:{parse:(_raw:unknown)=>({title:'todo'})},json:{}};
@@ -88,7 +88,7 @@ define(spec,{name:'add',title:'Add',description:'Add',effect:'write',highRisk:ar
 // @ts-expect-error provider wire union rejects product-specific values
  const invalidWire:ResponseItem={type:'project',projectId:'invalid'};
 // @ts-expect-error private library sources are not exported
- import type {ToolMetadata} from '@cuepoint/agent-core/src/tools.js';
+ import type {ToolMetadata} from '@momoki/agent-core/src/tools.js';
 void invalidPreview;void invalidWire;const privateType:ToolMetadata|undefined=undefined;void privateType;
 `);
         const compile = await run('outside-strict-types', process.execPath, [join(compiler, 'bin/tsc'), '-p', join(consumer, 'tsconfig.json'), '--listFiles', '--pretty', 'false'], consumer);
@@ -99,10 +99,10 @@ void invalidPreview;void invalidWire;const privateType:ToolMetadata|undefined=un
         assert.ok(typeFiles.some(file => file.includes('agent-providers') && file.endsWith('.d.ts')));
         await writeFile(join(consumer, 'runtime-exports.mjs'), `import assert from 'node:assert/strict';
 import {realpathSync} from 'node:fs';import {fileURLToPath} from 'node:url';import {registerHooks} from 'node:module';
-const edges=[];registerHooks({resolve(specifier,context,next){const resolved=next(specifier,context);if(specifier==='@cuepoint/agent-core'&&context.parentURL?.includes('agent-providers'))edges.push(realpathSync(fileURLToPath(resolved.url)));return resolved;}});
-await import('@cuepoint/agent-providers');const directCore=realpathSync(fileURLToPath(import.meta.resolve('@cuepoint/agent-core')));assert.ok(edges.length>0);assert.ok(edges.every(file=>file===directCore));console.log(JSON.stringify({sameCoreIdentity:true,providerCoreEdges:edges,directCore}));
-for(const name of ['@cuepoint/agent-core','@cuepoint/agent-providers','@cuepoint/agent-providers/http']){const file=realpathSync(fileURLToPath(import.meta.resolve(name)));assert.ok(file.startsWith(${JSON.stringify(evidence)}));assert.ok(file.endsWith('.js'));console.log(name+' '+file);}
-for(const name of ['@cuepoint/studio','react','dexie','@tauri-apps/api/core','@cuepoint/agent-core/src/runtime.js','@cuepoint/agent-providers/dist/responses.js'])await assert.rejects(import(name));
+const edges=[];registerHooks({resolve(specifier,context,next){const resolved=next(specifier,context);if(specifier==='@momoki/agent-core'&&context.parentURL?.includes('agent-providers'))edges.push(realpathSync(fileURLToPath(resolved.url)));return resolved;}});
+await import('@momoki/agent-providers');const directCore=realpathSync(fileURLToPath(import.meta.resolve('@momoki/agent-core')));assert.ok(edges.length>0);assert.ok(edges.every(file=>file===directCore));console.log(JSON.stringify({sameCoreIdentity:true,providerCoreEdges:edges,directCore}));
+for(const name of ['@momoki/agent-core','@momoki/agent-providers','@momoki/agent-providers/http']){const file=realpathSync(fileURLToPath(import.meta.resolve(name)));assert.ok(file.startsWith(${JSON.stringify(evidence)}));assert.ok(file.endsWith('.js'));console.log(name+' '+file);}
+for(const name of ['@momoki/studio','react','dexie','@tauri-apps/api/core','@momoki/agent-core/src/runtime.js','@momoki/agent-providers/dist/responses.js'])await assert.rejects(import(name));
 `);
         await run('outside-runtime-exports', process.execPath, ['runtime-exports.mjs'], consumer);
         const exampleFiles = Object.keys(await captureAgentPackageFiles(root, 'examples/agent-todo/src'));
@@ -113,7 +113,7 @@ for(const name of ['@cuepoint/studio','react','dexie','@tauri-apps/api/core','@c
         const after = await capture();
         assert.deepEqual(after, before);
         const archiveHashes = Object.fromEntries(await Promise.all(Object.entries(archives).map(async ([name, file]) => [name, sha(await readFile(file))])));
-        const report = {exitCode: 0, evidence, consumer, node: process.versions.node, pnpm: pinned, packedCoreVersion: core.version, providerCoreVersion: providers.dependencies['@cuepoint/agent-core'], archiveHashes, inputs: before, testSources, testOutputs, typeFiles, commands};
+        const report = {exitCode: 0, evidence, consumer, node: process.versions.node, pnpm: pinned, packedCoreVersion: core.version, providerCoreVersion: providers.dependencies['@momoki/agent-core'], archiveHashes, inputs: before, testSources, testOutputs, typeFiles, commands};
         await writeFile(join(evidence, 'report.json'), JSON.stringify(report, null, 2)); console.log(JSON.stringify({agentExample: 'PASS', evidence, conformance: 'complete', archiveHashes}));
         return report;
     } catch (cause) {await writeFile(join(evidence, 'failure.json'), JSON.stringify({exitCode: 1, evidence, commands, error: cause.stack}, null, 2)); throw cause;}

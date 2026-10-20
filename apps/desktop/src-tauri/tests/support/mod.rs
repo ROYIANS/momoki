@@ -1,4 +1,4 @@
-use cuepoint_native_storage::{AssetKind, ImportRequest, Job, Outcome, State, StorageWorker};
+use momoki_native_storage::{AssetKind, ImportRequest, Job, Outcome, State, StorageWorker};
 use std::{fs, path::PathBuf};
 
 pub struct Fixture {
@@ -7,7 +7,7 @@ pub struct Fixture {
 impl Fixture {
     pub fn new() -> Self {
         let base =
-            std::env::temp_dir().join(format!("cuepoint-native-test-{}", uuid::Uuid::new_v4()));
+            std::env::temp_dir().join(format!("momoki-native-test-{}", uuid::Uuid::new_v4()));
         fs::create_dir(&base).unwrap();
         Self { base }
     }
@@ -18,7 +18,7 @@ impl Fixture {
         let source = self.path("source.bin");
         fs::write(
             &source,
-            (0..(cuepoint_native_storage::CHUNK * 2 + 7))
+            (0..(momoki_native_storage::CHUNK * 2 + 7))
                 .map(|i| (i % 251) as u8)
                 .collect::<Vec<_>>(),
         )

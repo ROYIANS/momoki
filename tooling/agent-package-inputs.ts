@@ -17,7 +17,7 @@ export async function captureAgentPackageFiles(root:string,directory:string): Pr
     for (const entry of await readdir(join(root,directory),{withFileTypes:true})) {
         const file=`${directory}/${entry.name}`;
         if (entry.isDirectory()) Object.assign(result,await captureAgentPackageFiles(root,file));
-        else if (entry.isFile() && entry.name !== '.cuepoint-build.json') result[file]=hash(await readFile(join(root,file)));
+        else if (entry.isFile() && entry.name !== '.momoki-build.json') result[file]=hash(await readFile(join(root,file)));
     }
     return result;
 }
@@ -28,7 +28,7 @@ export async function captureAgentPackageInputs(root:string,row:PackageRow,packa
     const files=[`${row.path}/package.json`,`${row.path}/tsconfig.json`,'pnpm-lock.yaml',
         'tooling/build-agent-packages.mjs','tooling/agent-package-inputs.ts','tooling/workspace.mjs','quality/workspaces.json',
         'node_modules/typescript/package.json','node_modules/typescript/bin/tsc','node_modules/typescript/lib/tsc.js','node_modules/typescript/lib/_tsc.js'];
-    for (const dependency of packages.filter(candidate=>candidate.publicSources && row.dependencies.includes(candidate.name))) files.push(`${dependency.path}/dist/.cuepoint-build.json`);
+    for (const dependency of packages.filter(candidate=>candidate.publicSources && row.dependencies.includes(candidate.name))) files.push(`${dependency.path}/dist/.momoki-build.json`);
     for (const file of files) inputs[file]=hash(await readFile(join(root,file)));
     return inputs;
 }
@@ -37,7 +37,7 @@ export async function captureAgentPackageInputs(root:string,row:PackageRow,packa
 export async function assertAgentPackageFreshness(root=repositoryRoot): Promise<void> {
     const policy=JSON.parse(await readFile(join(root,'quality/workspaces.json'),'utf8')) as {packages:PackageRow[]};
     for (const row of policy.packages.filter(row=>row.publicSources)) {
-        const receipt=JSON.parse(await readFile(join(root,row.path,'dist/.cuepoint-build.json'),'utf8')) as BuildReceipt;
+        const receipt=JSON.parse(await readFile(join(root,row.path,'dist/.momoki-build.json'),'utf8')) as BuildReceipt;
         const outputs=await captureAgentPackageFiles(root,`${row.path}/dist`);
         if (!equal(outputs,receipt.outputs)) throw new Error(`Stale reusable package outputs: ${row.path}; run agent:build`);
         const inputs=await captureAgentPackageInputs(root,row,policy.packages);

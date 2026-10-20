@@ -1,5 +1,5 @@
 mod support;
-use cuepoint_native_storage::{Hooks, Job, Outcome, Project, StorageWorker};
+use momoki_native_storage::{Hooks, Job, Outcome, Project, StorageWorker};
 use std::fs;
 use support::{Fixture, request, state};
 

@@ -45,14 +45,14 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const endpoint=`http://127.0.0.1:${server.address().port}`;
 const frontend=resolve(root,'frontend');await mkdir(frontend);
 await build({configFile:false,root:resolve(base,'ui/e11-background'),publicDir:false,define:{__E11_ENDPOINT__:JSON.stringify(endpoint),__APP_VERSION__:JSON.stringify('0.1.3')},build:{outDir:frontend,emptyOutDir:true,rollupOptions:{output:{manualChunks:undefined}}}});
-const identifier=`dev.cuepoint.review.e11-${Date.now()}`;
+const identifier=`dev.momoki.review.e11-${Date.now()}`;
 const config={identifier,build:{frontendDist:frontend},app:{security:{capabilities:['main',{identifier:'e11-window-fixture',windows:['main'],permissions:['core:window:allow-close']}]}}};
 const env={...process.env,TAURI_CONFIG:JSON.stringify(config),PATH:`/Users/xiaomengdao/.nvm/versions/node/v24.11.0/bin:${process.env.PATH}`};
-const emittedBinary=resolve(base,'.tools/target/debug/cuepoint-prototype');
-const binary=resolve(root,'cuepoint-prototype');
+const emittedBinary=resolve(base,'.tools/target/debug/momoki');
+const binary=resolve(root,'momoki');
 async function child(command,args,name){const log=await open(resolve(root,name),'wx');try{const process=spawn(command,args,{cwd:base,env,stdio:['ignore',log.fd,log.fd]});const deadline=setTimeout(()=>process.kill('SIGKILL'),name==='native-build.log'?180_000:5_000);try{await new Promise((resolve,reject)=>{process.once('error',reject);process.once('close',(code,signal)=>code===0?resolve():reject(new Error(`${name}: ${code}/${signal}`)));});}finally{clearTimeout(deadline);}}finally{await log.close();}}
 console.log(`Native probe artifacts: ${root}`);
-await child('/Users/xiaomengdao/.nvm/versions/node/v24.11.0/bin/node',['scripts/tools.mjs','cargo','build','--manifest-path','src-tauri/Cargo.toml','--locked','--features','product-sqlite','--bin','cuepoint-prototype'],'native-build.log');
+await child('/Users/xiaomengdao/.nvm/versions/node/v24.11.0/bin/node',['scripts/tools.mjs','cargo','build','--manifest-path','src-tauri/Cargo.toml','--locked','--features','product-sqlite','--bin','momoki'],'native-build.log');
 // A private copy prevents a later scoped native compile from replacing this host.
 await copyFile(emittedBinary,binary);await chmod(binary,0o700);
 const log=await open(resolve(root,'native-host.log'),'wx');app=spawn(binary,[],{cwd:base,env,stdio:['ignore',log.fd,log.fd]});await log.close();

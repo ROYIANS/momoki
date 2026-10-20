@@ -1,8 +1,8 @@
 import type {AgentRequestMessage, AgentToolSchema} from "../models/agent";
 
-import {estimateTokens} from '@cuepoint/agent-core';
+import {estimateTokens} from '@momoki/agent-core';
 import {estimateImageTokens, wireTools, type WireProtocol} from "./contextMeasurement";
-export {estimateTokens} from '@cuepoint/agent-core';
+export {estimateTokens} from '@momoki/agent-core';
 
 export type ContextUsage = {
     categories: Array<{ id: string; label: string; tokens: number; color: string }>;

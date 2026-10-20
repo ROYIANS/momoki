@@ -8,7 +8,9 @@ use std::{
     time::{Duration, Instant},
 };
 
-const FORMAT: &str = "cuepoint.native-backup.v1";
+const FORMAT: &str = "momoki.native-backup.v1";
+/// The name before the rename; backups made then still restore.
+const LEGACY_FORMAT: &str = "cuepoint.native-backup.v1";
 impl Workspace {
     pub fn backup(
         &self,
@@ -102,7 +104,7 @@ fn verify_snapshot(
     check: &impl Fn() -> Result<()>,
 ) -> Result<()> {
     check()?;
-    if manifest.format != FORMAT || manifest.schema != SCHEMA {
+    if (manifest.format != FORMAT && manifest.format != LEGACY_FORMAT) || manifest.schema != SCHEMA {
         return Err(Error::new("schema", "Unsupported backup format"));
     }
     let database_path = paths::managed(backup_root, "metadata.sqlite", false)?;
@@ -169,7 +171,7 @@ pub(crate) fn restore(backup_root: &Path, destination: &Path, hooks: &Hooks) -> 
         &root,
         "workspace.ready.json",
         &ReadyMarker {
-            format: "cuepoint.workspace.ready.v1".into(),
+            format: "momoki.workspace.ready.v1".into(),
             schema: SCHEMA,
             workspace_id: manifest.workspace_id,
         },
@@ -191,7 +193,7 @@ mod tests {
             }
         }
         let root =
-            std::env::temp_dir().join(format!("cuepoint-backup-flush-{}", uuid::Uuid::new_v4()));
+            std::env::temp_dir().join(format!("momoki-backup-flush-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir(&root).unwrap();
         let fixture = Fixture(root);
         let path = fixture.0.join("metadata.sqlite");

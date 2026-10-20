@@ -11,7 +11,7 @@ const drivers=new WeakMap<ProductStore,StoreDriver>();
 export function createProductStore(driver:StoreDriver):ProductStore {
     const store=originalCreateProductStore(driver);
     drivers.set(store,driver);
-    const directory=process.env.CUEPOINT_TOOL_COVERAGE_DIR;
+    const directory=process.env.MOMOKI_TOOL_COVERAGE_DIR;
     if (directory) {
         mkdirSync(directory,{recursive:true});
         store.subscribe(change=>appendFileSync(join(directory,`tables-${process.pid}-${process.env.VITEST_POOL_ID ?? "worker"}.jsonl`),JSON.stringify({kind:"committedTables",owner:driver.owner,tables:[...change.tables],test:expect.getState().currentTestName ?? "unknown",file:expect.getState().testPath ?? "unknown"})+"\n"));

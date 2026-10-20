@@ -1,6 +1,6 @@
-Cuepoint media decoder third-party notices
+Momoki media decoder third-party notices
 
-Cuepoint invokes unmodified FFmpeg and ffprobe 8.0.3 as separate executables.
+Momoki invokes unmodified FFmpeg and ffprobe 8.0.3 as separate executables.
 FFmpeg copyright (c) 2000-2026 the FFmpeg developers.
 FFmpeg is licensed under the GNU Lesser General Public License version 2.1 or
 later for this selected build configuration. Full license and project notices

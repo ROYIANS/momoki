@@ -11,7 +11,7 @@ import {createServer} from "vite";
 
 // Narrow browser-port fixture, not an application build or installed-host test.
 const {chromium} = await import(process.env.MCP_PLAYWRIGHT_PATH ?? "playwright");
-const output = process.env.MCP_BROWSER_EVIDENCE_DIR ?? await mkdtemp(join(tmpdir(), "cuepoint-mcp-browser-evidence-"));
+const output = process.env.MCP_BROWSER_EVIDENCE_DIR ?? await mkdtemp(join(tmpdir(), "momoki-mcp-browser-evidence-"));
 await mkdir(output, {recursive: true});
 const counters = new Map(), requests = [], observations = [], errors = [];
 let appOrigin, remoteOrigin, browser, page;
@@ -26,7 +26,7 @@ const sourceFiles = ["pnpm-lock.yaml", "packages/studio/package.json", "tooling/
 const sourceHashes = async () => Object.fromEntries(await Promise.all(sourceFiles.map(async file => [file, createHash("sha256").update(await readFile(file)).digest("hex")])));
 const sources = await sourceHashes();
 // Ephemeral local fixture TLS only. The browser context explicitly trusts this test certificate.
-const tlsDirectory = await mkdtemp(join(tmpdir(), "cuepoint-mcp-browser-tls-"));
+const tlsDirectory = await mkdtemp(join(tmpdir(), "momoki-mcp-browser-tls-"));
 execFileSync("openssl", ["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-keyout", join(tlsDirectory, "key.pem"), "-out", join(tlsDirectory, "cert.pem"), "-days", "1", "-subj", "/CN=localhost"], {stdio: "ignore"});
 function count(mode) {counters.set(mode, (counters.get(mode) ?? 0) + 1);}
 function cors(req, res, allowed = true, expose = true) {
@@ -131,7 +131,7 @@ const httpOne = createHttpServer(handler);
 await new Promise(resolve => remote.listen(0, "127.0.0.1", resolve));
 await new Promise(resolve => httpOne.listen(0, "127.0.0.1", resolve));
 remoteOrigin = `https://127.0.0.1:${remote.address().port}`;
-const cacheDir = await mkdtemp(join(tmpdir(), "cuepoint-mcp-browser-vite-"));
+const cacheDir = await mkdtemp(join(tmpdir(), "momoki-mcp-browser-vite-"));
 const server = await createServer({configFile: false, cacheDir, plugins: [{name: "mcp-callback-fixture", transformIndexHtml: {order: "post", handler: html => html.replace(/<script type="module" src="\/@vite\/client"><\/script>/u, "")}, configureServer(vite) {
     vite.middlewares.use((req, _res, next) => {if (req.url?.startsWith("/mcp/oauth/callback")) req.url = "/tests/fixtures/mcp-browser/index.html"; next();});
 }}], resolve: {alias: {"@": fileURLToPath(new URL("../packages/studio/src", import.meta.url))}},
@@ -200,8 +200,8 @@ try {
             const callback = new URL(callbackUrl), fields = Object.fromEntries(callback.searchParams);
             const beforeTokens = tokenCount;
             // Correct fields from the wrong source/origin must not consume the live attempt.
-            await page.evaluate(({fields, redirect}) => window.postMessage({kind: "cuepoint_mcp_oauth_callback", redirect, fields}, location.origin), {fields, redirect: `${appOrigin}/mcp/oauth/callback`});
-            await popup.evaluate(({fields, redirect, origin}) => window.opener.postMessage({kind: "cuepoint_mcp_oauth_callback", redirect, fields}, origin), {fields, redirect: `${appOrigin}/mcp/oauth/callback`, origin: appOrigin});
+            await page.evaluate(({fields, redirect}) => window.postMessage({kind: "momoki_mcp_oauth_callback", redirect, fields}, location.origin), {fields, redirect: `${appOrigin}/mcp/oauth/callback`});
+            await popup.evaluate(({fields, redirect, origin}) => window.opener.postMessage({kind: "momoki_mcp_oauth_callback", redirect, fields}, origin), {fields, redirect: `${appOrigin}/mcp/oauth/callback`, origin: appOrigin});
             for (const [key, value] of [["state", "forged-state"], ["iss", `${remoteOrigin}/other-issuer`]]) {
                 const bad = new URL(callbackUrl); bad.searchParams.set(key, value);
                 await popup.goto(bad.href); await popup.waitForFunction(() => !location.search);

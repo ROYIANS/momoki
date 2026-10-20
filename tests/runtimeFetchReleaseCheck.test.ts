@@ -27,18 +27,18 @@ describe("release-check purpose", () => {
     });
 
     it.each([
-        "https://api.github.com/repos/ROYIANS/Cuepoint/releases",
-        "https://api.github.com/repos/ROYIANS/Cuepoint/releases?per_page=100",
-        "https://api.github.com/repos/ROYIANS/Cuepoint/releases?per_page=30&page=2",
-        "https://api.github.com/repos/ROYIANS/Cuepoint/releases?",
-        "https://api.github.com/repos/ROYIANS/Cuepoint/releases?per_page=30#frag",
-        "https://api.github.com/repos/ROYIANS/Cuepoint/releases/latest",
-        "https://api.github.com/repos/ROYIANS/Cuepoint",
+        "https://api.github.com/repos/ROYIANS/momoki/releases",
+        "https://api.github.com/repos/ROYIANS/momoki/releases?per_page=100",
+        "https://api.github.com/repos/ROYIANS/momoki/releases?per_page=30&page=2",
+        "https://api.github.com/repos/ROYIANS/momoki/releases?",
+        "https://api.github.com/repos/ROYIANS/momoki/releases?per_page=30#frag",
+        "https://api.github.com/repos/ROYIANS/momoki/releases/latest",
+        "https://api.github.com/repos/ROYIANS/momoki",
         "https://api.github.com/repos/other/repo/releases?per_page=30",
-        "https://api.github.com:8443/repos/ROYIANS/Cuepoint/releases?per_page=30",
-        "https://api.github.com.evil.example/repos/ROYIANS/Cuepoint/releases?per_page=30",
-        "https://evil.example/repos/ROYIANS/Cuepoint/releases?per_page=30",
-        "http://api.github.com/repos/ROYIANS/Cuepoint/releases?per_page=30",
+        "https://api.github.com:8443/repos/ROYIANS/momoki/releases?per_page=30",
+        "https://api.github.com.evil.example/repos/ROYIANS/momoki/releases?per_page=30",
+        "https://evil.example/repos/ROYIANS/momoki/releases?per_page=30",
+        "http://api.github.com/repos/ROYIANS/momoki/releases?per_page=30",
     ])("rejects %s before any native traffic", async target => {
         const deps = services();
         await expect(releaseCheck(deps)(target)).rejects.toThrow();
@@ -74,14 +74,14 @@ describe("release-check purpose", () => {
 
     it("rejects a redirect to another api.github.com path", async () => {
         const deps = services();
-        deps.nativeFetch.mockResolvedValueOnce(new Response(null, {status: 301, headers: {location: "/repos/ROYIANS/Cuepoint"}}));
+        deps.nativeFetch.mockResolvedValueOnce(new Response(null, {status: 301, headers: {location: "/repos/ROYIANS/momoki"}}));
         await expect(releaseCheck(deps)(RELEASE_CHECK_URL)).rejects.toThrow("匿名 GET");
         expect(deps.nativeFetch).toHaveBeenCalledOnce();
     });
 
     it("rejects a redirect downgraded to http", async () => {
         const deps = services();
-        deps.nativeFetch.mockResolvedValueOnce(new Response(null, {status: 307, headers: {location: "http://api.github.com/repos/ROYIANS/Cuepoint/releases?per_page=30"}}));
+        deps.nativeFetch.mockResolvedValueOnce(new Response(null, {status: 307, headers: {location: "http://api.github.com/repos/ROYIANS/momoki/releases?per_page=30"}}));
         await expect(releaseCheck(deps)(RELEASE_CHECK_URL)).rejects.toThrow();
         expect(deps.nativeFetch).toHaveBeenCalledOnce();
     });

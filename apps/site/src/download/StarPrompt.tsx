@@ -1,4 +1,4 @@
-import {GITHUB_URL} from "@cuepoint/distribution/brand";
+import {GITHUB_URL} from "@momoki/distribution/brand";
 import {IconControl} from "../ui/IconControl";
 import {formatStars} from "./format";
 

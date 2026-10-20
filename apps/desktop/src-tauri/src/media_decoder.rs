@@ -242,7 +242,7 @@ mod tests {
     use std::{fs, path::PathBuf};
 
     fn fixture() -> (PathBuf, Manifest) {
-        let root = std::env::temp_dir().join(format!("cuepoint-decoder-{}", uuid::Uuid::new_v4()));
+        let root = std::env::temp_dir().join(format!("momoki-decoder-{}", uuid::Uuid::new_v4()));
         fs::create_dir_all(root.join("media")).unwrap();
         let mut manifest = expected("macos-arm64").unwrap();
         for executable in manifest.executables.values_mut() {

@@ -1,6 +1,6 @@
 use super::*;
 fn fixture(hooks: Hooks) -> FullProductStore {
-    let root = std::env::temp_dir().join(format!("cuepoint-product-test-{}", uuid::Uuid::new_v4()));
+    let root = std::env::temp_dir().join(format!("momoki-product-test-{}", uuid::Uuid::new_v4()));
     FullProductStore::open(root, true, hooks).unwrap()
 }
 fn call(store: &mut FullProductStore, kind: &str, mut dto: Value) -> Result<Value> {
@@ -56,7 +56,7 @@ fn finish_entries(
         .map(|entry| serde_json::to_string(&entry).unwrap() + "\n")
         .collect::<String>();
     let mut sha = Sha256::new();
-    sha.update(b"cuepoint-batch-v1\n");
+    sha.update(b"momoki-batch-v1\n");
     sha.update(payload.as_bytes());
     let fingerprint = paths::hex_digest(sha.finalize());
     let mut offset = 0;
@@ -373,7 +373,7 @@ fn chunked_large_row_and_paged_epoch_no_whole_database_preload() {
     let payload =
         serde_json::to_string(&json!({"kind":"mutation","mutation":mutation})).unwrap() + "\n";
     let mut sha = Sha256::new();
-    sha.update(b"cuepoint-batch-v1\n");
+    sha.update(b"momoki-batch-v1\n");
     sha.update(payload.as_bytes());
     let fp = paths::hex_digest(sha.finalize());
     let mut offset = 0;

@@ -1,4 +1,4 @@
-use cuepoint_native_storage::{WorkspaceRef, derive_ref, validate_ref};
+use momoki_native_storage::{WorkspaceRef, derive_ref, validate_ref};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 
@@ -44,7 +44,7 @@ struct HashVector {
 fn actual_typescript_oracle_is_exact_in_rust() {
     let corpus: Corpus =
         serde_json::from_str(include_str!("../../fixtures/portable-contract-v1.json")).unwrap();
-    assert_eq!(corpus.format, "cuepoint.native-contract-corpus.v1");
+    assert_eq!(corpus.format, "momoki.native-contract-corpus.v1");
     assert_eq!(corpus.sources.len(), 4);
     for vector in corpus.references {
         assert_eq!(

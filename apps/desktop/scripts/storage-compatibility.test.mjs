@@ -16,7 +16,7 @@ const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const newTable=()=>({keyPath:'id',scope:'content',indexes:[{name:'projectId',keyPaths:['projectId'],unique:false}]});
 
 test('actual release prepare accepts a new table without catalog edits and rejects changed old definitions before matrix output',async ()=> {
-    const fixture=await mkdtemp(join(tmpdir(),'cuepoint-registry-release-'));
+    const fixture=await mkdtemp(join(tmpdir(),'momoki-registry-release-'));
     try {
         const files=['package.json','apps/desktop/package.json','apps/desktop/src-tauri/Cargo.toml','apps/desktop/src-tauri/tauri.conf.json',
             'apps/desktop/media/decoder-lock.json','apps/desktop/media/source-lock.json','packages/studio/src/platform/storage/schema.json'];
@@ -29,7 +29,7 @@ test('actual release prepare accepts a new table without catalog edits and rejec
         const output=join(fixture,'github-output'),version=JSON.parse(await readFile(join(fixture,'package.json'),'utf8')).version;
         const prepare=()=>spawnSync(process.execPath,[join(fixture,'apps/desktop/scripts/prepare-release.mjs')],{
             cwd:fixture,encoding:'utf8',env:{...process.env,GITHUB_EVENT_NAME:'push',GITHUB_REF:`refs/tags/desktop-v${version}`,
-                GITHUB_SHA:'a'.repeat(40),GITHUB_REPOSITORY:'ROYIANS/Cuepoint',GITHUB_RUN_ID:'1',GITHUB_RUN_ATTEMPT:'1',GITHUB_OUTPUT:output},
+                GITHUB_SHA:'a'.repeat(40),GITHUB_REPOSITORY:'ROYIANS/momoki',GITHUB_RUN_ID:'1',GITHUB_RUN_ATTEMPT:'1',GITHUB_OUTPUT:output},
         });
         const next=JSON.parse(current);next.tables.nextReleaseTable=newTable();
         await writeFile(join(fixture,'packages/studio/src/platform/storage/schema.json'),JSON.stringify(next));

@@ -41,7 +41,7 @@ export async function getGeneralAgentConfig(store?: ProductStore): Promise<Agent
         const agent: AgentConfig = {
             id: GENERAL_AGENT_ID,
             name: "创作助手",
-            instructions: "你是小光点的通用创作助手，帮助用户梳理创意、剧本和制作计划。准确说明已完成的工作，不要声称执行了没有实际调用的工具或修改了系统数据。",
+            instructions: "你是默默（全名齐默默），Momoki 里的通用创作助手，帮助用户梳理创意、剧本和制作计划。准确说明已完成的工作，不要声称执行了没有实际调用的工具或修改了系统数据。",
             permissionMode: "ask",
             enabledSkillIds: [...DEFAULT_SKILL_IDS],
             skillDefaultsVersion: SKILL_DEFAULTS_VERSION,

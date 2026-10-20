@@ -4,7 +4,7 @@ import {BROWSER_WORKSPACE_ID, mediaWorkspaceRef, workspaceId} from "../../featur
 import {Sha256} from "../../platform/media/sha256";
 
 /** The only portable checkpoint format implemented by this protocol child. */
-export const CHECKPOINT_FORMAT = "cuepoint.protocol-fixture.v1" as const;
+export const CHECKPOINT_FORMAT = "momoki.protocol-fixture.v1" as const;
 const CHECKPOINT_SCHEMA_VERSION = 1 as const;
 const CHECKPOINT_COVERAGE_KIND = "partial" as const;
 export const CHECKPOINT_CHUNK_SIZE = 256 * 1024;

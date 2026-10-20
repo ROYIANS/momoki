@@ -57,7 +57,7 @@ jobs:
       - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
         with:
           version: 10.15.0
-          dest: ${{ runner.temp }}/cuepoint-pnpm
+          dest: ${{ runner.temp }}/momoki-pnpm
           run_install: false
       - name: Pinned stable Rust
         # The shared tool resolver requires rustfmt's path; packaging never runs it.
@@ -75,7 +75,7 @@ jobs:
           sudo apt-get install --no-install-recommends -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev librsvg2-dev libayatana-appindicator3-dev patchelf xdg-utils gstreamer1.0-tools gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-libav libfuse2
       - name: Fresh normal product installers
         env:
-          CARGO_TARGET_DIR: ${{ runner.temp }}/cuepoint-release-target
+          CARGO_TARGET_DIR: ${{ runner.temp }}/momoki-release-target
         run: node apps/desktop/scripts/build-release.mjs --target '${{ matrix.target }}' --output "$RUNNER_TEMP/target-package"
       - name: Upload exact packaged target
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6, verified 2026-10-12

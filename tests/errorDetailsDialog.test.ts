@@ -55,7 +55,7 @@ describe("ErrorDetailsDialog", () => {
         expect(NO_AUTO_SEND_NOTICE).toContain("不会自动发送");
         expect(textarea().readOnly).toBe(true);
         for (const secret of SECRETS) expect(textarea().value).not.toContain(secret);
-        expect(textarea().value).toContain("Cuepoint 诊断信息");
+        expect(textarea().value).toContain("Momoki 诊断信息");
     });
     it("copies through the clipboard", async () => {
         await act(async () => { button("复制诊断信息").click(); });
@@ -79,8 +79,8 @@ describe("ErrorDetailsDialog", () => {
     it("saves a sanitized text file with a timestamped name", async () => {
         await act(async () => { button("保存为文件").click(); });
         const [blob, name] = downloadBlob.mock.calls[0] as [Blob, string];
-        expect(name).toMatch(/^cuepoint-diagnostic-\d{8}-\d{6}\.txt$/);
-        expect(diagnosticFilename(new Date(2026, 9, 13, 8, 5, 9))).toBe("cuepoint-diagnostic-20261013-080509.txt");
+        expect(name).toMatch(/^momoki-diagnostic-\d{8}-\d{6}\.txt$/);
+        expect(diagnosticFilename(new Date(2026, 9, 13, 8, 5, 9))).toBe("momoki-diagnostic-20261013-080509.txt");
         const text = await new Promise<string>(resolve => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.readAsText(blob); });
         expect(text).toBe(textarea().value);
         for (const secret of SECRETS) expect(text).not.toContain(secret);

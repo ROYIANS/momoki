@@ -2,7 +2,7 @@
 
 ## 1. Scope / Trigger
 
-Apply when changing `packages/studio/src/app/workflows/checkpoint.ts`, `packages/studio/src/app/workflows/syncProvider.ts` or future adapters that consume their contracts. This foundation implements only `cuepoint.protocol-fixture.v1`, schema 1, with explicitly partial coverage. Its project/media records are disposable protocol projections, not complete production table codecs. There is no user-facing sync, native filesystem/SQLite migration, managed hosting, marketplace or history/restore application in this boundary.
+Apply when changing `packages/studio/src/app/workflows/checkpoint.ts`, `packages/studio/src/app/workflows/syncProvider.ts` or future adapters that consume their contracts. This foundation implements only `momoki.protocol-fixture.v1`, schema 1, with explicitly partial coverage. Its project/media records are disposable protocol projections, not complete production table codecs. There is no user-facing sync, native filesystem/SQLite migration, managed hosting, marketplace or history/restore application in this boundary.
 
 ## 2. Signatures / Owners
 

@@ -17,7 +17,7 @@ async function toolVersion(command,env) {
 }
 
 export async function verifyNativeProbeReady(probe,env=process.env) {
-    const temporary=await mkdtemp(join(tmpdir(),'cuepoint-probe-ready-'));
+    const temporary=await mkdtemp(join(tmpdir(),'momoki-probe-ready-'));
     try {
         return await new Promise((accept,reject)=> {
             const child=spawn(probe,['create',join(temporary,'workspace')],{env,stdio:['pipe','pipe','pipe'],shell:false});
@@ -84,7 +84,7 @@ export async function prepareNativeTestProbe(options,environment=process.env) {
         if (!entry.isFile() || entry.isSymbolicLink() || entry.size === 0) throw new Error('Fresh native test probe output is missing or invalid');
         report.probe={path,size:entry.size,sha256:createHash('sha256').update(await readFile(path)).digest('hex')};
         report.readiness=await verifyNativeProbeReady(path,env);
-        await appendFile(options['github-env'],`CUEPOINT_NATIVE_STORE_PROBE=${path}\n`);
+        await appendFile(options['github-env'],`MOMOKI_NATIVE_STORE_PROBE=${path}\n`);
         report.status='passed';return report;
     } catch (error) {
         report.status='failed';report.error=error instanceof Error ? error.message : String(error);throw error;

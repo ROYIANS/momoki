@@ -181,7 +181,7 @@ describe("actual batch review target handoff", () => {
     it("does not intercept a canonical href that disagrees with its typed production target", async () => {
         await showReview();
         const link = targetLink();
-        const href = new URL(link.getAttribute("href")!, "https://cuepoint.test");
+        const href = new URL(link.getAttribute("href")!, "https://momoki.test");
         href.searchParams.set("shot", fixture.shots[1].id);
         link.setAttribute("href", `${href.pathname}${href.search}`);
         await click(link);

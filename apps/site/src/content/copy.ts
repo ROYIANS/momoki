@@ -24,7 +24,7 @@ export type SceneCopy = {
 export const SCENE_COPY: Record<SceneId, SceneCopy> = {
     leader: {
         kicker: "片头",
-        title: "小光点 Cuepoint",
+        title: "默默 Momoki",
         eyebrow: {text: "本地优先 · 开源 MIT", evidence: "README.md「许可」；LICENSE"},
         narration: {
             text: "本地优先的 AI 创作工作室，让故事、画面、声音和音乐在同一个项目中逐步成形。",
@@ -115,7 +115,7 @@ export const SCENE_COPY: Record<SceneId, SceneCopy> = {
         subtitle: {text: "作品留在你这里，钥匙也是。", evidence: "README.md「数据存放在哪里」「AI 连接与模型」"},
         points: [
             {
-                text: "AI 使用你自己的服务与 API Key，请求直接发往你配置的供应商；小光点本身不提供模型服务",
+                text: "AI 使用你自己的服务与 API Key，请求直接发往你配置的供应商；默默本身不提供模型服务",
                 evidence: "README.md「AI 连接与模型」"
             },
             {
@@ -187,11 +187,11 @@ export const ONLINE_NOTES: readonly Claim[] = [
 ];
 
 export const OPEN_SOURCE: Claim = {
-    text: "小光点的原创代码采用 MIT 协议开源；第三方内容遵循各自的许可。",
+    text: "默默的原创代码采用 MIT 协议开源；第三方内容遵循各自的许可。",
     evidence: "README.md「许可」；LICENSE；THIRD_PARTY_NOTICES.md",
 };
 
 export const PRIVACY: Claim = {
-    text: "项目数据只保存在你的浏览器或本机，不会上传到小光点的服务器；AI 请求直接发往你配置的供应商。浏览器版与桌面版的数据相互独立，请定期导出项目 ZIP。本页会加载 Google Fonts，站点可能启用 Umami 访问统计。",
+    text: "项目数据只保存在你的浏览器或本机，不会上传到默默的服务器；AI 请求直接发往你配置的供应商。浏览器版与桌面版的数据相互独立，请定期导出项目 ZIP。本页会加载 Google Fonts，站点可能启用 Umami 访问统计。",
     evidence: "README.md「数据、隐私与备份」；packages/distribution/src/analytics.ts",
 };

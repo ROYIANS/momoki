@@ -2,7 +2,7 @@ import {constants} from 'node:fs';
 import type {FileHandle} from 'node:fs/promises';
 import {link, lstat, mkdir, open, realpath, unlink} from 'node:fs/promises';
 import {basename, dirname, isAbsolute, join, relative, resolve} from 'node:path';
-import {Sha256} from '@cuepoint/studio/reference/lib/sha256';
+import {Sha256} from '@momoki/studio/reference/lib/sha256';
 import {CHUNK, portableLength} from './contracts';
 
 export function absent(error: unknown): boolean {

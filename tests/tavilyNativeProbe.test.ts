@@ -4,15 +4,15 @@ import {checkTavilyNative} from '../apps/desktop/ui/tavilyProbe';
 import {fixtureTavilyFetch} from '../apps/desktop/ui/tavilyProbeFetch';
 import {Evidence} from '../apps/desktop/ui/acceptanceEvidence';
 
-const state=vi.hoisted(()=>({native:true,profile:'dev.cuepoint.review.tavily.source-test',transport:vi.fn<typeof fetch>()}));
+const state=vi.hoisted(()=>({native:true,profile:'dev.momoki.review.tavily.source-test',transport:vi.fn<typeof fetch>()}));
 vi.mock('@/platform/runtime/runtimeIdentity',()=>({isTauriRuntime:()=>state.native}));
-vi.mock('@/platform/runtime/storageProfile',()=>({getProductStorage:()=>({runtime:'tauri',storage:'sqlite',profileId:state.profile,databaseName:`cuepoint-desktop:${state.profile}:v1`})}));
+vi.mock('@/platform/runtime/storageProfile',()=>({getProductStorage:()=>({runtime:'tauri',storage:'sqlite',profileId:state.profile,databaseName:`momoki-desktop:${state.profile}:v1`})}));
 vi.mock('@/platform/runtime/runtimeFetch',()=>({connectorProbeFetch:()=>state.transport}));
 
 const endpoint='http://127.0.0.1:56368/v1';
 const init=(path:string):RequestInit=>({method:path==='/usage'?'GET':'POST',headers:{Authorization:'Bearer synthetic-tavily-probe-only'},
     ...(path==='/usage'?{}:{body:'{}'}),credentials:'omit',redirect:'error'});
-beforeEach(()=>{state.native=true;state.profile='dev.cuepoint.review.tavily.source-test';state.transport.mockReset();});
+beforeEach(()=>{state.native=true;state.profile='dev.momoki.review.tavily.source-test';state.transport.mockReset();});
 
 describe('test-only Tavily exact routing contract',()=>{
     it.each(['/usage','/search','/extract'])('maps only %s to the exact loopback with unchanged init',async path=>{
@@ -66,7 +66,7 @@ describe('visible-probe shared adapter and owned cleanup',()=>{
         await expect(checkTavilyNative(new Evidence(()=>{}),endpoint)).rejects.toThrow('已有搜索配置');
         expect(state.transport).not.toHaveBeenCalled();expect((await db.searchConnections.get('tavily'))?.revision).toBe('other');
     });
-    it.each(['normal','dev.cuepoint.prototype.acceptance'])('rejects non-dedicated profile %s before config/transport',async profile=>{
+    it.each(['normal','dev.momoki.prototype.acceptance'])('rejects non-dedicated profile %s before config/transport',async profile=>{
         state.profile=profile;
         await expect(checkTavilyNative(new Evidence(()=>{}),endpoint)).rejects.toThrow('独立原生');
         expect(state.transport).not.toHaveBeenCalled();expect(await db.searchConnections.count()).toBe(0);

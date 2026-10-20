@@ -4,7 +4,7 @@ import type {Project} from "../../projects/models/project";
 
 export type TopicGrouping = "project" | "time";
 
-export const TOPIC_GROUPING_KEY = "cuepoint.agent.topicGrouping";
+export const TOPIC_GROUPING_KEY = "momoki.agent.topicGrouping";
 export const UNLINKED_PROJECT_KEY = "__unlinked__";
 const UNLINKED_PROJECT_LABEL = "未关联项目";
 

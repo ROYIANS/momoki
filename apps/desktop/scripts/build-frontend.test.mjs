@@ -11,13 +11,13 @@ const report=`
 import {getHeapStatistics} from 'node:v8';
 import {readFileSync} from 'node:fs';
 process.stdout.write(JSON.stringify({args:process.argv.slice(2),execArgv:process.execArgv,
-    cwd:process.cwd(),endpoint:process.env.CUEPOINT_STREAM_ENDPOINT,token:process.env.CUEPOINT_STREAM_TOKEN,
+    cwd:process.cwd(),endpoint:process.env.MOMOKI_STREAM_ENDPOINT,token:process.env.MOMOKI_STREAM_TOKEN,
     nodeOptions:process.env.NODE_OPTIONS,heapLimit:getHeapStatistics().heap_size_limit,agentPrepared:readFileSync('agent-build-ready','utf8')}));
 process.stderr.write('worker stderr');
 `;
 
 async function fixture(body=report) {
-    const root=await realpath(await mkdtemp(join(tmpdir(),'cuepoint frontend launcher ')));
+    const root=await realpath(await mkdtemp(join(tmpdir(),'momoki frontend launcher ')));
     const scripts=join(root,'apps/desktop/scripts');
     await mkdir(scripts,{recursive:true});
     await mkdir(join(root,'tooling'));
@@ -50,7 +50,7 @@ test('normal and acceptance builds inherit args, cwd and environment with one fi
     const f=await fixture();
     try {
         for (const args of [[],['--acceptance','a b;$(fixture)`literal`']]) {
-            const env={CUEPOINT_STREAM_ENDPOINT:'http://127.0.0.1:12345/v1',CUEPOINT_STREAM_TOKEN:'fixture-only-token',NODE_OPTIONS:'--max-old-space-size=256 --no-warnings'};
+            const env={MOMOKI_STREAM_ENDPOINT:'http://127.0.0.1:12345/v1',MOMOKI_STREAM_TOKEN:'fixture-only-token',NODE_OPTIONS:'--max-old-space-size=256 --no-warnings'};
             const result=await run(f,{args,env,nodeArgs:['--max-old-space-size=128']}).finished;
             assert.equal(result.code,0);assert.equal(result.signal,null);
             const actual=JSON.parse(result.stdout);
@@ -58,8 +58,8 @@ test('normal and acceptance builds inherit args, cwd and environment with one fi
             assert.deepEqual(actual.execArgv,['--max-old-space-size=4096']);
             assert.equal(actual.cwd,f.root);
             assert.equal(actual.agentPrepared,'prepared');
-            assert.equal(actual.endpoint,env.CUEPOINT_STREAM_ENDPOINT);
-            assert.equal(actual.token,env.CUEPOINT_STREAM_TOKEN);
+            assert.equal(actual.endpoint,env.MOMOKI_STREAM_ENDPOINT);
+            assert.equal(actual.token,env.MOMOKI_STREAM_TOKEN);
             assert.equal(actual.nodeOptions,env.NODE_OPTIONS);
             assert.ok(actual.heapLimit>4*1024**3 && actual.heapLimit<5*1024**3);
             assert.equal(result.stderr,'worker stderr');

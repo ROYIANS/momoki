@@ -1,4 +1,4 @@
-import type {AgentWireToolCall} from '@cuepoint/agent-core';
+import type {AgentWireToolCall} from '@momoki/agent-core';
 export type ChatContentPart = {type: 'text'; text: string} | {type: 'image_url'; image_url: {url: string; detail: 'auto'}};
 export type ChatRequestMessage =
     | {role: 'user' | 'system'; content: string | ChatContentPart[]}

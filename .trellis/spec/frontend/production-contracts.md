@@ -13,7 +13,7 @@ Use for production ZIP delivery, scoped AI context, generation preparation, or r
 
 ## 3. Contracts
 ### Delivery
-Flush project drafts, read one scoped readonly snapshot, generate ZIP outside the transaction. Format is `cuepoint-handoff-v1`; it is not a restore backup. Include README, manifest, full-column CSV, missing report and ordered shot folders with readable text and original selected first/last/clip files. Names are bounded/sanitized; ordinal prefixes prevent collisions. Image clip is a planning placeholder; optional absent tail is not a gap. `missingCount` counts shots with warnings. Do not include connector/chat/extra/unrelated entities or local proposal history.
+Flush project drafts, read one scoped readonly snapshot, generate ZIP outside the transaction. Format is `momoki-handoff-v1`; it is not a restore backup. Include README, manifest, full-column CSV, missing report and ordered shot folders with readable text and original selected first/last/clip files. Names are bounded/sanitized; ordinal prefixes prevent collisions. Image clip is a planning placeholder; optional absent tail is not a gap. `missingCount` counts shots with warnings. Do not include connector/chat/extra/unrelated entities or local proposal history.
 
 ### Context and intent
 Context explicitly projects project/world/episode/beat/shot, linked characters/scenes/props/effective style, output defaults and media metadata. No Blob/object URL/secrets/extra/unlinked record spreads. Local relationship IDs may remain in a warning when unresolved, but foreign entity content cannot enter the snapshot. Source tokens are synchronous canonical SHA-256, including complete entity content; tokens reveal no source prose. Revisions are conflict tokens, not authorization credentials.

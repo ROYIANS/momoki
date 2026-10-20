@@ -66,7 +66,7 @@ impl Drop for Probe {
     }
 }
 fn root() -> PathBuf {
-    std::env::temp_dir().join(format!("cuepoint-full-process-{}", uuid::Uuid::new_v4()))
+    std::env::temp_dir().join(format!("momoki-full-process-{}", uuid::Uuid::new_v4()))
 }
 fn begin(p: &mut Probe, session: &Value) -> Value {
     let mut r = session.clone();
@@ -80,7 +80,7 @@ fn prepare(p: &mut Probe, h: &Value) -> Value {
     let entry = json!({"kind":"mutation","mutation":{"kind":"put","table":"projects","key":"p","value":["obj",[["id",["str","p"]],["title",["str","Durable"]]]]}});
     let payload = entry.to_string() + "\n";
     let mut sha = Sha256::new();
-    sha.update(b"cuepoint-batch-v1\n");
+    sha.update(b"momoki-batch-v1\n");
     sha.update(payload.as_bytes());
     let fingerprint = sha
         .finalize()

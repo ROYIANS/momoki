@@ -1,4 +1,4 @@
-# Cuepoint desktop: shared product and native validation
+# Momoki desktop: shared product and native validation
 
 The normal Tauri application loads the existing root React product, including
 its Agent, pages and business commands. The normal product owns all shared

@@ -474,7 +474,7 @@ async fn begin_owned(
         .await
         .map_err(|_| McpError::Transport)?;
     let redirect = format!(
-        "http://127.0.0.1:{}/cuepoint-mcp-oauth",
+        "http://127.0.0.1:{}/momoki-mcp-oauth",
         listener
             .local_addr()
             .map_err(|_| McpError::Transport)?
@@ -499,7 +499,7 @@ async fn begin_owned(
     };
     let mut request = AuthorizationRequest::new(&redirect)
         .with_application_type("native")
-        .with_client_name("Cuepoint")
+        .with_client_name("Momoki")
         .with_scopes(scopes);
     if let Some(client) = client_id {
         request = request.with_preregistered_client(client)
@@ -567,7 +567,7 @@ async fn begin_owned(
                 let Ok(callback) = reqwest::Url::parse(&format!(
                     "{}{}",
                     task_redirect
-                        .split("/cuepoint-mcp-oauth")
+                        .split("/momoki-mcp-oauth")
                         .next()
                         .unwrap_or(""),
                     path
@@ -591,16 +591,16 @@ async fn begin_owned(
                     .iter()
                     .find(|(k, _)| k == "iss")
                     .map(|(_, v)| v.as_ref());
-                let valid = path.starts_with("/cuepoint-mcp-oauth?")
+                let valid = path.starts_with("/momoki-mcp-oauth?")
                     && callback.origin().ascii_serialization()
                         == task_redirect
-                            .split("/cuepoint-mcp-oauth")
+                            .split("/momoki-mcp-oauth")
                             .next()
                             .unwrap_or("")
                     && incoming_issuer.map_or(!require_issuer, |v| v == issuer)
                     && method == "GET"
                     && host == Some(expected_host)
-                    && callback.path() == "/cuepoint-mcp-oauth"
+                    && callback.path() == "/momoki-mcp-oauth"
                     && count("state") == 1
                     && pairs
                         .iter()
@@ -617,7 +617,7 @@ async fn begin_owned(
                     .handle_callback_url(callback.as_str())
                     .await
                     .map_err(|_| McpError::Protocol);
-                let _=socket.write_all(b"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 21\r\nConnection: close\r\n\r\nReturn to Cuepoint app").await;
+                let _=socket.write_all(b"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 21\r\nConnection: close\r\n\r\nReturn to Momoki app").await;
                 result?;
                 if !(current)() {
                     return Err(McpError::VaultConflict);

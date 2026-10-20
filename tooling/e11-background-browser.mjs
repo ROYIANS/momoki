@@ -200,14 +200,14 @@ try {
         await page.getByRole("button", {name: "上下文明细", exact: true}).waitFor();
         await page.getByText(/Previous creative discussion/).first().waitFor();
         const baseline = await page.evaluate(() => ({requests: window.e11.requests.length, preflights: window.e11.preflightRequests(),
-            marks: performance.getEntriesByType("mark").filter(entry => entry.name.startsWith("cuepoint.agent.")).map(entry => entry.name)}));
+            marks: performance.getEntriesByType("mark").filter(entry => entry.name.startsWith("momoki.agent.")).map(entry => entry.name)}));
         await composer().fill("E11 populated timing request");
         await page.getByRole("button", {name: "发送", exact: true}).click();
         await page.waitForFunction(count => window.e11.requests.length === count + 1, baseline.requests);
         await page.getByText(/Original live answer/).first().waitFor();
         await page.waitForFunction(oldMarks => performance.getEntriesByType("mark").some(entry => entry.name.endsWith(".firstPublicCommitted") && !oldMarks.includes(entry.name)), baseline.marks);
         measurements.populatedSend = await page.evaluate(({history, baseline}) => {
-            const marks = performance.getEntriesByType("mark").filter(entry => entry.name.startsWith("cuepoint.agent.") && !baseline.marks.includes(entry.name));
+            const marks = performance.getEntriesByType("mark").filter(entry => entry.name.startsWith("momoki.agent.") && !baseline.marks.includes(entry.name));
             const at = ending => marks.find(entry => entry.name.endsWith(`.${ending}`))?.startTime;
             const elapsed = (from, to) => at(from) === undefined || at(to) === undefined ? null : at(to) - at(from);
             return {history, modelPreflightGets: window.e11.preflightRequests() - baseline.preflights,

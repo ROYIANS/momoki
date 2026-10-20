@@ -2,7 +2,7 @@ import {useCallback, useEffect, useState} from "react";
 
 export type FilmMode = "film" | "static";
 
-export const SKIP_FILM_KEY = "cuepoint.landing.skipFilm";
+export const SKIP_FILM_KEY = "momoki.landing.skipFilm";
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">;

@@ -33,7 +33,7 @@ and verifies their returned resource IDs are absent while an unrelated 200 body
 remains present and readable. Informational 101/103 membership is tested only
 at the predicate level because reqwest handles interim responses separately.
 
-`src/cuepoint_cancel_tests.rs` starts a real local TCP server, sends one HTTP
+`src/momoki_cancel_tests.rs` starts a real local TCP server, sends one HTTP
 chunk, stalls the next chunk, closes the actual Tauri resource-table entry,
 then verifies that the read exits with RequestCanceled and the server sees
 disconnect. `src/scope.rs` adds only a test proving the product's generated

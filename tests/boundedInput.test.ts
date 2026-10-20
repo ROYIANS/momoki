@@ -1,6 +1,6 @@
 import {afterEach, describe, expect, it, vi} from "vitest";
-import {assertResponseBytes, readResponseBlob, readResponseBytes, readResponseJson, readResponseText, ResponseLimitError} from "@cuepoint/agent-providers/http";
-import {readSseEvents} from "@cuepoint/agent-providers/http";
+import {assertResponseBytes, readResponseBlob, readResponseBytes, readResponseJson, readResponseText, ResponseLimitError} from "@momoki/agent-providers/http";
+import {readSseEvents} from "@momoki/agent-providers/http";
 import {downloadApimartAudio, generateApimartSpeech, getApimartMusicTask, submitApimartMusic} from "@/features/audio/providers/apimartAudio";
 import {generateMimoSpeech, listMimoModels} from "@/features/audio/providers/mimoSpeech";
 import {downloadAIHubMixResult, type AIHubMixTask} from "@/features/video/providers/aihubmix";

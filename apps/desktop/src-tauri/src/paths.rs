@@ -624,7 +624,7 @@ mod tests {
     impl Fixture {
         fn new() -> Self {
             let path =
-                std::env::temp_dir().join(format!("cuepoint-native-stat-{}", uuid::Uuid::new_v4()));
+                std::env::temp_dir().join(format!("momoki-native-stat-{}", uuid::Uuid::new_v4()));
             fs::create_dir(&path).unwrap();
             Self(path)
         }
@@ -1008,7 +1008,7 @@ mod tests {
     #[test]
     fn completion_publication_cannot_exceed_its_reader_boundary() {
         let root =
-            std::env::temp_dir().join(format!("cuepoint-manifest-review-{}", uuid::Uuid::new_v4()));
+            std::env::temp_dir().join(format!("momoki-manifest-review-{}", uuid::Uuid::new_v4()));
         fs::create_dir(&root).unwrap();
         // Ordinary reviewed text fields can collectively exceed the fixed reader
         // boundary even though each individual value is within its own limit.

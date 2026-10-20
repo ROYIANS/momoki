@@ -4,7 +4,7 @@ import {Button} from "../../../../ui/button";
 import {Download, ExternalLink, RefreshCw} from "../../../../ui/icons";
 import {appVersion} from "../../../../platform/runtime/appVersion";
 import {MAX_RELEASE_ASSET_BYTES} from "../../updates/download";
-import {INSTALL_GUIDE_URL, RELEASES_URL} from "@cuepoint/distribution/releases";
+import {INSTALL_GUIDE_URL, RELEASES_URL} from "@momoki/distribution/releases";
 import {isTauriRuntime} from "../../../../platform/runtime/runtimeIdentity";
 import {SettingsGroup, SettingsRow} from "../SettingsCard";
 import {useUpdateCheck} from "../useUpdateCheck";
@@ -42,14 +42,14 @@ export function UpdateSection({visibleRowIds}: { visibleRowIds?: string[] }) {
         aria-hidden/></a></Button>;
     const date = publishedOn(release?.publishedAt);
     const installSteps = download.kind === "saved"
-        ? download.format === "dmg" ? "打开 dmg 后将小光点拖入应用程序文件夹。"
+        ? download.format === "dmg" ? "打开 dmg 后将默默拖入应用程序文件夹。"
             : download.format === "appimage" ? "先给 AppImage 文件添加执行权限，再运行安装包。"
-                : download.format === "deb" ? "用系统的软件安装器打开 .deb 文件。" : "先退出小光点，再运行 setup.exe 安装。"
+                : download.format === "deb" ? "用系统的软件安装器打开 .deb 文件。" : "先退出默默，再运行 setup.exe 安装。"
         : "";
 
     return <>
         {(visible("version") || visible("check") || visible("release")) && <SettingsGroup title="版本与更新">
-            {visible("version") && <SettingsRow title="当前版本" description={`小光点 ${appVersion()}`}/>}
+            {visible("version") && <SettingsRow title="当前版本" description={`默默 ${appVersion()}`}/>}
             {visible("check") && <>
                 <SettingsRow
                     title="检查更新"
@@ -114,12 +114,12 @@ export function UpdateSection({visibleRowIds}: { visibleRowIds?: string[] }) {
                                      aria-hidden/></a></Button>}/>}
             </SettingsGroup>
         </div>}
-        {(visible("privacy") || visible("about")) && <SettingsGroup title="关于小光点">
+        {(visible("privacy") || visible("about")) && <SettingsGroup title="关于默默">
             {visible("privacy") && <SettingsRow title="数据与隐私"
                                                 description="项目与密钥只保存在本机，检查更新不会上传它们"/>}
-            {visible("about") && <SettingsRow title="更多关于 Cuepoint"
+            {visible("about") && <SettingsRow title="更多关于 Momoki"
                                               control={<Button variant="outline" size="sm" asChild><Link
-                                                  to="/about">关于小光点</Link></Button>}/>}
+                                                  to="/about">关于默默</Link></Button>}/>}
         </SettingsGroup>}
     </>;
 }

@@ -3,11 +3,11 @@
 ## Scope
 
 `packages/agent-core` owns the reusable execution implementation and neutral
-contracts consumed through `@cuepoint/agent-core`. Its public root resolves to
+contracts consumed through `@momoki/agent-core`. Its public root resolves to
 emitted ESM JavaScript and declarations. Host-specific persistence, coordination,
 credentials, product policies and tool implementations stay with each consumer.
 Core imports neither Studio nor providers; another application must be able to
-bind its own typed services without adopting Cuepoint entities or storage.
+bind its own typed services without adopting Momoki entities or storage.
 
 ## Guidelines Index
 

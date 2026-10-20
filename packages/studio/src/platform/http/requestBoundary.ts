@@ -1,7 +1,7 @@
-import {requestOnce as dispatchOnce} from '@cuepoint/agent-providers/http';
+import {requestOnce as dispatchOnce} from '@momoki/agent-providers/http';
 import {runtimeFetchFor} from '../runtime/runtimeFetch';
 import type {RuntimeHttpPurpose} from '../product/httpPolicy';
-import type {RequestBoundaryOptions as TransportOptions} from '@cuepoint/agent-providers/http';
+import type {RequestBoundaryOptions as TransportOptions} from '@momoki/agent-providers/http';
 
 export type RequestBoundaryOptions = Omit<TransportOptions, 'fetchImpl'> & {
     fetchImpl?: typeof fetch;

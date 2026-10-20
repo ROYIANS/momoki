@@ -1,12 +1,12 @@
 import {requestOnce} from "../../../platform/http/requestBoundary";
-import {isReadAbort, readErrorText, readResponseText, ResponseLimitError} from "@cuepoint/agent-providers/http";
+import {isReadAbort, readErrorText, readResponseText, ResponseLimitError} from "@momoki/agent-providers/http";
 import {MAX_AUDIO_BYTES, MAX_ERROR_BYTES, MAX_JSON_BYTES, MAX_SPEECH_ENVELOPE_BYTES} from "../../../platform/media/limits";
 import type {MimoSpeechSettings} from "../models/audio";
 import {detectAudioMime} from "../engine/mime";
 import {collectModelMetadata, parseModelMetadata} from "../../settings/models/modelMetadata";
 import type {ListModelsResult} from "../../agent/providers/openaiCompatible";
-import {normalizeBaseUrl} from "@cuepoint/agent-providers/http";
-import {redactCredentials} from "@cuepoint/agent-providers/http";
+import {normalizeBaseUrl} from "@momoki/agent-providers/http";
+import {redactCredentials} from "@momoki/agent-providers/http";
 
 export const MIMO_VOICES = ["mimo_default", "冰糖", "茉莉", "苏打", "白桦", "Mia", "Chloe", "Milo", "Dean"] as const;
 export const MIMO_MODELS = {

@@ -146,7 +146,7 @@ async function packageIdentity(payload,receipt,target,evidence) {
 async function screenshot(driver,evidence,name) {await writeFile(join(evidence,`${name}.png`),await driver.screenshot(),{flag:'wx'});}
 
 async function profile(driver,identifier) {
-    const snapshot=await driver.execute("const d=Object.getOwnPropertyDescriptor(window,'__CUEPOINT_PRODUCT_PROFILE__');return {origin:location.protocol+'//'+location.host,profile:d?.value,writable:d?.writable,configurable:d?.configurable,frozen:Object.isFrozen(d?.value),startupError:document.body.innerText.includes('工作区无法打开')};");
+    const snapshot=await driver.execute("const d=Object.getOwnPropertyDescriptor(window,'__MOMOKI_PRODUCT_PROFILE__');return {origin:location.protocol+'//'+location.host,profile:d?.value,writable:d?.writable,configurable:d?.configurable,frozen:Object.isFrozen(d?.value),startupError:document.body.innerText.includes('工作区无法打开')};");
     validateReadOnlyProfile(snapshot,identifier,process.platform);
     return snapshot;
 }
@@ -192,7 +192,7 @@ async function currentFrontendIdentity(driver,receipt) {
 }
 
 async function uiSmoke(payload,receipt,evidence,state,report) {
-    const driverPath=process.env.TAURI_DRIVER_PATH,nativePath=process.env.CUEPOINT_NATIVE_WEBDRIVER_PATH;
+    const driverPath=process.env.TAURI_DRIVER_PATH,nativePath=process.env.MOMOKI_NATIVE_WEBDRIVER_PATH;
     if (!driverPath || !nativePath) throw new Error('Explicit external Tauri/native driver paths required');
     const port=await freePort(),nativePort=await freePort();
     const log=createWriteStream(join(evidence,'webdriver.log'),{flags:'wx'});
@@ -252,7 +252,7 @@ async function uiSmoke(payload,receipt,evidence,state,report) {
         await poll('second observed product exit',async()=>(await matchingProcesses(payload.executable)).length === 0);
         await driver.dispose();
         report.secondExitObserved=true;
-        const python=process.env.CUEPOINT_PYTHON_PATH || (process.platform === 'win32' ? 'python' : 'python3');
+        const python=process.env.MOMOKI_PYTHON_PATH || (process.platform === 'win32' ? 'python' : 'python3');
         const verified=await run(python,[join(root,'tooling/verify-release-smoke-store.py'),'--workspace',join(state,'product-workspace-v1'),
             '--expectation',join(evidence,'expectation.json')],{log:join(evidence,'disk-verifier.log')});
         report.diskVerification=JSON.parse(verified.output.trim());

@@ -1,13 +1,13 @@
 {
-  "name": "@cuepoint/desktop",
+  "name": "@momoki/desktop",
   "version": "0.1.6",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.15.0",
   "dependencies": {
     "@tauri-apps/api": "2.12.2",
-    "@cuepoint/studio": "workspace:*",
-    "@cuepoint/agent-providers": "workspace:*"
+    "@momoki/studio": "workspace:*",
+    "@momoki/agent-providers": "workspace:*"
   },
   "devDependencies": {
     "@tauri-apps/cli": "2.12.1",

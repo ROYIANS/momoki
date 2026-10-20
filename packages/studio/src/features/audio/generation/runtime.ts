@@ -46,7 +46,7 @@ export interface AudioGenerationOptions extends ApimartRequestOptions {
 const localLocks = new Map<string, Promise<unknown>>();
 
 async function locked<T>(id: string, operation: () => Promise<T>): Promise<T> {
-    if (typeof navigator !== "undefined" && navigator.locks) return navigator.locks.request(`cuepoint.audio-job.${id}`, operation);
+    if (typeof navigator !== "undefined" && navigator.locks) return navigator.locks.request(`momoki.audio-job.${id}`, operation);
     const previous = localLocks.get(id) ?? Promise.resolve();
     const pending = previous.catch(() => {
     }).then(operation);

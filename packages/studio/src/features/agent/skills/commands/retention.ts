@@ -1,5 +1,5 @@
-import type {InstalledSkillDescriptor} from "@cuepoint/agent-core";
-import {formatSkillCatalogue, SKILL_LIMITS} from "@cuepoint/agent-core";
+import type {InstalledSkillDescriptor} from "@momoki/agent-core";
+import {formatSkillCatalogue, SKILL_LIMITS} from "@momoki/agent-core";
 import {nowIso} from "../../../../platform/identity";
 import type {ProductStore, StoreTx} from "../../../../platform/storage/types";
 import type {InstalledSkillsSnapshot, SkillCatalogue, SkillRetention} from "../models/installedSkill";

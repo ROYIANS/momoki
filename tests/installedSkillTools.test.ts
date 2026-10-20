@@ -10,7 +10,7 @@ import {updateGeneralAgentConfig} from "@/features/agent/commands/agentSettings"
 import {saveToolRound, startModelStep, transitionToolCall} from "@/features/agent/commands/agentTools";
 import {BUILTIN_TOOLS, validateToolCall} from "@/features/agent/runtime/tools";
 import {createToolLoading, getOfferedToolNames} from "@/features/agent/runtime/toolLoading";
-import {selectCapabilityGroups} from "@cuepoint/agent-core";
+import {selectCapabilityGroups} from "@momoki/agent-core";
 import {installedSkillInstructions, INSTALLED_SKILL_TOOL_NAMES} from "@/features/agent/skills/runtime/disclosure";
 import {prepareSkillImport} from "@/features/agent/skills/runtime/package";
 import {installSkill} from "@/features/agent/skills/commands/installations";

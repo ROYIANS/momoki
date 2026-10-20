@@ -6,7 +6,7 @@
 
 ## Overview
 
-小光点 Cuepoint is a Vite + React + TanStack Router product with one shared browser and Tauri page/Agent/command tree. Current commands and reactive reads use ProductStore: browser IndexedDB and the complete native SQLite/files adapter share the same business code. The normal packaged owner is activated only after actual isolated acceptance; adapter implementation alone is not that acceptance. The schema-4 video prototype is a separate reference/test lane. Runtime detection selects system services/history; the trusted fixed startup profile selects one persistence owner. There is no database mirror or automatic old-data migration.
+默默 Momoki is a Vite + React + TanStack Router product with one shared browser and Tauri page/Agent/command tree. Current commands and reactive reads use ProductStore: browser IndexedDB and the complete native SQLite/files adapter share the same business code. The normal packaged owner is activated only after actual isolated acceptance; adapter implementation alone is not that acceptance. The schema-4 video prototype is a separate reference/test lane. Runtime detection selects system services/history; the trusted fixed startup profile selects one persistence owner. There is no database mirror or automatic old-data migration.
 
 ---
 

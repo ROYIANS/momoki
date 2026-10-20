@@ -13,8 +13,8 @@ import {
     SCHEMA,
     text
 } from './contracts';
-import type {WorkspaceId} from '@cuepoint/studio/reference/lib/workspace';
-import {workspaceId} from '@cuepoint/studio/reference/lib/workspace';
+import type {WorkspaceId} from '@momoki/studio/reference/lib/workspace';
+import {workspaceId} from '@momoki/studio/reference/lib/workspace';
 
 const TABLES = [
     'CREATE TABLE workspace_meta (id TEXT PRIMARY KEY, format TEXT NOT NULL, version INTEGER NOT NULL)',

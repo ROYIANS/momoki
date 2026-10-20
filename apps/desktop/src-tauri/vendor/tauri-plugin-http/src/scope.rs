@@ -234,7 +234,7 @@ mod tests {
 }
 
 #[cfg(test)]
-mod cuepoint_origin_tests {
+mod momoki_origin_tests {
     use super::*;
     #[test]
     fn product_exact_origin_patterns_do_not_expand_hosts_ports_or_schemes() {

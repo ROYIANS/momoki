@@ -3,8 +3,8 @@
 ## Workspace ownership
 
 Application entries live in `apps/web`, `apps/desktop` and `apps/site`. Browser
-and desktop import the same `@cuepoint/studio/bootstrap`; the site consumes only
-lightweight `@cuepoint/distribution` exports. The repository uses pnpm workspaces,
+and desktop import the same `@momoki/studio/bootstrap`; the site consumes only
+lightweight `@momoki/distribution` exports. The repository uses pnpm workspaces,
 declared dependencies and explicit export maps. See
 [Monorepo Boundaries](./monorepo-boundaries.md) for exports, discovery, build
 assembly and deployment contracts.

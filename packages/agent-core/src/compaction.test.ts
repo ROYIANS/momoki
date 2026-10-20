@@ -1,5 +1,5 @@
 import {describe,expect,it} from 'vitest';
-import {compactContext,replaceContinuationBase,createCapabilityLoading,selectCapabilityGroups,type CompactionHost,type ContextSource,type SummaryRecord,type CapabilityGroup} from '@cuepoint/agent-core';
+import {compactContext,replaceContinuationBase,createCapabilityLoading,selectCapabilityGroups,type CompactionHost,type ContextSource,type SummaryRecord,type CapabilityGroup} from '@momoki/agent-core';
 
 type Source=ContextSource & {revision:number};
 type Summary=SummaryRecord<Source>;

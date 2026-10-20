@@ -6,7 +6,7 @@ Agent → plus menu → Skills → Manage skills, and explicitly enable it if wa
 Examples are never automatically installed or enabled.
 
 Each package uses a root `SKILL.md` and optional text under `references/` or
-`assets/`. The directory and frontmatter `name` must match. Cuepoint supports
+`assets/`. The directory and frontmatter `name` must match. Momoki supports
 UTF-8 Markdown, plain text, JSON, YAML and CSV resources; scripts, executable and
 binary resources are excluded. Editing these source files does not update an
 installation: select the directory again through the manual update review.

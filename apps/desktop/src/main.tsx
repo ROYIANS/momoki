@@ -1,1 +1,1 @@
-import "@cuepoint/studio/bootstrap";
+import "@momoki/studio/bootstrap";

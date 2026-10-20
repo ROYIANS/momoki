@@ -1,10 +1,10 @@
 import {useEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Button} from '@cuepoint/studio/reference/components/ui/button';
+import {Button} from '@momoki/studio/reference/components/ui/button';
 import {acceptanceRequest} from './bridge';
 import {type AcceptanceEvent, Evidence, message} from './acceptanceEvidence';
 import {checkTavilyNative} from './tavilyProbe';
-import '@cuepoint/studio/reference/styles.css';
+import '@momoki/studio/reference/styles.css';
 import './prototype.css';
 
 function TavilyProbe() {

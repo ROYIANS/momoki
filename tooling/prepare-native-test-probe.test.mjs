@@ -10,7 +10,7 @@ const readySource=`process.stdout.write('{"ready":true,"ok":true}\\n');
 let input='';process.stdin.on('data',chunk=>{input+=chunk;if(input.includes('\\n')) {if(JSON.parse(input).type !== 'close') process.exit(3);process.stdout.write('{"ok":true,"value":{"closed":true}}\\n');}});`;
 async function executable(path,source) {await writeFile(path,'#!/usr/bin/env node\n'+source);await chmod(path,0o755);return path;}
 async function fixture({buildFails=false,rustVersion='1.99.0',probeSource=readySource}={}) {
-    const root=await mkdtemp(join(tmpdir(),'cuepoint-probe-contract-'));
+    const root=await mkdtemp(join(tmpdir(),'momoki-probe-contract-'));
     const options={cargo:join(root,'cargo'),rustc:join(root,'rustc'),'target-dir':join(root,'target'),'evidence-dir':join(root,'evidence'),'github-env':join(root,'github-env')};
     await executable(options.rustc,`console.log('rustc ${rustVersion} (contract fixture)');`);
     await executable(options.cargo,`import {mkdirSync,writeFileSync} from 'node:fs';import {join} from 'node:path';
@@ -26,12 +26,12 @@ test('shared probe build selects only locked no-GUI test hooks and platform-corr
 });
 test('fresh build and actual readiness exit precede explicit environment export',async ()=> {
     const f=await fixture();try {
-        const report=await prepareNativeTestProbe(f.options,{...process.env,CUEPOINT_NATIVE_STORE_PROBE:'/ignored-stale-probe'});
+        const report=await prepareNativeTestProbe(f.options,{...process.env,MOMOKI_NATIVE_STORE_PROBE:'/ignored-stale-probe'});
         assert.equal(report.status,'passed');assert.equal(report.targetAbsentBeforeBuild,true);
         assert.deepEqual(report.readiness,{ready:true,closed:true,processExited:true,exitCode:0});
         const build=JSON.parse(await readFile(join(f.options['target-dir'],'invocation.json'),'utf8'));
         assert.equal(build.rustc,f.options.rustc);assert.deepEqual(build.args,nativeProbeBuildArguments());
-        assert.equal(await readFile(f.options['github-env'],'utf8'),`EXISTING=value\nCUEPOINT_NATIVE_STORE_PROBE=${nativeProbeOutputPath(f.options['target-dir'])}\n`);
+        assert.equal(await readFile(f.options['github-env'],'utf8'),`EXISTING=value\nMOMOKI_NATIVE_STORE_PROBE=${nativeProbeOutputPath(f.options['target-dir'])}\n`);
     } finally {await f.cleanup();}
 });
 test('failed build cannot export a stale or absent executable',async ()=> {
@@ -88,7 +88,7 @@ test('GHCR prepares the real probe before root tests while desktop delivery rema
     assert.ok(preparation >= 0 && fullTest > preparation);
     assert.match(quality,/--cargo "\$\(rustup which --toolchain 1\.99\.0 cargo\)" --rustc "\$\(rustup which --toolchain 1\.99\.0 rustc\)"/);
     assert.match(quality,/--github-env "\$GITHUB_ENV"/);
-    assert.doesNotMatch(quality,/CUEPOINT_STORAGE_TEST_OWNER|CUEPOINT_NATIVE_STORAGE_ACCEPTANCE|--features product-sqlite/);
+    assert.doesNotMatch(quality,/MOMOKI_STORAGE_TEST_OWNER|MOMOKI_NATIVE_STORAGE_ACCEPTANCE|--features product-sqlite/);
     assert.match(quality,/node --test tooling\/prepare-native-test-probe\.test\.mjs/);
     assert.match(ghcr,/node-version: 22/);
     const example=ghcr.split('\n  agent-example:\n')[1].split(/\n  [a-z][a-z-]*:\n/)[0];

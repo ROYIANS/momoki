@@ -15,7 +15,7 @@ function nativeProfile(id: string, storage = "indexeddb") {
     const invoke = vi.fn(() => {throw new Error("Unexpected SQLite/system request");});
     vi.stubGlobal("window", {
         __TAURI_INTERNALS__: {invoke},
-        __CUEPOINT_PRODUCT_PROFILE__: {version: 1, id, storage},
+        __MOMOKI_PRODUCT_PROFILE__: {version: 1, id, storage},
         dispatchEvent: vi.fn(),
     });
     return invoke;
@@ -29,9 +29,9 @@ describe("fixed shared product storage ownership", () => {
     });
 
     it("separates native runtime identity, declared storage owner and stable fresh namespaces", () => {
-        const normal = resolveProductStorage(true, {version: 1, id: "dev.cuepoint.product", storage: "indexeddb"});
-        const isolated = resolveProductStorage(true, {version: 1, id: "dev.cuepoint.review", storage: "indexeddb"});
-        const prototype = resolveProductStorage(true, {version: 1, id: "dev.cuepoint.fixture", storage: "sqlite"});
+        const normal = resolveProductStorage(true, {version: 1, id: "dev.momoki.product", storage: "indexeddb"});
+        const isolated = resolveProductStorage(true, {version: 1, id: "dev.momoki.review", storage: "indexeddb"});
+        const prototype = resolveProductStorage(true, {version: 1, id: "dev.momoki.fixture", storage: "sqlite"});
         expect(normal).toMatchObject({runtime: "tauri", storage: "indexeddb"});
         expect(isolated.databaseName).not.toBe(normal.databaseName);
         expect(normal.databaseName).not.toBe("aifenjing");
@@ -52,7 +52,7 @@ describe("fixed shared product storage ownership", () => {
         await browserDb.projects.add({...emptyProject("Browser sentinel"), id: "browser-sentinel"});
         const browserRead = vi.spyOn(browserDb.projects, "toArray");
         vi.resetModules();
-        const invoke = nativeProfile("dev.cuepoint.owner-test");
+        const invoke = nativeProfile("dev.momoki.owner-test");
         const {db} = await import("@/platform/product/store");
         const {getProductStorage} = await import("@/platform/runtime/storageProfile");
         const {getVideoWorkspaceRepository} = await import("@/features/video/services/workspaceRepository");
@@ -60,7 +60,7 @@ describe("fixed shared product storage ownership", () => {
         try {
             await db.delete();
             await db.open();
-            expect(db.name).toBe("cuepoint-desktop:dev.cuepoint.owner-test:v1");
+            expect(db.name).toBe("momoki-desktop:dev.momoki.owner-test:v1");
             const repository = getVideoWorkspaceRepository();
             expect(repository.storage).toBe("indexeddb");
             expect(await repository.projects()).toEqual([]);
@@ -71,8 +71,8 @@ describe("fixed shared product storage ownership", () => {
             await repository.setShotSlot(shot.id, "firstFrame", {...emptySlot(), result: {mediaId: imported.id, kind: "image"}});
             const bytes = (await db.media.get(imported.id))?.blob;
             expect(await bytes?.text()).toBe("internal-image");
-            window.__CUEPOINT_PRODUCT_PROFILE__ = {version: 1, id: "different", storage: "sqlite"};
-            expect(getProductStorage().profileId).toBe("dev.cuepoint.owner-test");
+            window.__MOMOKI_PRODUCT_PROFILE__ = {version: 1, id: "different", storage: "sqlite"};
+            expect(getProductStorage().profileId).toBe("dev.momoki.owner-test");
             expect(getVideoWorkspaceRepository()).toBe(repository);
             db.close();
             await db.open();
@@ -95,14 +95,14 @@ describe("fixed shared product storage ownership", () => {
 
     it("does not read or import another desktop profile's records or bytes", async () => {
         vi.resetModules();
-        nativeProfile("dev.cuepoint.isolation-a");
+        nativeProfile("dev.momoki.isolation-a");
         const first = (await import("@/platform/product/store")).db;
         await first.delete();
         await first.open();
         await first.media.add({id: "profile-a-only", projectId: "studio", filename: "owned.png", mimeType: "image/png", blob: new Blob(["a-only"])});
         first.close();
         vi.resetModules();
-        const invoke = nativeProfile("dev.cuepoint.isolation-b");
+        const invoke = nativeProfile("dev.momoki.isolation-b");
         const second = (await import("@/platform/product/store")).db;
         try {
             await second.delete();

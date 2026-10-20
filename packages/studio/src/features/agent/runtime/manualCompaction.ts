@@ -1,4 +1,4 @@
-import {redactCredentials} from "@cuepoint/agent-providers/http";
+import {redactCredentials} from "@momoki/agent-providers/http";
 import type {ProductStore} from "../../../platform/storage/types";
 import {db as productDb} from "../../../platform/product/store";
 import {createId, nowIso} from "../../../platform/identity";
@@ -87,7 +87,7 @@ export async function recoverManualCompactions(threadId: string, locks?: ThreadL
     const db = store ?? productDb;
     const manager: ThreadLockManager | undefined = locks ?? (typeof navigator !== "undefined" ? navigator.locks : undefined);
     if (!manager) return;
-    await manager.request(`cuepoint:agent:${threadId}`, {ifAvailable: true}, async lock => {
+    await manager.request(`momoki:agent:${threadId}`, {ifAvailable: true}, async lock => {
         if (!lock) return;
         await db.contextCompactions.where("threadId").equals(threadId).filter(record => record.status === "running" && record.origin === "manual")
             .modify({status: "interrupted", error: "上次整理已中断，未启用未完成的摘要。", updatedAt: nowIso()});

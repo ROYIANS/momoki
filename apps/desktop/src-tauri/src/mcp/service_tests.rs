@@ -75,7 +75,7 @@ impl Harness {
             session.clone(),
             source,
             memory.clone(),
-            "dev.cuepoint".into(),
+            "dev.momoki".into(),
             "isolated".into(),
             open,
         )
@@ -738,7 +738,7 @@ async fn mcp_service_native_current_catalogue_and_session_are_final_guards() {
 #[tokio::test]
 async fn mcp_service_stdio_stop_keeps_unknown_when_sdk_cancels_original() {
     let h = Arc::new(Harness::new());
-    let marker = std::env::temp_dir().join(format!("cuepoint-mcp-effect-{}", uuid::Uuid::new_v4()));
+    let marker = std::env::temp_dir().join(format!("momoki-mcp-effect-{}", uuid::Uuid::new_v4()));
     let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("src/mcp/fixtures/server.py");
     let reference = h
         .config(PrivateConfig::Stdio {
@@ -875,7 +875,7 @@ async fn mcp_service_verified_original_ack_survives_retirement() {
 #[tokio::test]
 async fn mcp_service_pending_connect_retirement_drains_unpublished_process_tree() {
     let h = Arc::new(Harness::new());
-    let dir = std::env::temp_dir().join(format!("cuepoint-mcp-pending-{}", uuid::Uuid::new_v4()));
+    let dir = std::env::temp_dir().join(format!("momoki-mcp-pending-{}", uuid::Uuid::new_v4()));
     std::fs::create_dir(&dir).unwrap();
     let marker = dir.join("pids");
     let release = dir.join("release");

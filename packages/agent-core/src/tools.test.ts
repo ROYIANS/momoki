@@ -1,5 +1,5 @@
 import {describe, expect, it, vi} from 'vitest';
-import {validateToolInput} from '@cuepoint/agent-core';
+import {validateToolInput} from '@momoki/agent-core';
 
 describe('shared tool argument dispatch', () => {
     it('checks uniqueness, offered authority and raw size before parsing', () => {

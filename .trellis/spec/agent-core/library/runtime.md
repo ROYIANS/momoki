@@ -205,7 +205,7 @@ its own similar loop. Correct: both hosts call the same `executeRun` and provide
 named semantic operations for their own storage and policies.
 
 ```ts
-import {executeRun} from '@cuepoint/agent-core';
+import {executeRun} from '@momoki/agent-core';
 
 // This caller has acquired the host's real execution ownership.
 await executeRun(run, controller, host);

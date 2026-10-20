@@ -1,6 +1,6 @@
 import {publishAssistantActivity} from "./threadActivity";
 import type {ThreadActivityIdentity} from "../models/threadActivity";
-import {canSettleRun} from '@cuepoint/agent-core';
+import {canSettleRun} from '@momoki/agent-core';
 import type {StoreTx} from "../../../platform/storage/types";
 import type {AgentRun, AgentRunOutput, AgentRunStatus} from "../models/agent";
 import {nowIso} from "../../../platform/identity";

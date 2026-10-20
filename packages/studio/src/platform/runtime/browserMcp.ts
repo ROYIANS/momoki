@@ -322,7 +322,7 @@ export function createBrowserMcpServices(options: BrowserMcpOptions): McpHostSer
                         onInsufficientScope: "throw", maxStepUpRetries: 0,
                         reconnectionOptions: {maxRetries: 0, initialReconnectionDelay: 1_000, maxReconnectionDelay: 1_000, reconnectionDelayGrowFactor: 1},
                     });
-                    client = new Client({name: "Cuepoint", version: "0.1.6"}, {capabilities: {}, inputRequired: {autoFulfill: false},
+                    client = new Client({name: "Momoki", version: "0.1.6"}, {capabilities: {}, inputRequired: {autoFulfill: false},
                         versionNegotiation: {mode: "auto", probe: {maxRetries: 0, timeoutMs: options.requestTimeoutMs ?? 30_000}}, listMaxPages: 16});
                     await client.connect(transport, {signal: controller.signal, timeout: options.requestTimeoutMs ?? 30_000, maxTotalTimeout: options.requestTimeoutMs ?? 30_000});
                     const tools = client.getServerCapabilities()?.tools ? await collect(client, "tools", controller.signal) : [];

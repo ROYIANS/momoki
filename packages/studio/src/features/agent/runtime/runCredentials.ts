@@ -1,5 +1,5 @@
 import type {ProductStore} from '../../../platform/storage/types';
-import {redactCredentials} from "@cuepoint/agent-providers/http";
+import {redactCredentials} from "@momoki/agent-providers/http";
 import {resolveConnector} from '../../settings/commands/connectors';
 import {assertRetryConnector} from '../commands/agentRuns';
 import type {AgentRun} from '../models/agent';

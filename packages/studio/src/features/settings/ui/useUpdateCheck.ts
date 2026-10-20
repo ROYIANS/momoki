@@ -1,9 +1,9 @@
 import {useCallback, useEffect, useRef, useState} from "react";
 import {appVersion} from "../../../platform/runtime/appVersion";
 import {downloadAsset} from "../updates/download";
-import {type AssetChoice, detectPlatform, type NavigatorInfo, pickAssets} from "@cuepoint/distribution/platform";
-import {fetchLatestDesktopRelease, type LatestDesktopRelease} from "@cuepoint/distribution/releases";
-import {classifyUpdate, type UpdateClass} from "@cuepoint/distribution/version";
+import {type AssetChoice, detectPlatform, type NavigatorInfo, pickAssets} from "@momoki/distribution/platform";
+import {fetchLatestDesktopRelease, type LatestDesktopRelease} from "@momoki/distribution/releases";
+import {classifyUpdate, type UpdateClass} from "@momoki/distribution/version";
 import {runtimeFetchFor} from "../../../platform/runtime/runtimeFetch";
 import {downloadBlob, isPublishedSaveError} from "../../../platform/runtime/runtimeSave";
 import {writeLastUpdateCheckAt} from "./settingsStore";

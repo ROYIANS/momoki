@@ -5,14 +5,14 @@ settings:
 importers:
   .:
     dependencies:
-      "@cuepoint/agent-providers":
+      "@momoki/agent-providers":
         specifier: workspace:*
         version: link:packages/agent-providers
     devDependencies:
-      "@cuepoint/agent-core":
+      "@momoki/agent-core":
         specifier: workspace:*
         version: link:packages/agent-core
-      "@cuepoint/distribution":
+      "@momoki/distribution":
         specifier: workspace:*
         version: link:packages/distribution
       "@eslint/js":
@@ -113,7 +113,7 @@ importers:
         version: 3.25.76
   apps/web:
     dependencies:
-      "@cuepoint/studio":
+      "@momoki/studio":
         specifier: workspace:*
         version: link:../../packages/studio
     devDependencies:
@@ -127,7 +127,7 @@ importers:
       vite: *a5
   apps/site:
     dependencies:
-      "@cuepoint/distribution":
+      "@momoki/distribution":
         specifier: workspace:*
         version: link:../../packages/distribution
       react: *a6
@@ -141,10 +141,10 @@ importers:
       vite: *a5
   apps/desktop:
     dependencies:
-      '@cuepoint/agent-providers':
+      '@momoki/agent-providers':
         specifier: workspace:*
         version: link:../../packages/agent-providers
-      "@cuepoint/studio":
+      "@momoki/studio":
         specifier: workspace:*
         version: link:../../packages/studio
       "@tauri-apps/api": &a17
@@ -171,13 +171,13 @@ importers:
       "@cfworker/json-schema":
         specifier: 4.1.1
         version: 4.1.1
-      '@cuepoint/agent-providers':
+      '@momoki/agent-providers':
         specifier: workspace:*
         version: link:../agent-providers
-      "@cuepoint/agent-core":
+      "@momoki/agent-core":
         specifier: workspace:*
         version: link:../agent-core
-      "@cuepoint/distribution":
+      "@momoki/distribution":
         specifier: workspace:*
         version: link:../distribution
       "@dnd-kit/core":
@@ -278,10 +278,10 @@ importers:
       typescript: *a4
   examples/agent-todo:
     dependencies:
-      "@cuepoint/agent-core":
+      "@momoki/agent-core":
         specifier: workspace:*
         version: link:../../packages/agent-core
-      "@cuepoint/agent-providers":
+      "@momoki/agent-providers":
         specifier: workspace:*
         version: link:../../packages/agent-providers
     devDependencies:
@@ -295,7 +295,7 @@ importers:
         version: 5.0.1(@types/node@22.20.3)(jsdom@26.1.0)(vite@7.3.6(@types/node@22.20.3)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.1))
   packages/agent-providers:
     dependencies:
-      '@cuepoint/agent-core':
+      '@momoki/agent-core':
         specifier: workspace:*
         version: link:../agent-core
     devDependencies:

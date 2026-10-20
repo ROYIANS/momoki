@@ -1,7 +1,7 @@
 import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 import type {DownloadAssetResult} from "@/features/settings/updates/download";
-import type {LatestDesktopRelease, ReleaseResult} from "@cuepoint/distribution/releases";
-import type {AssetChoice} from "@cuepoint/distribution/platform";
+import type {LatestDesktopRelease, ReleaseResult} from "@momoki/distribution/releases";
+import type {AssetChoice} from "@momoki/distribution/platform";
 
 type Effect = {deps?: unknown[]; setup: () => void | (() => void); cleanup?: () => void};
 type Host = {cells: unknown[]; cursor: number; effects: Array<() => void>; mounted: boolean; lateWrites: number};
@@ -51,7 +51,7 @@ vi.mock("react", async original => {
         },
     };
 });
-vi.mock("@cuepoint/distribution/releases", async original => ({...await original<typeof import("@cuepoint/distribution/releases")>(), fetchLatestDesktopRelease: boundary.fetchRelease}));
+vi.mock("@momoki/distribution/releases", async original => ({...await original<typeof import("@momoki/distribution/releases")>(), fetchLatestDesktopRelease: boundary.fetchRelease}));
 vi.mock("@/features/settings/updates/download", () => ({downloadAsset: boundary.downloadAsset, MAX_RELEASE_ASSET_BYTES: 64 * 1024 * 1024}));
 vi.mock("@/platform/runtime/runtimeFetch", () => ({runtimeFetchFor: (purpose: string) => {boundary.transport(purpose); return fetch;}}));
 vi.mock("@/platform/runtime/runtimeSave", async original => ({...await original<typeof import("@/platform/runtime/runtimeSave")>(), downloadBlob: boundary.save}));
@@ -67,12 +67,12 @@ import {UpdateSection} from "@/features/settings/ui/sections/UpdateSection";
 
 const release: LatestDesktopRelease = {
     version: "0.1.4", tag: "desktop-v0.1.4", prerelease: false,
-    htmlUrl: "https://github.com/ROYIANS/Cuepoint/releases/tag/desktop-v0.1.4", assets: [],
+    htmlUrl: "https://github.com/ROYIANS/momoki/releases/tag/desktop-v0.1.4", assets: [],
 };
 const asset: AssetChoice = {
     os: "windows", arch: "x64", format: "exe", label: "Windows", event: "download-windows-x64",
-    asset: {name: "Cuepoint_0.1.4_windows_x64_setup.exe", size: 3, sha256: "a".repeat(64),
-        url: "https://github.com/ROYIANS/Cuepoint/releases/download/desktop-v0.1.4/Cuepoint_0.1.4_windows_x64_setup.exe"},
+    asset: {name: "Momoki_0.1.4_windows_x64_setup.exe", size: 3, sha256: "a".repeat(64),
+        url: "https://github.com/ROYIANS/momoki/releases/download/desktop-v0.1.4/Momoki_0.1.4_windows_x64_setup.exe"},
 };
 const payload: DownloadAssetResult = {kind: "ok", bytes: new Uint8Array([1, 2, 3]), contentType: "application/octet-stream"};
 const hosts: Host[] = [];

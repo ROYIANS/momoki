@@ -23,7 +23,7 @@ import {PanelHeaderActionsContext} from "./PanelHeader";
 import {ModuleNavigationContext} from "./ModuleLayout";
 import {ContextPanelHostProvider, useContextPanelHost} from "./ContextPanelHost";
 import {getHistoryNavigation} from "../navigation/historyNavigation";
-import {LOGO_SRC, PRODUCT_NAME_ZH} from "@cuepoint/distribution/brand";
+import {LOGO_SRC, PRODUCT_NAME_ZH} from "@momoki/distribution/brand";
 import {cn} from "../../ui/cn";
 import {getWindowChromeKind} from "../../platform/runtime/windowChrome";
 import {topbarZones} from "./topbarZones";

@@ -317,7 +317,7 @@ pub(crate) fn window_chrome_script() -> String {
     };
     let config = serde_json::json!({"version": 1, "kind": kind});
     format!(
-        "Object.defineProperty(window,'__CUEPOINT_WINDOW_CHROME__',{{value:Object.freeze({config}),writable:false,configurable:false}});"
+        "Object.defineProperty(window,'__MOMOKI_WINDOW_CHROME__',{{value:Object.freeze({config}),writable:false,configurable:false}});"
     )
 }
 
@@ -333,13 +333,13 @@ pub(crate) fn profile(identifier: &str, sqlite: bool) -> Result<(String, [u8; 16
     }
     let storage = if sqlite { "sqlite" } else { "indexeddb" };
     let digest = Sha256::digest(format!(
-        "cuepoint-product-profile-v1:{identifier}:{storage}"
+        "momoki-product-profile-v1:{identifier}:{storage}"
     ));
     let mut store = [0; 16];
     store.copy_from_slice(&digest[..16]);
     let config = serde_json::json!({"version": 1, "id": identifier, "storage": storage});
     let script = format!(
-        "Object.defineProperty(window,'__CUEPOINT_PRODUCT_PROFILE__',{{value:Object.freeze({config}),writable:false,configurable:false}});"
+        "Object.defineProperty(window,'__MOMOKI_PRODUCT_PROFILE__',{{value:Object.freeze({config}),writable:false,configurable:false}});"
     );
     Ok((script, store))
 }
@@ -381,18 +381,18 @@ mod tests {
     }
     #[test]
     fn profiles_are_stable_isolated_and_explicit() {
-        let normal = profile("dev.cuepoint.prototype.offline", false).unwrap();
+        let normal = profile("design.tulai.momoki", false).unwrap();
         assert_eq!(
             normal,
-            profile("dev.cuepoint.prototype.offline", false).unwrap()
+            profile("design.tulai.momoki", false).unwrap()
         );
         assert_ne!(
             normal.1,
-            profile("dev.cuepoint.prototype.review", false).unwrap().1
+            profile("dev.momoki.prototype.review", false).unwrap().1
         );
         assert_ne!(
             normal.1,
-            profile("dev.cuepoint.prototype.offline", true).unwrap().1
+            profile("design.tulai.momoki", true).unwrap().1
         );
         assert!(normal.0.contains("indexeddb"));
         assert!(normal.0.contains("Object.freeze"));
@@ -400,9 +400,9 @@ mod tests {
     }
     #[test]
     fn webview_directories_are_fixed_isolated_and_ordinary() {
-        let root = std::env::temp_dir().join(format!("cuepoint-webview-{}", uuid::Uuid::new_v4()));
-        let normal = profile("dev.cuepoint.prototype.offline", true).unwrap().1;
-        let review = profile("dev.cuepoint.review.smoke", true).unwrap().1;
+        let root = std::env::temp_dir().join(format!("momoki-webview-{}", uuid::Uuid::new_v4()));
+        let normal = profile("design.tulai.momoki", true).unwrap().1;
+        let review = profile("dev.momoki.review.smoke", true).unwrap().1;
         let path = webview_profile_directory(&root, normal).unwrap();
         assert_eq!(path, webview_profile_directory(&root, normal).unwrap());
         assert_ne!(path, webview_profile_directory(&root, review).unwrap());
@@ -410,7 +410,7 @@ mod tests {
             path,
             webview_profile_directory(
                 &root,
-                profile("dev.cuepoint.prototype.offline", false).unwrap().1
+                profile("design.tulai.momoki", false).unwrap().1
             )
             .unwrap()
         );
@@ -424,7 +424,7 @@ mod tests {
     #[test]
     fn webview_directory_rejects_symlink_namespace() {
         let root =
-            std::env::temp_dir().join(format!("cuepoint-webview-link-{}", uuid::Uuid::new_v4()));
+            std::env::temp_dir().join(format!("momoki-webview-link-{}", uuid::Uuid::new_v4()));
         let outside = root.join("outside");
         std::fs::create_dir_all(&outside).unwrap();
         std::os::unix::fs::symlink(&outside, root.join("webview-profiles-v1")).unwrap();
