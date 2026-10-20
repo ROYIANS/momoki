@@ -58,6 +58,7 @@ import {Button} from "../../../ui/button";
 import {MediaPreview} from "../../library/ui/MediaThumb";
 import {GenerationConfigurationFields} from "./GenerationReview";
 import {useAgentActivityNavigation} from "./AgentActivityNavigation";
+import {agentExecution} from "../runtime/agentExecution";
 import "./generationBatch.css";
 
 type BatchDetail = Awaited<ReturnType<typeof readGenerationBatch>>;
@@ -634,6 +635,8 @@ function BatchSurface({batch, parentReadError}: { batch: GenerationBatch; parent
                                         onClick={() => void action(async () => {
                                             const result = await batchUserAction(current.id, () => applyBatchSelections(current.id, current.threadId));
                                             setOutcomes(result);
+                                            // The adoption queued a continuation for the agent; start it now if the conversation is free.
+                                            if (result.some(item => item.applied)) void agentExecution.drainQueue(current.threadId).catch(() => undefined);
                                         })}>写入选中的 {selectedCount} 个目标</Button>
                             </div>
                         </>}

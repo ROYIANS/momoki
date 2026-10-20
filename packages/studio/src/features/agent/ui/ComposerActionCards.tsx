@@ -6,6 +6,7 @@ import {Check, ChevronRight, Hand, Images, Pause, Play, ShieldAlert, ShieldCheck
 import {applyBatchSelections, retryFailedBatch} from "../commands/agentGenerationBatches";
 import {batchUserAction, startGenerationBatch, stopGenerationBatch} from "../../video/agent/generationBatchRuntime";
 import {type AgentActivityTarget, useAgentActivityNavigation} from "./AgentActivityNavigation";
+import {agentExecution} from "../runtime/agentExecution";
 import {ComposerPanel, ComposerRow, MenuItem, RowAction, RowMenu} from "./ComposerPanel";
 
 type OnRunAction = (runId: string, action: RunAction, callId?: string) => void;
@@ -92,6 +93,8 @@ function BatchRow({card, onReveal}: {card: BatchCardData; onReveal: (target: Age
         const result = await batchUserAction(batch.id, () => applyBatchSelections(batch.id, threadId));
         const missed = result.filter(item => !item.applied);
         if (missed.length) setError(`${missed.length} 个目标未写入：${missed[0].error ?? "目标已被修改"}`);
+        // The adoption queued a continuation for the agent; start it now if the conversation is free.
+        if (result.some(item => item.applied)) void agentExecution.drainQueue(threadId).catch(() => undefined);
     });
     const canAct = !card.readOnly && !pending;
     const writeLabel = `写入 ${card.pendingWrites} 个目标`;

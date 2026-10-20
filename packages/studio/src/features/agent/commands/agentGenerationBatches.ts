@@ -7,6 +7,8 @@ import {resolveConnector} from "../../settings/commands/connectors";
 import {setCharacterSlot, setPropSlot, setSceneSlot, setStyleSlot} from "../../library/commands/assets";
 import {setShotSlot} from "../../video/commands/shots";
 import type {AgentGenerationJob} from '../models/agentGeneration';
+import type {AgentPendingInputSystem} from '../models/agentPendingInput';
+import {enqueueSystemInput} from './agentPendingInputs';
 import {
     type GenerationBatch,
     type GenerationBatchItem,
@@ -379,6 +381,17 @@ export async function selectBatchCandidate(id: string, threadId: string, itemId:
 }
 
 /** Explicit user selection writes are grouped by entity. Other entities can succeed independently. */
+/** The system line that continues the agent after the user adopts results. Content is for the model; display is for the user. */
+function adoptionMessage(title: string, system: AgentPendingInputSystem): {content: string; display: string} {
+    const count = system.applied.length;
+    const kinds = new Set(system.applied.map(item => item.kind));
+    const noun = kinds.size === 1 ? (kinds.has('video') ? '段视频' : '张图') : '个结果';
+    return {
+        content: `[系统事件 · 用户已采纳批量结果，非用户输入] 批次「${title}」已把所选结果写入 ${count} 个目标：${system.applied.map(item => item.label).join('、')}。请基于这些已写入的结果继续后续步骤。`,
+        display: `已采纳 ${count} ${noun}，继续`,
+    };
+}
+
 export async function applyBatchSelections(id: string, threadId: string, store?: ProductStore) {
     const db = store ?? productDb;
     const before = await readGenerationBatch(id, threadId, db);
@@ -390,6 +403,8 @@ export async function applyBatchSelections(id: string, threadId: string, store?:
         groups.set(key, [...groups.get(key) ?? [], item]);
     }
     const outcomes: Array<{ targetKey: string; applied: boolean; error?: string }> = [];
+    // One id for the whole user action: every group's system item merges into a single continuation.
+    const adoptionId = createId('adopt');
     for (const [key, items] of groups) {
         try {
             const inputRecords: Awaited<ReturnType<typeof loadGenerationInputs>> = [];
@@ -406,6 +421,7 @@ export async function applyBatchSelections(id: string, threadId: string, store?:
                 }
                 const current = await readGenerationTarget(items[0].baseline.target, db);
                 if (current.revision !== batch.entityRevisions[key]) throw new Error('目标已被人工修改；结果保留，未覆盖');
+                const adopted: AgentPendingInputSystem['applied'] = [];
                 for (const item of items) {
                     if (batch.selections[item.targetKey] !== item.id) throw new Error('所选候选已变化，请重新检查');
                     const job = await db.agentGenerationJobs.get(item.jobId!);
@@ -433,6 +449,7 @@ export async function applyBatchSelections(id: string, threadId: string, store?:
                             break;
                     }
                     const after = await readGenerationTarget(job.target, db);
+                    adopted.push({targetKey: item.targetKey, label: item.label, kind: job.kind, jobId: job.id});
                     await db.agentGenerationJobs.update(job.id, {
                         status: 'applied',
                         error: undefined,
@@ -453,6 +470,12 @@ export async function applyBatchSelections(id: string, threadId: string, store?:
                         }]
                     }, db);
                 }
+                // Written in the same transaction as the slots: a refresh right after adopting still continues.
+                if (adopted.length) await enqueueSystemInput(db, {
+                    threadId, dedupeKey: `adopt:${adoptionId}`,
+                    system: {kind: 'batch-adopted', batchId: id, adoptionId, applied: adopted},
+                    compose: system => adoptionMessage(batch.title, system),
+                });
             });
             outcomes.push(...items.map(item => ({targetKey: item.targetKey, applied: true})));
         } catch (error) {

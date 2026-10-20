@@ -235,3 +235,46 @@ describe('batch task evidence', () => {
     await expect(validateTaskSources(task, [{ type: 'generation', id: b.jobId! }], 'result', 'ai')).rejects.toThrow('完成结果');
   });
 });
+
+describe('adopting results continues the agent', () => {
+  const pending = (threadId: string) => db.agentPendingInputs.where('threadId').equals(threadId).toArray();
+  async function generated(count = 5) {
+    const f = await fixture(count); await confirm(f);
+    const state = await run(f, apimartMock().fetchImpl);
+    return {f, state};
+  }
+  it('queues nothing until the user writes the chosen results', async () => {
+    const {f, state} = await generated();
+    await selectBatchCandidate(f.id, f.thread.id, state.items[0].id);
+    expect(await pending(f.thread.id)).toHaveLength(0);
+  });
+  it('queues one system continuation, in the same transaction as the writes', async () => {
+    const {f, state} = await generated(); const [a, , , , tail] = state.items;
+    await selectBatchCandidate(f.id, f.thread.id, a.id); await selectBatchCandidate(f.id, f.thread.id, tail.id);
+    expect((await applyBatchSelections(f.id, f.thread.id)).every(o => o.applied)).toBe(true);
+    const rows = await pending(f.thread.id);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({source: 'system', mode: 'next-turn', status: 'queued', display: '已采纳 2 张图，继续'});
+    expect(rows[0].dedupeKey).toMatch(/^adopt:/);
+    expect(rows[0].system).toMatchObject({kind: 'batch-adopted', batchId: f.id});
+    expect(rows[0].system!.applied).toHaveLength(2);
+    // The text the model sees names the targets and says it is not user input.
+    expect(rows[0].content).toContain('非用户输入');
+    expect(rows[0].content).toContain(a.label);
+  });
+  it('writes no continuation when the write is refused, and none when nothing new is written', async () => {
+    const {f, state} = await generated(); const [a] = state.items;
+    await patchShot(f.shot.id, {notes: '人工改动'});
+    await selectBatchCandidate(f.id, f.thread.id, a.id);
+    expect((await applyBatchSelections(f.id, f.thread.id)).every(o => !o.applied)).toBe(true);
+    expect(await pending(f.thread.id)).toHaveLength(0);
+  });
+  it('does not repeat the continuation when the same results are written again', async () => {
+    const {f, state} = await generated(); const [a] = state.items;
+    await selectBatchCandidate(f.id, f.thread.id, a.id);
+    await applyBatchSelections(f.id, f.thread.id);
+    expect(await pending(f.thread.id)).toHaveLength(1);
+    await applyBatchSelections(f.id, f.thread.id);
+    expect(await pending(f.thread.id)).toHaveLength(1);
+  });
+});
