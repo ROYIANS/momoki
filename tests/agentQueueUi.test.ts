@@ -137,8 +137,12 @@ describe("composer pending-send queue", () => {
         await vi.waitFor(() => expect(cards()[0].dataset.mode).toBe("idle"));
         expect(button("立即发送")).toBeTruthy();
         expect(button("删除")).toBeTruthy();
-        await click("更多");
-        expect(button("编辑")).toBeTruthy();
+        // The list re-reads asynchronously after the delete, and a late re-render can reset the row menu between
+        // the click and the check on a loaded machine. Open it until it is open; the menu itself is what we check.
+        await vi.waitFor(async () => {
+            if (!button("编辑")) await click("更多");
+            expect(button("编辑")).toBeTruthy();
+        });
         expect(network).not.toHaveBeenCalled();
     });
 

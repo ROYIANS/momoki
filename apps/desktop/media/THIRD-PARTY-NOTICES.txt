@@ -10,6 +10,8 @@ the bundled sources/ archives for source, modifications and build information.
 The selected AtlasYang ffmpeg-static-builds release is ffmpeg-8.0.3-build4,
 build repository commit 0393ae2c796360fbcbbc44c85eeb769eead473b1.
 This identifies a third-party build, not an official FFmpeg binary release.
+That repository is no longer online; the same executables are redistributed from
+this project's own release (see SOURCE.md).
 No application code is linked to the FFmpeg libraries.
 
 Included codec dependencies and their notices:

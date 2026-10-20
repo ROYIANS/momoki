@@ -11,10 +11,10 @@
     "macos-arm64": {
       "triple": "aarch64-apple-darwin",
       "archive": {
-        "url": "https://github.com/AtlasYang/ffmpeg-static-builds/releases/download/ffmpeg-8.0.3-build4/ffmpeg-8.0.3-macos-arm64.tar.gz",
+        "url": "https://github.com/ROYIANS/momoki/releases/download/media-ffmpeg-8.0.3-build4/ffmpeg-8.0.3-macos-arm64.tar.gz",
         "format": "tar.gz",
-        "bytes": 30110463,
-        "sha256": "26f6269b117a51c5fdfd3a870c4e0a62b99f0575740a3933fc3d852f0a3f80b1"
+        "bytes": 30064655,
+        "sha256": "28a48f34a24e23432bfd67bf87499005fd1c39c7ddf26c0c73ed35eecd26870c"
       },
       "executables": {
         "ffmpeg": {
@@ -32,10 +32,10 @@
     "macos-x64": {
       "triple": "x86_64-apple-darwin",
       "archive": {
-        "url": "https://github.com/AtlasYang/ffmpeg-static-builds/releases/download/ffmpeg-8.0.3-build4/ffmpeg-8.0.3-macos-x64.tar.gz",
+        "url": "https://github.com/ROYIANS/momoki/releases/download/media-ffmpeg-8.0.3-build4/ffmpeg-8.0.3-macos-x64.tar.gz",
         "format": "tar.gz",
-        "bytes": 33547741,
-        "sha256": "b84b4515aaf2fe443a76445f02d05544a384dcd46cc6059fb8a1a4f9aaa3035d"
+        "bytes": 33431894,
+        "sha256": "55091b14eaaf9fddb82e61d853e6feaf9f24764a6ab67ab42446a82de16de0d7"
       },
       "executables": {
         "ffmpeg": {
@@ -53,10 +53,10 @@
     "windows-x64": {
       "triple": "x86_64-pc-windows-msvc",
       "archive": {
-        "url": "https://github.com/AtlasYang/ffmpeg-static-builds/releases/download/ffmpeg-8.0.3-build4/ffmpeg-8.0.3-win-x64.zip",
+        "url": "https://github.com/ROYIANS/momoki/releases/download/media-ffmpeg-8.0.3-build4/ffmpeg-8.0.3-win-x64.zip",
         "format": "zip",
-        "bytes": 38876415,
-        "sha256": "fd3473736674343cd1948eb45f28b46f377616432a5cc15eb896bdaabea506f2"
+        "bytes": 38996786,
+        "sha256": "dfd1af453bbb8fb14f4aa396e3bf5d2e1802dca5b899303c376ee9df7c51fe06"
       },
       "executables": {
         "ffmpeg": {

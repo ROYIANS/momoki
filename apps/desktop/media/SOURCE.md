@@ -11,6 +11,17 @@ source availability does not depend on an expiring CI log or a network request.
 The decoder lock separately pins the three actual executable archive identities
 and the measured extracted executable identities.
 
+**Archive hosting (2026-10-21).** The upstream repository
+`AtlasYang/ffmpeg-static-builds` was removed after the release was reviewed, so
+its original archives can no longer be downloaded. The three archives are now
+hosted as assets of this project's `media-ffmpeg-8.0.3-build4` GitHub Release.
+They are repacked, in the same flat tar.gz/zip layout the release tooling
+accepts, from the exact reviewed executables: every extracted `ffmpeg` and
+`ffprobe` keeps the byte length and SHA-256 pinned in `decoder-lock.json`, and
+the archive length/SHA-256 there now describes the repacked archives. Nothing
+inside the executables changed, and the provenance reports and all source
+archives are unchanged.
+
 The libaom source entry also names a tracked `archiveFile` under `sources/`.
 Its upstream Gitiles archive regenerates per-file timestamps on each request,
 changing archive bytes for the same commit. The tracked copy preserves the
