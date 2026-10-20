@@ -6891,6 +6891,20 @@
       "owner": "features/agent",
       "public": false,
       "publicTypes": []
+    },
+    {
+      "file": "packages/studio/src/app/layout/PanelHeader.tsx",
+      "target": "packages/studio/src/app/layout/PanelHeader.tsx",
+      "owner": "app",
+      "public": false,
+      "publicTypes": []
+    },
+    {
+      "file": "packages/studio/src/app/layout/topbarZones.ts",
+      "target": "packages/studio/src/app/layout/topbarZones.ts",
+      "owner": "app",
+      "public": false,
+      "publicTypes": []
     }
   ],
   "featureUiAppEntries": [
@@ -6960,6 +6974,7 @@
         "ContextPanelContent",
         "ContextPanelDescription",
         "ContextPanelHeader",
+        "ContextPanelHeaderActions",
         "ContextPanelTitle"
       ]
     },

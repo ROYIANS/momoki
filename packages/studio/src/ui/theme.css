@@ -147,13 +147,100 @@
 .app-topbar {
     position: relative;
     z-index: 30;
-    display: flex;
+    display: grid;
+    /* Left over the rail and module navigation, middle over the content, right over the docked panel. */
+    grid-template-columns: minmax(max-content, var(--app-nav-zone, var(--shell-rail-width))) minmax(0, 1fr) var(--app-panel-zone, 0px);
     flex: none;
     align-items: center;
     height: 44px;
     max-height: 44px;
-    padding-right: 12px;
     background: var(--surface-chrome);
+}
+
+.app-topbar-zone {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    height: 44px;
+}
+
+/* A short divider, half the bar's height and vertically centred, so the bar is not cut into separate slabs. */
+.app-topbar-center,
+.app-topbar-right {
+    position: relative;
+}
+
+.app-topbar-center::before,
+.app-topbar-right::before {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 1px;
+    height: 50%;
+    background: var(--border);
+    content: "";
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.app-topbar-right[hidden]::before {
+    display: none;
+}
+
+.app-topbar-center {
+    padding: 0 8px 0 12px;
+}
+
+.app-topbar-right {
+    gap: 4px;
+    /* Right padding matches the frame inset the zone reaches into, so the close button lines up with the panel. */
+    padding: 0 calc(var(--shell-inset) + 8px) 0 12px;
+    overflow: hidden;
+}
+
+.context-panel-actions-inline {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 8px 0;
+}
+
+.app-panel-title:empty + .app-panel-header-actions {
+    justify-content: flex-start;
+}
+
+.app-topbar-right[hidden] {
+    display: none;
+}
+
+.app-panel-title {
+    flex: none;
+    max-width: 50%;
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app-panel-title:empty {
+    display: none;
+}
+
+.app-panel-header-actions {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 2px;
+    min-width: 0;
+}
+
+.app-header-actions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 2px;
 }
 
 .app-topbar-leading {
@@ -536,8 +623,12 @@
         padding-left: var(--shell-inset);
     }
 
-    .app-topbar {
-        padding-right: 8px;
+    .app-topbar-center {
+        padding: 0 8px;
+    }
+
+    .app-topbar-center::before {
+        display: none;
     }
 
     .app-topbar-leading {

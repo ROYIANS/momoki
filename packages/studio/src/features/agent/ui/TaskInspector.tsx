@@ -27,6 +27,7 @@ import {
     ContextPanelContent,
     ContextPanelDescription,
     ContextPanelHeader,
+    ContextPanelHeaderActions,
     ContextPanelTitle
 } from "../../../app/layout/context-panel";
 import {
@@ -248,15 +249,9 @@ function TaskInspectorContent({
                          }}>
         <ContextPanelContent className="agent-chat-root css-var-agent-chat agent-task-inspector"
                              showCloseButton={false}>
-            <div className="agent-task-inspector-nav"><Button variant="ghost" size="sm"
-                                                              disabled={pending || reviewPending}
-                                                              onClick={() => requestDeparture(onOpenBoard)}><ArrowLeft/>任务工作台</Button><Button
-                variant="ghost"
-                size="icon"
-                aria-label="关闭任务详情"
-                disabled={pending || reviewPending}
-                onClick={() => requestDeparture(() => onOpenChange(false))}><X/></Button>
-            </div>
+            {/* The back action lives in the top bar's panel zone, next to the shared close button. */}
+            <ContextPanelHeaderActions><Button variant="ghost" size="sm" disabled={pending || reviewPending}
+                                               onClick={() => requestDeparture(onOpenBoard)}><ArrowLeft/>任务工作台</Button></ContextPanelHeaderActions>
             <div className="agent-task-inspector-scroll">
                 <ContextPanelHeader className="agent-task-inspector-heading"><span
                     className={`agent-task-status is-${state}`}>{TASK_STATE_LABELS[state]}</span><ContextPanelTitle>{task.title}</ContextPanelTitle><ContextPanelDescription><Sparkles

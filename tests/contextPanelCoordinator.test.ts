@@ -11,7 +11,8 @@ vi.mock("react",async original => {
 });
 import {ContextPanelHostProvider} from "@/app/layout/ContextPanelHost";
 type Host = {active: string | null;docked: boolean;fullWidth: boolean;width: number;
-    register: (entry:{id:string;width:number;close:()=>void;depart:(proceed:()=>void,cancel:()=>void)=>void})=>()=>void;
+    activeTitle: string | null;canToggle: boolean;closeActive: () => void;toggle: () => void;
+    register: (entry:{id:string;width:number;title?:string;reopen?:()=>void;close:(reason?:string)=>void;depart:(proceed:()=>void,cancel:()=>void)=>void})=>()=>void;
     request:(id:string)=>void;release:(id:string)=>void};
 function draw(surfaceWidth = 1440,navigationWidth = 260): Host {
     hooks.cursor = 0;
@@ -56,5 +57,37 @@ describe("controlled context-panel coordination", () => {
         expect(draw(threshold)).toMatchObject({active:"detail",docked:true,fullWidth:false});
         expect(draw(threshold - 1)).toMatchObject({active:"detail",docked:false,fullWidth:true});
         expect(draw(390)).toMatchObject({active:"detail",docked:false,fullWidth:true});
+    });
+
+    it("carries the active panel's title for the top bar and clears it on release", () => {
+        const host = draw(); host.register({id:"task",width:400,title:"任务工作台",close:vi.fn(),depart:yes=>yes()});
+        expect(draw().activeTitle).toBeNull();
+        host.request("task"); expect(draw().activeTitle).toBe("任务工作台");
+        host.release("task"); expect(draw().activeTitle).toBeNull();
+    });
+    it("closes the active panel through its own departure guard, as a user close", () => {
+        let accept = () => {},cancel = () => {};
+        const close = vi.fn(),host = draw();
+        host.register({id:"edit",width:400,close,depart:(yes,no)=>{accept=yes;cancel=no;}});
+        host.request("edit"); draw().closeActive();
+        // A guard that has not decided yet must not close the panel.
+        expect(close).not.toHaveBeenCalled();
+        cancel(); expect(close).not.toHaveBeenCalled(); expect(draw().active).toBe("edit");
+        draw().closeActive(); accept(); expect(close).toHaveBeenCalledExactlyOnceWith("user");
+    });
+    it("toggles: closes the open panel, and reopens the last one when none is open", () => {
+        const close = vi.fn(),reopen = vi.fn(),host = draw();
+        host.register({id:"skills",width:400,close,reopen,depart:yes=>yes()});
+        expect(draw().canToggle).toBe(false);
+        host.request("skills"); expect(draw().canToggle).toBe(true);
+        draw().toggle(); expect(close).toHaveBeenCalledExactlyOnceWith("user");
+        host.release("skills"); expect(draw().active).toBeNull(); expect(draw().canToggle).toBe(true);
+        draw().toggle(); expect(reopen).toHaveBeenCalledOnce();
+    });
+    it("does nothing on toggle when the last panel is no longer registered", () => {
+        const reopen = vi.fn(),host = draw();
+        const remove = host.register({id:"gone",width:400,close:vi.fn(),reopen,depart:yes=>yes()});
+        host.request("gone"); host.release("gone"); remove();
+        expect(() => draw().toggle()).not.toThrow(); expect(reopen).not.toHaveBeenCalled();
     });
 });

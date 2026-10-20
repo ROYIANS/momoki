@@ -1,0 +1,4 @@
+{"file": ".trellis/tasks/10-20-sidebar-panels/prd.md", "reason": "对照验收标准"}
+{"file": ".trellis/tasks/10-20-sidebar-panels/design.md", "reason": "对照设计契约与风险"}
+{"file": ".trellis/spec/frontend/agent-business-details.md", "reason": "详情面板契约"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "质量门槛"}

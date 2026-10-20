@@ -8,3 +8,6 @@ export function AppHeaderPortal({children}: { children: ReactNode }) {
     const target = useContext(AppHeaderContext);
     return target ? createPortal(children, target) : null;
 }
+
+/** The top bar's right end of the middle zone: this page's quick actions. */
+export const AppHeaderActionsContext = createContext<HTMLElement | null>(null);

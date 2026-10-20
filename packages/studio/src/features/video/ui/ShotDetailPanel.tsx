@@ -116,7 +116,7 @@ export function ShotDetailPanel({request, onRequestOutcome, onClosed, closeReque
         if (open) return;
         if (reason === "guard-refused" || reason === "busy") {
             callbacks.current.onRequestOutcome({requestId: active.id, status: "refused", reason: reason === "busy" ? "busy" : "guard"});
-        } else callbacks.current.onClosed({requestId: active.id, reason: reason ?? "close"});
+        } else callbacks.current.onClosed({requestId: active.id, reason: reason === "replaced" ? "replaced" : "close"});
     }} onRequestDeparture={(proceed, cancel) => requestDeparture(proceed, discard, cancel)}>
         <ContextPanelContent returnLabel={returnLabel ?? "返回对话"} showReturnWhenDocked={!!returnLabel}
             onReturn={returnLabel ? () => close("return") : undefined}

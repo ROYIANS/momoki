@@ -8,21 +8,25 @@ import {
     ListTodo,
     Menu,
     PanelLeft,
+    PanelRightClose,
     Settings,
     Upload,
-    Users
+    Users,
+    X
 } from "../../ui/icons";
 import {type ReactNode, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore} from "react";
 import {useAutoUpdateCheck} from "../../features/settings/ui/useAutoUpdateCheck";
 import {Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle} from "../../ui/sheet";
 import {Tooltip, TooltipContent, TooltipTrigger} from "../../ui/tooltip";
-import {AppHeaderContext} from "./AppHeaderPortal";
+import {AppHeaderActionsContext, AppHeaderContext} from "./AppHeaderPortal";
+import {PanelHeaderActionsContext} from "./PanelHeader";
 import {ModuleNavigationContext} from "./ModuleLayout";
 import {ContextPanelHostProvider, useContextPanelHost} from "./ContextPanelHost";
 import {getHistoryNavigation} from "../navigation/historyNavigation";
 import {LOGO_SRC, PRODUCT_NAME_ZH} from "@cuepoint/distribution/brand";
 import {cn} from "../../ui/cn";
 import {getWindowChromeKind} from "../../platform/runtime/windowChrome";
+import {topbarZones} from "./topbarZones";
 
 function matchesPath(pathname: string, target: string) {
     return pathname === target || pathname.startsWith(`${target}/`);
@@ -71,6 +75,8 @@ export function AppFrame({children, onImport, contentScroll = "auto"}: {
     const capabilities = useSyncExternalStore(history.subscribe, history.getSnapshot, history.getSnapshot);
     const [navOpen, setNavOpen] = useState(false);
     const [headerHost, setHeaderHost] = useState<HTMLDivElement | null>(null);
+    const [actionsHost, setActionsHost] = useState<HTMLDivElement | null>(null);
+    const [panelActionsHost, setPanelActionsHost] = useState<HTMLDivElement | null>(null);
     const [panelHost, setPanelHost] = useState<HTMLDivElement | null>(null);
     const [surface, setSurface] = useState<HTMLDivElement | null>(null);
     const [surfaceWidth, setSurfaceWidth] = useState(0);
@@ -161,35 +167,17 @@ export function AppFrame({children, onImport, contentScroll = "auto"}: {
         className={mobile ? undefined : "app-nav-label"}>导入项目</span></button> : null;
     return <div className="app-frame studio-floor" data-window-chrome={chromeKind}>
         <ModuleNavigationContext value={navigation}>
-            <ContextPanelHostProvider target={panelHost} surfaceWidth={surfaceWidth} navigationWidth={navigationWidth}>
+            <ContextPanelHostProvider target={panelHost} surfaceWidth={surfaceWidth} navigationWidth={navigationWidth} headerZone>
                 <AppHeaderContext value={headerHost}>
-                    <header className="app-topbar" inert={isolated} aria-hidden={isolated || undefined}
-                            data-tauri-drag-region={chromeKind === "macos-overlay" ? "deep" : undefined}>
-                        <div className="app-topbar-leading">
-                            <Link to="/about" aria-label={PRODUCT_NAME_ZH} data-tauri-drag-region="false"
-                                  className={cn("app-topbar-brand rounded-md", FOCUS)}><img src={LOGO_SRC}
-                                                                                            alt=""/></Link>
-                            <button type="button" onClick={() => setNavOpen(true)} aria-label="打开应用导航"
-                                    data-tauri-drag-region="false"
-                                    className={cn("app-mobile-nav-trigger app-header-shortcut", FOCUS)}><Menu
-                                className="size-4" aria-hidden/></button>
-                        </div>
-                        <div className="app-history-controls" data-tauri-drag-region="false">
-                            <button type="button" aria-label="后退" disabled={!capabilities.canBack}
-                                    onClick={history.back} className={cn("app-header-shortcut", FOCUS)}><ArrowLeft
-                                className="size-4" aria-hidden/></button>
-                            <button type="button" aria-label="前进" disabled={!capabilities.canForward}
-                                    onClick={history.forward} className={cn("app-header-shortcut", FOCUS)}><ArrowRight
-                                className="size-4" aria-hidden/></button>
-                            {navigation.registered &&
-                                <button type="button" aria-label={open ? "收起模块导航" : "展开模块导航"}
-                                        aria-expanded={open} onClick={navigation.toggle}
-                                        className={cn("app-header-shortcut", FOCUS)}><PanelLeft className="size-4"
-                                                                                                aria-hidden/></button>}
-                        </div>
-                        <div ref={setHeaderHost} className="app-header-slot"/>
-                        <div className="app-header-fallback"><span>{section?.label ?? PRODUCT_NAME_ZH}</span></div>
-                    </header>
+                <AppHeaderActionsContext value={actionsHost}>
+                <PanelHeaderActionsContext value={panelActionsHost}>
+                    <AppTopbar isolated={isolated} chromeKind={chromeKind} narrow={narrow} navigationWidth={navigationWidth}
+                               label={section?.label ?? PRODUCT_NAME_ZH}
+                               setHeaderHost={setHeaderHost} setActionsHost={setActionsHost} setPanelActionsHost={setPanelActionsHost}
+                               onOpenMobileNav={() => setNavOpen(true)}
+                               navigation={{registered: navigation.registered, open, toggle: navigation.toggle}}
+                               history={{canBack: capabilities.canBack, canForward: capabilities.canForward,
+                                   back: history.back, forward: history.forward}}/>
                     <div className="app-frame-body">
                         <aside className="app-navigation" inert={isolated} aria-hidden={isolated || undefined}>
                             {renderNavigation(false)}
@@ -207,10 +195,65 @@ export function AppFrame({children, onImport, contentScroll = "auto"}: {
                             {renderNavigation(true)}
                         </SheetContent>
                     </Sheet>
+                </PanelHeaderActionsContext>
+                </AppHeaderActionsContext>
                 </AppHeaderContext>
             </ContextPanelHostProvider>
         </ModuleNavigationContext>
     </div>;
+}
+
+/**
+ * Three zones, each above the column it belongs to and separated by a divider: shortcuts over the navigation,
+ * title and page actions over the content, and the active panel's own header over the panel.
+ */
+function AppTopbar({isolated, chromeKind, narrow, navigationWidth, label, setHeaderHost, setActionsHost, setPanelActionsHost,
+                       onOpenMobileNav, navigation, history}: {
+    isolated: boolean; chromeKind: ReturnType<typeof getWindowChromeKind>; narrow: boolean; navigationWidth: number; label: string;
+    setHeaderHost: (node: HTMLDivElement | null) => void; setActionsHost: (node: HTMLDivElement | null) => void;
+    setPanelActionsHost: (node: HTMLDivElement | null) => void; onOpenMobileNav: () => void;
+    navigation: {registered: boolean; open: boolean; toggle: () => void};
+    history: {canBack: boolean; canForward: boolean; back: () => void; forward: () => void};
+}) {
+    const host = useContextPanelHost();
+    const zones = topbarZones({narrow, navigationWidth, panelWidth: host?.width ?? 0, panelDocked: !!host?.active && host.docked});
+    return <header className="app-topbar" inert={isolated} aria-hidden={isolated || undefined}
+                   data-tauri-drag-region={chromeKind === "macos-overlay" ? "deep" : undefined}
+                   style={{"--app-nav-zone": zones.navigation, "--app-panel-zone": zones.panel} as React.CSSProperties}>
+        <div className="app-topbar-zone app-topbar-left">
+            <div className="app-topbar-leading">
+                <Link to="/about" aria-label={PRODUCT_NAME_ZH} data-tauri-drag-region="false"
+                      className={cn("app-topbar-brand rounded-md", FOCUS)}><img src={LOGO_SRC} alt=""/></Link>
+                <button type="button" onClick={onOpenMobileNav} aria-label="打开应用导航" data-tauri-drag-region="false"
+                        className={cn("app-mobile-nav-trigger app-header-shortcut", FOCUS)}><Menu className="size-4" aria-hidden/></button>
+            </div>
+            <div className="app-history-controls" data-tauri-drag-region="false">
+                <button type="button" aria-label="后退" disabled={!history.canBack} onClick={history.back}
+                        className={cn("app-header-shortcut", FOCUS)}><ArrowLeft className="size-4" aria-hidden/></button>
+                <button type="button" aria-label="前进" disabled={!history.canForward} onClick={history.forward}
+                        className={cn("app-header-shortcut", FOCUS)}><ArrowRight className="size-4" aria-hidden/></button>
+                {navigation.registered &&
+                    <button type="button" aria-label={navigation.open ? "收起模块导航" : "展开模块导航"}
+                            aria-expanded={navigation.open} onClick={navigation.toggle}
+                            className={cn("app-header-shortcut", FOCUS)}><PanelLeft className="size-4" aria-hidden/></button>}
+            </div>
+        </div>
+        <div className="app-topbar-zone app-topbar-center">
+            <div ref={setHeaderHost} className="app-header-slot"/>
+            <div className="app-header-fallback"><span>{label}</span></div>
+            <div ref={setActionsHost} className="app-header-actions" data-tauri-drag-region="false"/>
+            {host?.canToggle &&
+                <button type="button" aria-label={host.active ? "收起右侧栏" : "打开右侧栏"} aria-pressed={!!host.active}
+                        data-tauri-drag-region="false" onClick={host.toggle}
+                        className={cn("app-header-shortcut", FOCUS)}><PanelRightClose className="size-4" aria-hidden/></button>}
+        </div>
+        <div className="app-topbar-zone app-topbar-right" hidden={!zones.panelShown} data-tauri-drag-region="false">
+            <span className="app-panel-title">{host?.activeTitle}</span>
+            <div ref={setPanelActionsHost} className="app-panel-header-actions"/>
+            <button type="button" aria-label="关闭面板" onClick={host?.closeActive}
+                    className={cn("app-header-shortcut", FOCUS)}><X className="size-4" aria-hidden/></button>
+        </div>
+    </header>;
 }
 
 function WorkingSurface({setSurface, setPanelHost, contentScroll, children}: {

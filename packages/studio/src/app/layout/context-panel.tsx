@@ -17,6 +17,8 @@ import {ArrowLeft, XIcon} from "../../ui/icons";
 import {createOverlayFocusReturn} from "../../ui/overlayFocusReturn";
 import {cn} from "../../ui/cn";
 
+export {ContextPanelHeaderActions} from "./PanelHeader";
+
 type PanelContext = {
     shown: boolean;
     fullWidth: boolean;
@@ -34,8 +36,10 @@ function usePanel() {
 }
 
 /** Feature-owned open/draft state; the frame arbitrates presentation only. */
-export function ContextPanel({open, onOpenChange, width = 400, onRequestDeparture, children}: {
+export function ContextPanel({open, onOpenChange, width = 400, title, onRequestDeparture, children}: {
     open: boolean; onOpenChange: (open: boolean, reason?: ContextPanelHostCloseReason) => void; width?: number; children: ReactNode;
+    /** Shown in the top bar's panel zone while this panel is active. */
+    title?: string;
     onRequestDeparture?: (proceed: () => void, cancel?: () => void) => void;
 }) {
     const id = useId();
@@ -52,7 +56,7 @@ export function ContextPanel({open, onOpenChange, width = 400, onRequestDepartur
         const lifetimeState = registrationLifetime.current;
         const lifetime = ++lifetimeState.generation;
         const unregister = register?.({
-            id, width, depart: (proceed, cancel) => {
+            id, width, title, reopen: () => current.current.onOpenChange(true), depart: (proceed, cancel) => {
                 if (current.current.onRequestDeparture) current.current.onRequestDeparture(proceed, cancel); else proceed();
             }, close: reason => current.current.onOpenChange(false, reason)
         });
@@ -61,7 +65,7 @@ export function ContextPanel({open, onOpenChange, width = 400, onRequestDepartur
             // Preserve the host's pending guard rather than request it twice.
             queueMicrotask(() => {if (lifetimeState.generation === lifetime) unregister?.();});
         };
-    }, [register, id, width]);
+    }, [register, id, width, title]);
     useEffect(() => {
         if (open) request?.(id); else release?.(id);
     }, [open, request, release, id]);
@@ -149,7 +153,7 @@ export function ContextPanelContent({
                         </button>
                     </div>
                     {children}
-                    {showCloseButton && !panel.fullWidth &&
+                    {showCloseButton && !panel.fullWidth && !host?.headerZone &&
                         <button type="button" aria-label="关闭" className="context-panel-close" onClick={panel.close}>
                             <XIcon className="size-4" aria-hidden/></button>}
                 </div>
