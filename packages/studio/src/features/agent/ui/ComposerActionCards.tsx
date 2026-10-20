@@ -1,8 +1,7 @@
 import {useState} from "react";
-import {MODEL_STEPS_PER_SEGMENT} from "../models/agent";
 import type {RunAction} from "../models/chatRunAction";
-import {useComposerActions, type ApprovalCardData, type BatchCardData, type RecoveryCardData} from "./useComposerActions";
-import {Check, ChevronRight, Hand, Images, Pause, Play, ShieldAlert, ShieldCheck, Square, Undo2, X} from "../../../ui/icons";
+import {useComposerActions, type ApprovalCardData, type BatchCardData} from "./useComposerActions";
+import {Check, ChevronRight, Images, Pause, Play, ShieldAlert, ShieldCheck, Square, Undo2, X} from "../../../ui/icons";
 import {applyBatchSelections, retryFailedBatch} from "../commands/agentGenerationBatches";
 import {batchUserAction, startGenerationBatch, stopGenerationBatch} from "../../video/agent/generationBatchRuntime";
 import {type AgentActivityTarget, useAgentActivityNavigation} from "./AgentActivityNavigation";
@@ -37,24 +36,6 @@ function ApprovalRow({card, busy, onRunAction}: {card: ApprovalCardData; busy: b
         <span className="composer-row-quiet" title={preview?.changes.slice(0, 3).join("；") || undefined}>{previewLine(card)}</span>
         {card.total > 1 ? <span className="composer-row-tag">{`${card.position}/${card.total}`}</span> : null}
         {risky ? <span className="composer-row-tag" data-tone="warn">高风险操作</span> : null}
-    </ComposerRow>;
-}
-
-function RecoveryRow({card, busy, onRunAction}: {card: RecoveryCardData; busy: boolean; onRunAction: OnRunAction}) {
-    const {run, state} = card;
-    const resumeTitle = state.budgetPaused ? `继续执行 · 最多 ${MODEL_STEPS_PER_SEGMENT} 轮` : "从已保存的步骤继续";
-    return <ComposerRow className="agent-composer-action-card" data-kind="recovery"
-                        icon={state.unknown ? <Hand size={16}/> : <Pause size={16}/>}
-                        actions={<>
-                            {state.canResume ? <RowAction icon={<Play size={16} aria-hidden/>} label="继续" primary disabled={busy}
-                                                          title={resumeTitle} onClick={() => onRunAction(run.id, "resume")}/> : null}
-                            <RowAction icon={<X size={16} aria-hidden/>} label="结束" disabled={busy}
-                                       title="结束本次执行" onClick={() => onRunAction(run.id, "cancel")}/>
-                        </>}>
-        <span className="composer-row-lead">{state.budgetPaused ? "执行已暂停" : state.unknown ? "有操作结果待核实" : "执行未完成"}</span>
-        <span className="composer-row-quiet">
-            {state.unknown ? "请先核实未确认的操作，再决定是否继续" : state.budgetPaused ? `可继续，最多再跑 ${MODEL_STEPS_PER_SEGMENT} 轮` : "已保存的步骤不会丢失"}
-        </span>
     </ComposerRow>;
 }
 
@@ -143,8 +124,6 @@ export function ComposerActionCards({threadId, busy, readOnly, onRunAction}: {
     return <ComposerPanel label="待你处理" className="agent-composer-action-cards">
         {visible.map(card => card.kind === "approval"
             ? <ApprovalRow key={card.call.id} card={card} busy={busy} onRunAction={onRunAction}/>
-            : card.kind === "recovery"
-                ? <RecoveryRow key={`recovery:${card.run.id}`} card={card} busy={busy} onRunAction={onRunAction}/>
-                : <BatchRow key={`batch:${card.batch.id}`} card={card} onReveal={reveal}/>)}
+            : <BatchRow key={`batch:${card.batch.id}`} card={card} onReveal={reveal}/>)}
     </ComposerPanel>;
 }

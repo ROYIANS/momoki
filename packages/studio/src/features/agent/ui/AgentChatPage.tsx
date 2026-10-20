@@ -548,6 +548,7 @@ function AgentChatInner({threadId, view}: { threadId?: Id; view?: "tasks" }) {
         }
         else if (kind === "retry-run" && target.runId) handleRetry(target.runId);
         else if (kind === "continue" && target.runId) onRunAction(target.runId, "resume");
+        else if (kind === "end" && target.runId) onRunAction(target.runId, "cancel");
         else if ((kind === "check" || kind === "recover" || kind === "confirm") && id) handleSubmissionAction(id, kind);
     };
     const threadNotice = projectUnavailable ? <div className="agent-thread-notice" role="status">

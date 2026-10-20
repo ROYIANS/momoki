@@ -4,7 +4,7 @@ import type {AgentGenerationStatus} from "../models/agentGeneration";
 import type {GenerationBatch} from "../models/agentGenerationBatch";
 import {readGenerationBatch} from "../commands/agentGenerationBatches";
 import {isLaterUserTurn} from "../models/chatTurns";
-import {isCardApproval, runActionState, type RunActionState} from "../runtime/runActionState";
+import {isCardApproval, runActionState} from "../runtime/runActionState";
 
 export interface ApprovalCardData {
     kind: "approval";
@@ -13,12 +13,6 @@ export interface ApprovalCardData {
     /** Pending decisions of this run including this one; shown as "1/N". */
     position: number;
     total: number;
-}
-
-export interface RecoveryCardData {
-    kind: "recovery";
-    run: AgentRun;
-    state: RunActionState;
 }
 
 /** What a generation batch is waiting for, derived the same way the review surface derives it. */
@@ -38,7 +32,7 @@ export interface BatchCardData {
     readOnly: boolean;
 }
 
-export type ComposerActionData = ApprovalCardData | RecoveryCardData | BatchCardData;
+export type ComposerActionData = ApprovalCardData | BatchCardData;
 
 const WORKING = new Set<AgentGenerationStatus>(["submitting", "submitted", "running", "remote_completed", "downloading"]);
 
@@ -104,7 +98,6 @@ export function useComposerActions({threadId, readOnly}: {threadId?: string; rea
         const actions = runActionState(run, calls);
         const pending = calls.filter(call => isCardApproval(actions, call));
         pending.forEach((call, index) => cards.push({kind: "approval", run, call, position: index + 1, total: pending.length}));
-        if (actions.recoverable && !pending.length) cards.push({kind: "recovery", run, state: actions});
     }
     cards.push(...state.batchCards);
     return cards;

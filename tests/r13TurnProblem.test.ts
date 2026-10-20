@@ -44,6 +44,14 @@ describe("turn problem model", () => {
         expect(deriveTurnProblem({...base, run: run({status: "completed" as never})})).toBeUndefined();
         expect(deriveTurnProblem({...base, run: run({status: "cancelled" as never})})).toBeUndefined();
     });
+
+    it("offers ending the run beside continuing it, only when tool work holds the thread and not read-only", () => {
+        // One bubble carries both: continue (primary) and end (secondary), so no second surface repeats them.
+        expect(deriveTurnProblem({...base, run: run({hasToolCalls: true})})).toMatchObject({
+            action: {kind: "continue"}, secondary: {kind: "end", label: "结束"}});
+        expect(deriveTurnProblem({...base, run: run({hasToolCalls: false})})?.secondary).toBeUndefined();
+        expect(deriveTurnProblem({...base, run: run({hasToolCalls: true}), readOnly: true})?.secondary).toBeUndefined();
+    });
     it("shows nothing while an invocation owns the thread, and the generic owner error never replaces the run reason", () => {
         expect(deriveTurnProblem({...base, active: true, attempts: [attempt()], run: run()})).toBeUndefined();
         expect(deriveTurnProblem({...base, run: run({status: "failed", error: "网络连接失败"}), executionError: "执行未完成", executionErrorId: "error:1"}))

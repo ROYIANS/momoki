@@ -14,15 +14,23 @@
     flex: none;
     flex-direction: column;
     min-width: 0;
-    margin: 0 10px -18px;
-    padding: 6px 6px 24px;
+    margin: 0 10px 8px;
+    padding: 6px;
     border: 1px solid var(--border);
-    border-bottom: 0;
-    border-radius: 16px 16px 0 0;
+    border-radius: 16px;
     background: color-mix(in srgb, var(--surface-panel) 82%, var(--background));
     color: var(--foreground);
     font-size: 14px;
     line-height: 20px;
+}
+
+/* Tuck the lower edge behind what follows only when that is the input frame or another panel. Anything else
+   (a notice bubble, a sheet) keeps a normal gap so it is never covered. */
+.agent-chat-root .composer-panel:has(+ .composer-panel, + .agent-composer) {
+    margin-bottom: -18px;
+    padding-bottom: 24px;
+    border-bottom: 0;
+    border-radius: 16px 16px 0 0;
 }
 
 .agent-chat-root .composer-panel-note {

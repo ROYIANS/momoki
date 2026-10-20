@@ -3,7 +3,7 @@ import type {ChatSubmissionAttempt} from "./chatSubmissionAttempt";
 
 type TurnProblemKind = "unsent" | "interrupted" | "failed" | "stopped";
 /** Every action maps onto an existing owner behaviour; the bubble never invents recovery. */
-export type TurnProblemActionKind = "retry-send" | "retry-run" | "continue" | "check" | "recover" | "confirm";
+export type TurnProblemActionKind = "retry-send" | "retry-run" | "continue" | "end" | "check" | "recover" | "confirm";
 
 interface TurnProblemAction {kind: TurnProblemActionKind; label: string}
 
@@ -68,8 +68,11 @@ function runProblem(run: TurnProblemRun | undefined, readOnly: boolean): TurnPro
     const mapped = paused ? {reason: "已暂停"} : describeProblemReason(run.error, failed ? "执行失败" : "执行已中断");
     const action: TurnProblemAction | undefined = readOnly ? undefined : run.hasToolCalls ?
         {kind: "continue", label: "继续"} : {kind: "retry-run", label: "重试"};
+    // A run that already made tool calls holds the thread until it is continued or ended, so ending is offered too.
+    const secondary: TurnProblemAction | undefined = !readOnly && run.hasToolCalls ? {kind: "end", label: "结束"} : undefined;
     return {id: `run:${run.id}:${run.status}`, runId: run.id, kind: failed ? "failed" : "interrupted",
-        reason: mapped.reason, detail: "detail" in mapped ? mapped.detail : undefined, dismissible: true, action};
+        reason: mapped.reason, detail: "detail" in mapped ? mapped.detail : undefined, dismissible: true, action,
+        ...(secondary ? {secondary} : {})};
 }
 
 /**

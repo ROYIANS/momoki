@@ -85,24 +85,12 @@ describe("composer action cards", () => {
         expect(onRunAction).toHaveBeenCalledWith("run-1", "cancel");
     });
 
-    it("offers resume and end for an interrupted run, with the budget wording when paused at the limit", async () => {
+    it("draws no row for an interrupted run: the one problem bubble above the composer owns continue and end", async () => {
         await db.agentRuns.add(makeRun({status: "interrupted"}));
         await draw();
-        await vi.waitFor(() => expect(button("从已保存的步骤继续")).toBeTruthy());
-        await act(async () => button("从已保存的步骤继续")!.click());
-        expect(onRunAction).toHaveBeenCalledWith("run-1", "resume");
-        await act(async () => button("结束本次执行")!.click());
-        expect(onRunAction).toHaveBeenCalledWith("run-1", "cancel");
-        await db.agentRuns.update("run-1", {pauseReason: "model_step_limit"});
-        await vi.waitFor(() => expect(button("继续执行 · 最多 32 轮")).toBeTruthy());
-    });
-
-    it("hides resume while an operation result is unknown, keeping only end", async () => {
-        await db.agentRuns.add(makeRun({status: "failed"}));
-        await db.agentToolCalls.add(makeCall("c1", {status: "unknown"}));
-        await draw();
-        await vi.waitFor(() => expect(button("结束本次执行")).toBeTruthy());
-        expect(button("从已保存的步骤继续")).toBeUndefined();
+        await new Promise(resolve => setTimeout(resolve, 30));
+        expect(container.querySelector('[data-kind="recovery"]')).toBeNull();
+        expect(button("继续")).toBeUndefined();
     });
 
     it("renders nothing for a read-only thread, a stale run or a plain finished run", async () => {

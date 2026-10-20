@@ -289,7 +289,7 @@ export function FloatingComposer({
     return (
         <ComposerSurface
             stackClassName={[expanded ? "is-expanded" : "", plusOpen ? "is-plus-open" : ""].filter(Boolean).join(" ") || undefined}
-            above={<><div ref={sheetHost} className="agent-composer-sheets"/>{actions ? <ComposerActionCards threadId={actions.threadId} busy={sending} readOnly={readOnly} onRunAction={actions.onRunAction}/> : null}{queue ? <ComposerQueue threadId={queue.threadId} active={sending}/> : null}<ComposerCardHost notice={notice} attention={attention}/></>}
+            above={<><div ref={sheetHost} className="agent-composer-sheets"/><ComposerCardHost notice={notice} attention={attention}/>{actions ? <ComposerActionCards threadId={actions.threadId} busy={sending} readOnly={readOnly} onRunAction={actions.onRunAction}/> : null}{queue ? <ComposerQueue threadId={queue.threadId} active={sending}/> : null}</>}
             frameClassName={`agent-composer agent-composer-refined${dragging ? " reference-dragging" : ""}${inline ? " is-inline" : ""}`}
             frameProps={{
                  onDragOver: (event) => {
