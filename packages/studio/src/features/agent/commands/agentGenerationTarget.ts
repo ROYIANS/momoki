@@ -7,7 +7,7 @@ import {emptySlot} from "../../library/models/slot";
 import {targetRevision} from "../../../platform/data/revision";
 
 /** Library targets never change underneath a request, so their revision is a constant. */
-export const LIBRARY_TARGET_REVISION = "library-v1";
+const LIBRARY_TARGET_REVISION = "library-v1";
 
 async function readTargetEntity(target: ProductionTarget, store?: ProductStore) {
     const db = store ?? productDb;
@@ -20,6 +20,8 @@ async function readTargetEntity(target: ProductionTarget, store?: ProductStore) 
             return db.scenes.get(target.entityId);
         case "prop":
             return db.props.get(target.entityId);
+        case "library":
+            throw new Error("素材库目标没有对应的实体");
         case "style":
         default:
             return db.styles.get(target.entityId);

@@ -139,6 +139,8 @@ async function writeResult(target: ProductionTarget, slot: GenerationSlot, store
             return setPropSlot(target.entityId, target.slot, slot, undefined, db);
         case "style":
             return setStyleSlot(target.entityId, target.slot, slot, undefined, db);
+        case "library":
+            throw new Error("素材库目标没有槽位可写");
     }
 }
 

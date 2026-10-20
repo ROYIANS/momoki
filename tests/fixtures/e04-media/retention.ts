@@ -55,7 +55,8 @@ export async function snapshotFreshness(source: RetentionSource) {
 /** E04's 14 current-reference passes plus the two full media passes added by the desktop media commit (2b00d8e5):
  * the candidate dependency-closure read in deleteMediaIfOrphans and the dependency expansion in collectMediaIds.
  * Both are one bounded scan each, independent of candidate count; thread-activity (E11) rows live in deviceSettings and are never scanned here. */
-export const CURRENT_REFERENCE_PASSES = 14 + 2;
+// One more global reference scan than before: IP portraits (`ipProfiles.avatarMediaId`).
+export const CURRENT_REFERENCE_PASSES = 15 + 2;
 export async function workCount(size: number, original = false, ownerCount = 3) {
     const owners = Array.from({length: ownerCount}, (_, i) => `owner-${i}`), ids: string[] = [];
     for (let i = 0; i < size; i++) {const id = `work-${i}`; ids.push(id); await db.media.put(media(id, owners[i % owners.length], true));}

@@ -1825,6 +1825,7 @@
       "public": false,
       "publicTypes": [],
       "publicSymbols": [
+        "libraryMaterialName",
         "readGenerationTarget"
       ]
     },
@@ -2100,6 +2101,7 @@
       "public": false,
       "publicTypes": [],
       "publicSymbols": [
+        "adoptGeneratedMedia",
         "adoptMaterialInProject",
         "promoteLegacyMaterial"
       ]

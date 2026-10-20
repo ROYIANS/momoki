@@ -245,6 +245,11 @@
               "type": "string",
               "minLength": 0,
               "maxLength": 8000
+            },
+            "avatarMediaId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
             }
           },
           "required": [],

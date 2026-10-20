@@ -151,3 +151,11 @@ return narrow ? <Dialog><ShotEditor/></Dialog> : <aside><ShotEditor/></aside>;
 <ShotDetailLink href={shotDetailHref(target)} target={target}>查看镜头</ShotDetailLink>
 <ContextPanelContent returnLabel="返回对话"><VideoOwnedFields/></ContextPanelContent>
 ```
+
+## Generation without a slot (2026-10-20)
+
+`ProductionTarget` has a `library` kind: `{kind: "library", projectId, entityId, slot: "image" | "video", label?}`. `slot` is the media type (it replaces the slot-based image/video inference), `entityId` names a group of alternatives the agent chose, and `label` becomes the material name. It goes through the same submit/batch/confirm/recover path as a slot target; only three places differ: `readGenerationTarget` returns an empty slot with the constant revision `library-v1` (nothing to conflict with), and applying — `applyAgentGeneration` and `applyBatchSelections` — calls `adoptGeneratedMedia` instead of a `set*Slot`. That keeps the chosen result once as a project-scope `LibraryMaterial` (found again by `source.entityId` = media id, so applying twice never duplicates) and marks the media `libraryRetained`. Assigning it later uses the existing `slot_update(result)`, `project_update(coverMediaId)` and `ip_update(avatarMediaId)`; video can only go to a shot `clip`.
+
+Every `switch (target.kind)` must name `library` explicitly (the exhaustiveness lint enforces it) — do not let it fall through to a slot write.
+
+`IpProfile.avatarMediaId` is an image owned by the `studio` library (a project image is copied there by `setIpAvatar`), counted as in use by `collectMediaIds` for the whole store and for `studio`.

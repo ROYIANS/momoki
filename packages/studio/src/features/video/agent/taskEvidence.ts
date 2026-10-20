@@ -108,6 +108,7 @@ async function readCurrentGenerationSlot(job: AgentGenerationJob, store?: Produc
             return currentAssetSlot(job, await db.props.get(target.entityId), PROP_SLOTS);
         case "style":
             return currentAssetSlot(job, await db.styles.get(target.entityId), STYLE_SLOTS);
+        case "library":
         default:
             return undefined;
     }
