@@ -526,3 +526,7 @@
         transition: none;
     }
 }
+
+.side-panel .ip-editor-fields {
+    grid-template-columns: 1fr;
+}

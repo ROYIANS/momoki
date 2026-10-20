@@ -8,14 +8,7 @@ import {STUDIO_LIBRARY_ID} from "../../models/ownership";
 import {slotMediaIds} from "../../models/slot";
 import type {MaterialEntity, MaterialKind, MaterialPayload, SettingMaterialKind} from "../../models/materials";
 import {Button} from "../../../../ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle
-} from "../../../../ui/dialog";
+import {SidePanel} from "../../../../app/layout/SidePanel";
 import {MaterialPreview} from "./MaterialPreview";
 import {KIND_LABELS, MaterialScopeSelect, parseScope, useMaterialDraftGuard} from "./MaterialControls";
 
@@ -108,19 +101,19 @@ export function LegacyMaterialSources({view, scope, search, kind, onCreated}: {
                     <strong>{row.name}</strong><span>{row.ownerId === STUDIO_LIBRARY_ID ? "工作室原件" : data?.projects.find((project) => project.id === row.ownerId)?.name ?? "原项目已删除"}</span>
                 </div>
             </Button>)}</div>}
-        {selected && <Dialog open onOpenChange={(open) => {
+        {selected && <SidePanel open onOpenChange={(open) => {
             if (!open) requestClose(() => setSelected(null));
-        }}><DialogContent
-            className="material-dialog"><DialogHeader><DialogTitle>{selected.name}</DialogTitle><DialogDescription>从原件建立独立素材快照。以后编辑或删除原件，不会改变已保存的版本。</DialogDescription></DialogHeader><MaterialPreview
-            payload={selected.payload} inspect/>
+        }} kind="material-promote" width={460} title={selected.name}
+                                description="从原件建立独立素材快照。以后编辑或删除原件，不会改变已保存的版本。"
+                                footer={<><Button variant="outline" disabled={pending}
+                                                  onClick={() => setSelected(null)}>关闭</Button><Button disabled={pending}
+                                                                                                         onClick={() => void promote()}>{pending ? "正在保存…" : "保存为独立素材"}</Button></>}>
+            <MaterialPreview payload={selected.payload} inspect/>
             {selected.kind !== "media" && <LegacySettingLink row={selected}/>}
             <label className="material-field">提升到<MaterialScopeSelect value={target} onChange={setTarget}
                                                                          disabled={pending}/></label>
             {error && <p role="alert" className="material-error">{error}</p>}
-            <DialogFooter><Button variant="outline" disabled={pending}
-                                  onClick={() => setSelected(null)}>关闭</Button><Button disabled={pending}
-                                                                                         onClick={() => void promote()}>{pending ? "正在保存…" : "保存为独立素材"}</Button></DialogFooter>
-        </DialogContent></Dialog>}{dialog}
+        </SidePanel>}{dialog}
     </section>;
 }
 

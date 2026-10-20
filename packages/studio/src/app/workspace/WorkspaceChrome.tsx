@@ -24,7 +24,7 @@ import {toast} from "sonner";
 import {Still} from "../../features/library/ui/Still";
 import {Button} from "../../ui/button";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "../../ui/dropdown-menu";
-import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,} from "../../ui/dialog";
+import {SidePanel} from "../layout/SidePanel";
 import {episodeLabel} from "../../features/video/models/episodes";
 import {normalizeProjectMode} from "../../features/video/models/format";
 import {IMAGE_ACCEPT, pickMediaFile, uploadMediaFile} from "../../features/library/services/media";
@@ -384,12 +384,13 @@ export function WorkspaceChrome({projectId}: { projectId: string }) {
                         </div>
                     </ModuleLayout>
 
-                    <Dialog open={settingsOpen && (!unavailable || outputProtected)} onOpenChange={changeSettingsOpen}>
-                        <DialogContent className="flex flex-col overflow-hidden sm:max-w-2xl">
-                            <DialogHeader>
-                                <DialogTitle>项目设定</DialogTitle>
-                            </DialogHeader>
-                            <div className="app-scroll min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
+                    <SidePanel open={settingsOpen && (!unavailable || outputProtected)} onOpenChange={changeSettingsOpen}
+                               kind="project-settings" width={460} title="项目设定"
+                               footer={<Button variant="outline" disabled={outputState.saving}
+                                               onClick={() => changeSettingsOpen(false)}>
+                                   完成
+                               </Button>}>
+                            <div className="space-y-4">
                                 <ProjectSettingsPanel project={project} unavailable={unavailable}
                                                       onOutputState={setOutputState}/>
                                 <div>
@@ -418,14 +419,7 @@ export function WorkspaceChrome({projectId}: { projectId: string }) {
                                     </div>
                                 </div>
                             </div>
-                            <DialogFooter>
-                                <Button variant="outline" disabled={outputState.saving}
-                                        onClick={() => changeSettingsOpen(false)}>
-                                    完成
-                                </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
+                    </SidePanel>
                     <AlertDialog open={confirmSettingsClose} onOpenChange={setConfirmSettingsClose}>
                         <AlertDialogContent>
                             <AlertDialogHeader>

@@ -64,7 +64,7 @@ describe("E05 serial file import", () => {
         await act(async () => {const send = button("导入 3 个文件"); send.click(); send.click();});
         expect(create).toHaveBeenCalledTimes(1); expect(progress()).toContain("已导入 0 / 3"); expect(progress()).toContain("A.txt");
         expect(button("取消").disabled).toBe(true);
-        await click("关闭"); expect(document.querySelector('[role="dialog"]')).toBeTruthy(); expect(closed).not.toHaveBeenCalled();
+        await click("返回工作区"); expect(document.querySelector('[data-slot="context-panel-content"]')).toBeTruthy(); expect(closed).not.toHaveBeenCalled();
         await act(async () => root.render(h(Owner, {initialScope: "project:other"})));
         await act(async () => {const stop = button("停止后续导入"); stop.click(); stop.click();});
         expect(button("停止后续导入").disabled).toBe(true); expect(progress()).toContain("当前文件完成后停止");
@@ -100,7 +100,7 @@ describe("E05 serial file import", () => {
         expect(button("继续导入").disabled).toBe(true); expect(button("选择文件").disabled).toBe(true);
         expect(document.querySelector('[role="alert"]')?.textContent).toContain("导入结果待确认");
         await click("查看素材库");
-        expect(document.querySelector('[role="dialog"]')).toBeNull(); expect(imported).not.toHaveBeenCalled();
+        expect(document.querySelector('[data-slot="context-panel-content"]')).toBeNull(); expect(imported).not.toHaveBeenCalled();
         expect(routing.blockers.at(-1)?.shouldBlockFn()).toBe(true); expect(routing.blockers.at(-1)?.enableBeforeUnload).toBe(true);
         await act(async () => root.render(h(Owner, {initialScope: "project:other"})));
         await click("打开导入");

@@ -2,14 +2,7 @@ import {useEffect, useRef, useState} from "react";
 import {Upload} from "../../../../ui/icons";
 import {createFileMaterial} from "../../commands/materials";
 import {Button} from "../../../../ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle
-} from "../../../../ui/dialog";
+import {SidePanel} from "../../../../app/layout/SidePanel";
 import {MaterialScopeSelect, parseScope, useMaterialDraftGuard} from "./MaterialControls";
 import {StorageError} from "../../../../platform/storage/errors";
 import type {MaterialScope} from "../../models/materials";
@@ -152,10 +145,17 @@ export function MaterialImportDialog({initialScope, open = true, onClose, onImpo
     if (progress) importLabel = "继续导入";
     if (pending) importLabel = "正在导入…";
     const selectionLocked = pending || unknown || progress !== null;
-    return <><Dialog open={open} onOpenChange={(nextOpen) => {
+    return <><SidePanel open={open} onOpenChange={(nextOpen) => {
         if (!nextOpen) close();
-    }}><DialogContent
-        className="material-dialog"><DialogHeader><DialogTitle>导入媒体与资料</DialogTitle><DialogDescription>素材按选择的位置保存。项目内素材需要明确提升后，才会出现在共享素材中。</DialogDescription></DialogHeader>
+    }} kind="material-import" width={460} title="导入媒体与资料"
+                        description="素材按选择的位置保存。项目内素材需要明确提升后，才会出现在共享素材中。"
+                        footer={<><Button variant="outline" disabled={pending}
+                                          onClick={close}>{unknown ? "查看素材库" : "取消"}</Button>
+                            {unknown && <><Button variant="outline" onClick={() => resolveUnknown("retry")}>已核对，重新导入此文件</Button>
+                                <Button variant="outline" onClick={() => resolveUnknown("skip")}>已核对，跳过此文件继续</Button></>}
+                            {pending && <Button variant="outline" disabled={progress?.stopRequested} onClick={requestStop}>停止后续导入</Button>}
+                            <Button disabled={pending || unknown || !files.length}
+                                    onClick={() => void save()}>{importLabel}</Button></>}>
         <label className="material-field">保存位置<MaterialScopeSelect value={scope} onChange={value => {
             if (!pendingRef.current && !batchRef.current) setScope(value);
         }} disabled={selectionLocked}/></label>
@@ -179,12 +179,5 @@ export function MaterialImportDialog({initialScope, open = true, onClose, onImpo
             <p role="status" className="material-muted">已导入 {progress.completed} / {progress.total}
                 {pending && progress.currentName && ` · 正在保存 ${progress.currentName}`}
                 {pending && progress.stopRequested && " · 当前文件完成后停止后续导入"}</p>}
-        <DialogFooter><Button variant="outline" disabled={pending}
-                              onClick={close}>{unknown ? "查看素材库" : "取消"}</Button>
-            {unknown && <><Button variant="outline" onClick={() => resolveUnknown("retry")}>已核对，重新导入此文件</Button>
-                <Button variant="outline" onClick={() => resolveUnknown("skip")}>已核对，跳过此文件继续</Button></>}
-            {pending && <Button variant="outline" disabled={progress?.stopRequested} onClick={requestStop}>停止后续导入</Button>}
-            <Button disabled={pending || unknown || !files.length}
-            onClick={() => void save()}>{importLabel}</Button></DialogFooter>
-    </DialogContent></Dialog>{dialog}</>;
+    </SidePanel>{dialog}</>;
 }

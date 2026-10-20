@@ -7,7 +7,7 @@ import {toast} from "sonner";
 import {listProjectReferences, removeProjectReference} from "../../references/commands/references";
 import {registerProjectImage, retryReferenceImport} from "../../references/documents/import";
 import {type ProjectReference, type ReferenceAttachment, referenceAttachment} from "../../references/models/references";
-import {Dialog, DialogContent, DialogHeader, DialogTitle} from "../../../ui/dialog";
+import {SidePanel} from "../../../app/layout/SidePanel";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -94,8 +94,7 @@ export function ReferenceLibrary({projectId, open, onOpenChange, selected, onSel
         }
     }
 
-    return <><Dialog open={open} onOpenChange={onOpenChange}><DialogContent
-        className="reference-dialog"><DialogHeader><DialogTitle>项目资料</DialogTitle></DialogHeader>
+    return <><SidePanel open={open} onOpenChange={onOpenChange} kind="reference-library" width={460} title="项目资料">
         <div className="reference-library-tabs" aria-label="资料类型">
             <button type="button" aria-pressed={view === "references"} onClick={() => setView("references")}>参考资料
             </button>
@@ -137,7 +136,7 @@ export function ReferenceLibrary({projectId, open, onOpenChange, selected, onSel
                         </div>
                     </div>;
                 })}</div>
-    </DialogContent></Dialog><AlertDialog open={!!remove} onOpenChange={(next) => {
+    </SidePanel><AlertDialog open={!!remove} onOpenChange={(next) => {
         if (!next && !busy) setRemove(undefined);
     }}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>从项目移除这份资料？</AlertDialogTitle><AlertDialogDescription>“{remove?.filename}”将无法用于新的消息和工具读取。历史消息及引用记录仍会保留。</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel
         disabled={!!busy}>取消</AlertDialogCancel><AlertDialogAction disabled={!!busy} onClick={(event) => {

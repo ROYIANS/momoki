@@ -14,7 +14,7 @@ import {Button} from "../../../ui/button";
 import {Input} from "../../../ui/input";
 import {Textarea} from "../../../ui/textarea";
 import {Field} from "../../../ui/field";
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,} from "../../../ui/dialog";
+import {SidePanel} from "../../../app/layout/SidePanel";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -221,32 +221,49 @@ export function MemoryEditor({
 
     return (
         <>
-            <Dialog
+            <SidePanel
                 open
                 onOpenChange={(open) => {
                     if (!open) close();
                 }}
+                kind="memory-editor"
+                width={520}
+                title={memory ? "编辑记忆" : source ? "保存为项目记忆" : "添加项目记忆"}
+                description="写下后续创作可以复用的内容，并明确它适用的条件。"
+                footer={<>
+
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                disabled={pending}
+                                onClick={close}
+                            >
+                                取消
+                            </Button>
+                            <Button
+                                type="submit"
+                                form="memory-editor-form"
+                                disabled={
+                                    pending ||
+                                    saveCompleted ||
+                                    identityMismatch ||
+                                    !!readError ||
+                                    (!!memory &&
+                                        (!current || current.revision !== expectedRevision)) ||
+                                    !draft.title.trim() ||
+                                    !draft.body.trim()
+                                }
+                            >
+                                {pending ? "保存中…" : memory ? "保存修改" : "确认并保存"}
+                            </Button>
+                                        </>}
             >
-                <DialogContent
-                    className="memory-editor-dialog"
-                    onEscapeKeyDown={(event) => {
-                        if (pending) event.preventDefault();
-                    }}
-                >
-                    <DialogHeader>
-                        <DialogTitle>
-                            {memory ? "编辑记忆" : source ? "保存为项目记忆" : "添加项目记忆"}
-                        </DialogTitle>
-                        <DialogDescription>
-                            写下后续创作可以复用的内容，并明确它适用的条件。
-                        </DialogDescription>
-                    </DialogHeader>
                     <form
                         onSubmit={(event) => {
                             event.preventDefault();
                             void save();
                         }}
-                        className="memory-editor-form"
+                        className="memory-editor-form" id="memory-editor-form"
                     >
                         <div className="memory-editor-body">
                             <fieldset disabled={pending || saveCompleted} className="memory-editor-fields">
@@ -408,34 +425,8 @@ export function MemoryEditor({
                                 </div>
                             )}
                         </div>
-                        <div className="memory-editor-actions">
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                disabled={pending}
-                                onClick={close}
-                            >
-                                取消
-                            </Button>
-                            <Button
-                                type="submit"
-                                disabled={
-                                    pending ||
-                                    saveCompleted ||
-                                    identityMismatch ||
-                                    !!readError ||
-                                    (!!memory &&
-                                        (!current || current.revision !== expectedRevision)) ||
-                                    !draft.title.trim() ||
-                                    !draft.body.trim()
-                                }
-                            >
-                                {pending ? "保存中…" : memory ? "保存修改" : "确认并保存"}
-                            </Button>
-                        </div>
                     </form>
-                </DialogContent>
-            </Dialog>
+            </SidePanel>
             <AlertDialog
                 open={discard || blocker.status === "blocked"}
                 onOpenChange={(open) => {

@@ -197,7 +197,7 @@ describe("B01 actual query consumers", () => {
         for (const stale of [a, null]) {
             tree = draw(run, [{projectId: project.id, project}, result(a.id, stale), first]);
             expect(tree.filter(node => name(node) === "Outlet")).toHaveLength(1);
-            expect(tree.some(node => name(node) === "Dialog" && node.props.open === true)).toBe(true);
+            expect(tree.some(node => name(node) === "SidePanel" && node.props.open === true)).toBe(true);
             expect(tree.some(node => (node.props.params as {episodeId?: string})?.episodeId === a.id)).toBe(false);
         }
         reset(); host.pathname = "/p/missing";

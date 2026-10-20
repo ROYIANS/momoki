@@ -109,7 +109,8 @@ function nodes(tree: unknown): Node[] {
     if (node.type === MemoryPromotion || (typeof node.type === "function" && node.type.name === "ReviewDocument")) {
         return [node, ...nodes((node.type as (props: Record<string, unknown>) => unknown)(node.props))];
     }
-    return [node, ...nodes(node.props.children)];
+    // A side panel keeps its confirm/cancel in `footer`, outside its children.
+    return [node, ...nodes(node.props.children), ...nodes(node.props.footer)];
 }
 function draw(host: Host, run: () => unknown, results = host.results) {
     runtime.active = host; host.cursor = 0; host.queryIndex = 0; host.queriers = []; host.results = results;

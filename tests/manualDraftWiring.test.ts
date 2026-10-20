@@ -91,7 +91,8 @@ function nodes(tree: unknown): Node[] {
     const node = tree as Node;
     if ([AssetDetailContent, CharacterDetailFields, SceneDetailFields, PropDetailFields, StyleDetailFields].includes(node.type as never))
         return [node, ...nodes((node.type as (props: Record<string, unknown>) => unknown)(node.props))];
-    return [node, ...nodes(node.props.children)];
+    // A side panel keeps its confirm/cancel in `footer`, outside its children.
+    return [node, ...nodes(node.props.children), ...nodes(node.props.footer)];
 }
 // Identity wrappers must be traversed to keep exercising their actual consumers.
 function unwrap(tree: unknown): unknown {
@@ -306,8 +307,8 @@ describe("slot session target and owned media", () => {
         const staleSave = button(tree, "保存").props.onClick as () => void;
         props = {...props, targetKey: "owner-B:asset-B:front", projectId: "owner-B", title: "B title", onSave: b};
         tree = draw();
-        expect(tree.some(n => n.props.children === "A title")).toBe(true);
-        expect(tree.some(n => n.props.children === "B title")).toBe(false);
+        expect(tree.some(n => n.props.title === "A title" && n.props.kind === "slot-editor")).toBe(true);
+        expect(tree.some(n => n.props.title === "B title")).toBe(false);
         expect(tree.some(n => n.props.value === "A draft")).toBe(true);
         expect(button(tree, "保存").props.disabled).toBe(true);
         staleSave();

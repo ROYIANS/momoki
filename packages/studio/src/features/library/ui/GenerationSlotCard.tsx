@@ -18,14 +18,7 @@ import {MediaPicker} from "./MediaPicker";
 import {MediaPreview} from "./MediaThumb";
 import {Badge} from "../../../ui/badge";
 import {Button} from "../../../ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "../../../ui/dialog";
+import {SidePanel} from "../../../app/layout/SidePanel";
 import {Label} from "../../../ui/label";
 import {Textarea} from "../../../ui/textarea";
 
@@ -352,13 +345,23 @@ export function GenerationSlotEditor({
     return (
         <>
             {navigationGuard}
-            <Dialog open={open} onOpenChange={(next) => !next && void close()}>
-                <DialogContent className="flex max-h-[90vh] max-w-2xl flex-col overflow-hidden sm:max-w-2xl">
-                    <DialogHeader>
-                        <DialogTitle>{editSession.title}</DialogTitle>
-                        <DialogDescription>填写画面描述、添加参考，或上传、复用已有素材。保存后可用于分镜和交付。</DialogDescription>
-                    </DialogHeader>
-                    <div className="app-scroll space-y-5 overflow-auto pr-1">
+            <SidePanel open={open} onOpenChange={(next) => !next && void close()} kind="slot-editor" width={520}
+                       title={editSession.title}
+                       description="填写画面描述、添加参考，或上传、复用已有素材。保存后可用于分镜和交付。"
+                       footer={<>
+                        <Button variant="outline" disabled={pending === "save" || pending === "close"}
+                                onClick={() => void close()}>
+                            {pending === "close" ? "正在清理…" : "取消"}
+                        </Button>
+                        <Button
+                            variant="brand"
+                            disabled={pending !== null || cancelled || targetChanged || unavailable || workspaceUnavailable}
+                            onClick={() => void save()}
+                        >
+                            {pending === "save" ? "保存中…" : pending === "upload" ? "上传中…" : error && !failedUpload.current ? "重试保存" : "保存"}
+                        </Button>
+                       </>}>
+                    <div className="space-y-5">
                         <div className="grid gap-2">
                             <Label htmlFor={promptId}>画面描述 / 提示词</Label>
                             <Textarea
@@ -478,21 +481,7 @@ export function GenerationSlotEditor({
                             ) : null}
                         </div>
                     ) : null}
-                    <DialogFooter>
-                        <Button variant="outline" disabled={pending === "save" || pending === "close"}
-                                onClick={() => void close()}>
-                            {pending === "close" ? "正在清理…" : "取消"}
-                        </Button>
-                        <Button
-                            variant="brand"
-                            disabled={pending !== null || cancelled || targetChanged || unavailable || workspaceUnavailable}
-                            onClick={() => void save()}
-                        >
-                            {pending === "save" ? "保存中…" : pending === "upload" ? "上传中…" : error && !failedUpload.current ? "重试保存" : "保存"}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            </SidePanel>
         </>
     );
 }

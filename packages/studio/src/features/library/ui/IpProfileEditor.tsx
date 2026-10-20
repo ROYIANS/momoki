@@ -6,7 +6,7 @@ import {createIpProfile, updateIpProfile} from "../commands/ipProfiles";
 import {Button} from "../../../ui/button";
 import {Input} from "../../../ui/input";
 import {Textarea} from "../../../ui/textarea";
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "../../../ui/dialog";
+import {SidePanel} from "../../../app/layout/SidePanel";
 import {
     AlertDialog,
     AlertDialogCancel,
@@ -120,19 +120,22 @@ export function IpProfileEditor({profile, onClose, onSaved}: {
     }
 
     return <>
-        <Dialog open onOpenChange={open => {
+        <SidePanel open onOpenChange={open => {
             if (!open) close();
-        }}>
-            <DialogContent className="ip-profile-dialog" onInteractOutside={event => {
-                if (pendingRef.current) event.preventDefault();
-            }} onEscapeKeyDown={event => {
-                if (pendingRef.current || discardOpen) event.preventDefault();
-            }}>
-                <DialogHeader><DialogTitle>{profile ? "编辑 IP 档案" : "新建 IP"}</DialogTitle><DialogDescription>先起个名字，其余内容可以在创作中慢慢补充。</DialogDescription></DialogHeader>
+        }} kind="ip-profile-editor" width={520} title={profile ? "编辑 IP 档案" : "新建 IP"}
+                   description="先起个名字，其余内容可以在创作中慢慢补充。"
+                   footer={<>
+                       {error ? <p role="alert" className="mr-auto text-sm text-destructive">{error}</p> : null}
+                       <Button type="button" variant="ghost" disabled={pending} onClick={close}>取消</Button>
+                       <Button type="submit" form={`${id}-form`}
+                               disabled={pending || (Boolean(profile) && !dirty)}>{pending &&
+                           <LoaderCircle className="animate-spin motion-reduce:animate-none"
+                                         aria-hidden/>}{pending ? "正在保存…" : profile ? "保存修改" : "创建 IP"}</Button>
+                   </>}>
                 <form onSubmit={event => {
                     event.preventDefault();
                     void save();
-                }} className="ip-editor-form">
+                }} className="ip-editor-form" id={`${id}-form`}>
                     <div className="ip-editor-fields">
                         <div className="ip-editor-field ip-editor-name"><label htmlFor={`${id}-name`}>IP
                             名称 <span>必填</span></label><Input id={`${id}-name`} autoFocus value={draft.name}
@@ -156,19 +159,8 @@ export function IpProfileEditor({profile, onClose, onSaved}: {
                                                                                           }}/><p>{field.hint}</p>
                         </div>)}
                     </div>
-                    <footer className="ip-editor-footer">
-                        <div>{error ? <p role="alert" className="text-destructive">{error}</p> :
-                            <p>关联项目的聊天会读取档案摘要；生成仍以确认的提示词与参数为准。</p>}</div>
-                        <div className="ip-editor-actions"><Button type="button" variant="ghost" disabled={pending}
-                                                                   onClick={close}>取消</Button><Button type="submit"
-                                                                                                        disabled={pending || (Boolean(profile) && !dirty)}>{pending &&
-                            <LoaderCircle className="animate-spin motion-reduce:animate-none"
-                                          aria-hidden/>}{pending ? "正在保存…" : profile ? "保存修改" : "创建 IP"}</Button>
-                        </div>
-                    </footer>
                 </form>
-            </DialogContent>
-        </Dialog>
+        </SidePanel>
         <AlertDialog open={discardOpen || blocker.status === "blocked"} onOpenChange={open => {
             if (!open && !pending) {
                 setDiscardOpen(false);
