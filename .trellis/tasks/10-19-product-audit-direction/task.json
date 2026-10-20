@@ -21,7 +21,8 @@
   "children": [
     "10-19-agent-queue-steer-parallel",
     "10-20-sidebar-panels",
-    "10-20-generation-slot-decoupling"
+    "10-20-generation-slot-decoupling",
+    "10-20-generation-message-display"
   ],
   "parent": null,
   "relatedFiles": [],

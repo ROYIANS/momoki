@@ -4,7 +4,7 @@ import {AgentAudioBatches} from "../../audio/ui/AudioGenerationBatches";
 import {ShotDetailLink} from "../../../app/details/ShotDetails";
 import {shotDetailHref} from "../../video/models/shotDetailTarget";
 import {useProductQuery} from "../../../platform/product/queries";
-import {Check, CircleAlert, Image, LoaderCircle, Video} from "../../../ui/icons";
+import {CircleAlert, LoaderCircle} from "../../../ui/icons";
 import type {AgentGenerationStatus} from "../models/agentGeneration";
 import {MediaPreview} from "../../library/ui/MediaThumb";
 
@@ -22,28 +22,27 @@ export function AgentGenerationResults({runId}: { runId: string }) {
     return <><AgentGenerationBatches runId={runId}/><AgentAudioBatches runId={runId}/>{Boolean(jobs?.length) &&
         <div className="agent-generation-results" aria-label="生成素材">
             {jobs?.map((job) => {
-                const Icon = job.kind === "image" ? Image : Video;
                 const attention = ["unknown", "conflict", "failed"].includes(job.status);
                 const working = ["submitting", "submitted", "running", "remote_completed", "downloading"].includes(job.status);
                 const progress = typeof job.progress === "number" && Number.isFinite(job.progress) && job.progress >= 0 && job.progress <= 100 ? job.progress : undefined;
-                return <section className="agent-generation-result" key={job.id}
-                                aria-label={`${job.kind === "image" ? "图片" : "视频"}生成`}>
-                    <div className="agent-generation-heading"><Icon size={16}
-                                                                    aria-hidden/><strong>{job.kind === "image" ? "图片生成" : "视频生成"}</strong><span
-                        title={job.model}>{job.model}</span></div>
-                    <div className="agent-generation-status" role="status">
-                        {attention ? <CircleAlert size={14} aria-hidden/> : working ?
-                            <LoaderCircle size={14} className="animate-spin motion-reduce:animate-none" aria-hidden/> :
-                            <Check size={14} aria-hidden/>}
-                        <span>{LABELS[job.status]}{working && progress !== undefined ? ` · ${progress}%` : ""}</span>
-                    </div>
-                    {job.result && <MediaPreview mediaId={job.result.mediaId} inspect label="生成结果预览"
-                                                 className="agent-generation-media"/>}
+                const ratio = /^\d+:\d+$/.test(String(job.parameters.size ?? job.parameters.aspectRatio ?? "")) ? String(job.parameters.size ?? job.parameters.aspectRatio).replace(":", " / ") : job.kind === "video" ? "16 / 9" : "1 / 1";
+                const noun = job.kind === "image" ? "图像" : "视频";
+                return <section className="agent-generation-result" key={job.id} aria-label={`${noun}生成`}>
+                    {working && <>
+                        <p className="agent-generation-caption" role="status">正在创建{noun}</p>
+                        <div className="agent-generation-placeholder" style={{aspectRatio: ratio}}>
+                            <span className="agent-generation-percent">{progress !== undefined ? `${Math.round(progress)}%` : <LoaderCircle size={14} className="animate-spin motion-reduce:animate-none" aria-hidden/>}</span>
+                        </div>
+                    </>}
+                    {!working && job.result && <MediaPreview mediaId={job.result.mediaId} inspect label="生成结果预览"
+                                                             className="agent-generation-media"/>}
+                    {!working && !job.result && !attention && <p role="status">{LABELS[job.status]}</p>}
+                    {attention && <div className="agent-generation-status" role="status"><CircleAlert size={14} aria-hidden/><span>{LABELS[job.status]}</span></div>}
                     {job.error && <p className="agent-generation-error">{job.error}</p>}
                     {job.status === "unknown" && <p>请先在供应商处确认，避免重复提交。</p>}
-                    <ShotDetailLink href={job.target.kind === "shot" ? shotDetailHref({projectId: job.target.projectId, episodeId: job.target.episodeId, shotId: job.target.entityId}) : generationTargetDestination(job.target).to}
+                    {!working && <ShotDetailLink href={job.target.kind === "shot" ? shotDetailHref({projectId: job.target.projectId, episodeId: job.target.episodeId, shotId: job.target.entityId}) : generationTargetDestination(job.target).to}
                           target={job.target.kind === "shot" ? {projectId: job.target.projectId, episodeId: job.target.episodeId, shotId: job.target.entityId} : undefined}
-                          className="agent-change-link">查看{TARGETS[job.target.kind]} ↗</ShotDetailLink>
+                          className="agent-change-link">查看{TARGETS[job.target.kind]} ↗</ShotDetailLink>}
                 </section>;
             })}
         </div>}</>;

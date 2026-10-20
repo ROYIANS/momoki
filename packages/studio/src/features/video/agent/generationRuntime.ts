@@ -86,7 +86,7 @@ export async function prepareAgentGeneration(raw: GenerationSubmitArgs, context:
     const snapshot = await prepareGenerationSnapshot(raw, context.signal, db);
     return {
         summary: `使用 ${snapshot.provider} / ${snapshot.args.model} 为${snapshot.request.target.kind === "library" ? "项目素材库" : `「${snapshot.current.label}」`}生成${snapshot.request.kind === "image" ? "图片" : "视频"}`,
-        changes: [snapshot.request.target.kind === "library" ? `保存位置：项目素材库「${snapshot.current.label}」` : `槽位：${snapshot.request.target.slot}`, `提示词：${snapshot.args.prompt.slice(0, 1500)}`, `参数：${JSON.stringify(snapshot.request.parameters).slice(0, 1800)}`, `参考素材：${snapshot.inputs.length} 项；此操作可能产生供应商费用，完成后需要单独写入目标。`],
+        changes: [snapshot.request.target.kind === "library" ? `保存位置：项目素材库「${snapshot.current.label}」` : `槽位：${snapshot.request.target.slot}`, `提示词：${snapshot.args.prompt.slice(0, 1500)}`, `参考素材：${snapshot.inputs.length} 项；此操作可能产生供应商费用，完成后需要单独写入目标。`],
         revision: snapshot.fingerprint,
         target: {label: snapshot.current.label, href: generationTargetHref(snapshot.request.target)}
     };

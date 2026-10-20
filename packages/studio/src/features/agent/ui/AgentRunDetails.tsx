@@ -110,7 +110,9 @@ function ToolCallRow({run, call, busy, readOnly, actions, onAction}: {
     }, [request, run.id, call.id]);
     useEffect(() => {
         if (awaiting) setOpen(true);
-    }, [awaiting]);
+        // Once decided, a generation call's confirmation text is history; the result card carries the story.
+        else if (call.name === "submit_generation" || call.name === "apply_generation") setOpen(false);
+    }, [awaiting, call.name]);
     const reviewGeneration = !readOnly && call.name === "submit_generation" && awaiting && actions.canDecide;
     const musicReview = call.name === "music_generate";
     const activeMusicReview = musicReview && !readOnly && awaiting && actions.canDecide;
@@ -315,10 +317,10 @@ export function AgentRunDetails({run, message, calls, steered = NO_STEERED, busy
                     </li>)}</ol>
                 </details>}
             </>}
-            {/* Keep mounted: review dialogs own unsaved drafts and navigation guards. */}
-            <AgentGenerationResults runId={run.id}/>
             {!readOnly && recoverable && !pendingApproval && <p className="agent-action-hint">
                 {budgetPaused ? "已暂停，可在输入框上方继续" : "执行未完成，可在输入框上方继续或结束"}</p>}
         </div>
+        {/* Outside the fold: a finished picture is the answer, not process. Also keeps review drafts mounted. */}
+        <AgentGenerationResults runId={run.id}/>
     </section>;
 }
