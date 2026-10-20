@@ -62,7 +62,7 @@ import * as connectors from "@/features/settings/models/connectors";
 import {ConnectorsSection as ConnectorsPage} from "@/features/settings/ui/ConnectorsPage";
 import {StoryPage} from "@/features/video/ui/StoryPage";
 import {PageHeader} from "@/app/layout/PageLayout";
-import {Dialog, DialogContent} from "@/ui/dialog";
+import {SidePanel} from "@/app/layout/SidePanel";
 import {DraftStatus} from "@/app/drafts/draft-status";
 import {Input} from "@/ui/input";
 import {Textarea} from "@/ui/textarea";
@@ -91,7 +91,9 @@ function nodes(tree: unknown): Node[] {
     const children = node.type === PageHeader
         ? PageHeader(node.props as Parameters<typeof PageHeader>[0])
         : node.props.children;
-    return [node, ...nodes(children), ...(node.type === ModuleLayout ? nodes(node.props.navigation) : [])];
+    return [node, ...nodes(children), ...(node.type === ModuleLayout ? nodes(node.props.navigation) : []),
+        // A side panel keeps its confirm/cancel in `footer`, outside its children.
+        ...nodes(node.props.footer)];
 }
 function draw(host: Host, run: () => unknown) {
     runtime.active = host; host.cursor = 0; host.queryIndex = 0;
@@ -115,7 +117,7 @@ function connectorUI(configs: ConnectorConfig[] = []) {
     const host = mount([{connectors: configs}]); const render = () => draw(host, () => ConnectorsPage());
     const cards = render().filter(node => text(node).trim() === "安装" || text(node) === "编辑");
     const open = (index = 0) => {click(cards[index]); return render();};
-    const close = (tree = render()) => (tree.find(node => node.type === Dialog)!.props.onOpenChange as (open: boolean) => void)(false);
+    const close = (tree = render()) => (tree.find(node => node.type === SidePanel)!.props.onOpenChange as (open: boolean) => void)(false);
     return {host, render, open, close, cards};
 }
 async function storyUI() {
@@ -174,7 +176,7 @@ describe("B06 deferred risk proof through actual callbacks", () => {
 type Listed = Awaited<ReturnType<typeof connectors.listConnectorModels>>;
 type Tested = Awaited<ReturnType<typeof connectors.testConnectorConnection>>;
 function credentialInputs(tree: Node[]) {return tree.filter(node => node.type === Input);}
-function dialogOpen(tree: Node[]) {return tree.find(node => node.type === Dialog)!.props.open;}
+function dialogOpen(tree: Node[]) {return tree.find(node => node.type === SidePanel)!.props.open;}
 function displayed(tree: Node[], value: string) {return tree.some(node => text(node).includes(value));}
 function latest(tree: Node[]) {
     const status = tree.find(node => node.type === DraftStatus)!;
@@ -336,12 +338,10 @@ describe("B06 connector operation ownership", () => {
         click(button(tree, "测试连接")); click(button(tree, "拉取模型探活"));
         const locked = ui.render();
         expect(dialogOpen(locked)).toBe(true);
-        const content = locked.find(node => node.type === DialogContent)!;
-        expect(content.props.showCloseButton).toBe(false);
-        const dismissal = {preventDefault: vi.fn()};
-        (content.props.onEscapeKeyDown as (event: unknown) => void)(dismissal);
-        (content.props.onPointerDownOutside as (event: unknown) => void)(dismissal);
-        expect(dismissal.preventDefault).toHaveBeenCalledTimes(2);
+        // The panel's own close paths all go through onOpenChange, which refuses while a write is in flight.
+        const panel = locked.find(node => node.type === SidePanel)!;
+        (panel.props.onOpenChange as (open: boolean) => void)(false);
+        expect(dialogOpen(ui.render())).toBe(true);
         expect(credentialInputs(locked).map(node => node.props.value)).toEqual(["https://frozen.example/v1", "frozen-key"]);
         expect(credentialInputs(locked).every(node => node.props.disabled)).toBe(true);
         expect(button(locked, "断开").props.disabled).toBe(true);

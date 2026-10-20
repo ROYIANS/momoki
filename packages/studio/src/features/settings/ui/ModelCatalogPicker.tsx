@@ -3,14 +3,7 @@ import {toast} from "sonner";
 import {showError} from "../../../app/errors/showError";
 import {Button} from "../../../ui/button";
 import {Checkbox} from "../../../ui/checkbox";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle
-} from "../../../ui/dialog";
+import {SidePanel} from "../../../app/layout/SidePanel";
 import {Input} from "../../../ui/input";
 import scopeJson from "../modelCatalog/scope.json";
 import {
@@ -110,14 +103,14 @@ export function ModelCatalogPicker({entries, onClose}: { entries: readonly Catal
     }
 
     return (
-        <Dialog open onOpenChange={open => {
+        <SidePanel open onOpenChange={open => {
             if (!open && !saving) onClose();
-        }}>
-            <DialogContent className="flex flex-col overflow-hidden sm:max-w-3xl">
-                <DialogHeader>
-                    <DialogTitle>选择模型</DialogTitle>
-                    <DialogDescription>勾选要同步到本机的模型。归一化 ID 相同的选项只会导入一次。</DialogDescription>
-                </DialogHeader>
+        }} kind="model-catalog" width={520} title="选择模型" description="勾选要同步到本机的模型。归一化 ID 相同的选项只会导入一次。"
+                   footer=<>
+                    <Button variant="outline" disabled={saving} onClick={onClose}>取消</Button>
+                    <Button variant="brand" disabled={!ready || saving}
+                            onClick={() => void save()}>{saving ? "保存中…" : "保存"}</Button>
+</>>
                 <div className="grid min-h-0 gap-3">
                     <label className="flex items-center gap-2 text-sm">
                         <Checkbox checked={autoCommon} disabled={!ready}
@@ -184,12 +177,6 @@ export function ModelCatalogPicker({entries, onClose}: { entries: readonly Catal
                                      }}/> :
                         <p className="text-muted-foreground py-8 text-center text-sm">没有匹配的模型</p>}
                 </div>
-                <DialogFooter className="shrink-0">
-                    <Button variant="outline" disabled={saving} onClick={onClose}>取消</Button>
-                    <Button variant="brand" disabled={!ready || saving}
-                            onClick={() => void save()}>{saving ? "保存中…" : "保存"}</Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+        </SidePanel>
     );
 }

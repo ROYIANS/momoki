@@ -9,14 +9,7 @@ import {Badge} from "../../../ui/badge";
 import {Button} from "../../../ui/button";
 import {PageState} from "../../../app/layout/PageLayout";
 import {SettingsGroup} from "./SettingsCard";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "../../../ui/dialog";
+import {SidePanel} from "../../../app/layout/SidePanel";
 import {Field} from "../../../ui/field";
 import {Input} from "../../../ui/input";
 import {deleteConnector, upsertConnector} from "../commands/connectors";
@@ -332,30 +325,53 @@ export function ConnectorsSection({visibleRowIds, onEditorOpenChange}: {
                 onEditorOpenChange={onEditorOpenChange}/></div>
             {activeSection === "catalog" && <div className="settings-model-catalog"><ModelCatalogSection/></div>}
 
-            <Dialog open={Boolean(editor)} onOpenChange={(open) => !open && closeEditor()}>
-                <DialogContent
-                    className="flex flex-col overflow-hidden"
-                    showCloseButton={!saving}
-                    onEscapeKeyDown={(event) => {
-                        if (writeLocked()) event.preventDefault();
-                    }}
-                    onPointerDownOutside={(event) => {
-                        if (writeLocked()) event.preventDefault();
-                    }}
-                >
-                    <DialogHeader>
-                        <DialogTitle>{editor?.existing ? "编辑连接" : "安装连接"}</DialogTitle>
-                        <DialogDescription>
-                            {editor?.definition.id === "mimo"
-                                ? "MiMo · 聊天和配音共用此连接。支持预置音色、音色设计与声音克隆；测试连接只读取模型目录，不发起生成。"
-                                : editor?.definition.id === "aihubmix"
-                                    ? "AIHubMix · 聊天、图像与视频共用此连接。模型目录公开可读；测试连接仅验证任务列表读取权限，不发起生成。"
-                                    : editor?.definition.id === "apimart"
-                                        ? "APIMart · 聊天、图像与视频共用此连接。测试连接仅查询模型，不发起生成。"
-                                        : `${editor?.definition.title ?? ""} · OpenAI 兼容协议。此处只配置接入点；模型在聊天里选。`}
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid min-h-0 gap-4 overflow-y-auto p-1">
+            <SidePanel open={Boolean(editor)} onOpenChange={(open) => !open && closeEditor()} kind="connector-editor" width={460}
+                       title={editor?.existing ? "编辑连接" : "安装连接"}
+                       description={editor?.definition.id === "mimo"
+                           ? "MiMo · 聊天和配音共用此连接。支持预置音色、音色设计与声音克隆；测试连接只读取模型目录，不发起生成。"
+                           : editor?.definition.id === "aihubmix"
+                               ? "AIHubMix · 聊天、图像与视频共用此连接。模型目录公开可读；测试连接仅验证任务列表读取权限，不发起生成。"
+                               : editor?.definition.id === "apimart"
+                                   ? "APIMart · 聊天、图像与视频共用此连接。测试连接仅查询模型，不发起生成。"
+                                   : `${editor?.definition.title ?? ""} · OpenAI 兼容协议。此处只配置接入点；模型在聊天里选。`}
+                       footer=<>
+                        <div className="flex flex-wrap gap-2">
+                            {editor?.existing ? (
+                                <Button
+                                    variant="ghost"
+                                    className="text-destructive hover:text-destructive"
+                                    disabled={testing || saving || probing}
+                                    onClick={() => void handleDisconnect()}
+                                >
+                                    断开
+                                </Button>
+                            ) : null}
+                        </div>
+                        <div className="flex flex-wrap justify-end gap-2">
+                            <Button
+                                variant="outline"
+                                disabled={testing || saving || probing}
+                                onClick={() => void handleProbeModels()}
+                            >
+                                {probing ? "拉取中…" : editor?.definition.id === "aihubmix" ? "获取公开模型" : "拉取模型探活"}
+                            </Button>
+                            <Button
+                                variant="outline"
+                                disabled={testing || saving || probing}
+                                onClick={() => void handleTest()}
+                            >
+                                {testing ? "测试中…" : "测试连接"}
+                            </Button>
+                            <Button
+                                variant="brand"
+                                disabled={testing || saving || probing}
+                                onClick={() => void handleSave()}
+                            >
+                                {saving ? "保存中…" : "保存"}
+                            </Button>
+                        </div>
+</>>
+                    <div className="grid gap-4">
                         <Field label="Base URL">
                             <Input
                                 type="url"
@@ -395,45 +411,7 @@ export function ConnectorsSection({visibleRowIds, onEditorOpenChange}: {
                         ) : null}
                     </div>
                     {opError ? <p role="alert" className="text-destructive shrink-0 px-1 text-sm break-words">{opError}</p> : null}
-                    <DialogFooter className="shrink-0 gap-2 sm:justify-between">
-                        <div className="flex flex-wrap gap-2">
-                            {editor?.existing ? (
-                                <Button
-                                    variant="ghost"
-                                    className="text-destructive hover:text-destructive"
-                                    disabled={testing || saving || probing}
-                                    onClick={() => void handleDisconnect()}
-                                >
-                                    断开
-                                </Button>
-                            ) : null}
-                        </div>
-                        <div className="flex flex-wrap justify-end gap-2">
-                            <Button
-                                variant="outline"
-                                disabled={testing || saving || probing}
-                                onClick={() => void handleProbeModels()}
-                            >
-                                {probing ? "拉取中…" : editor?.definition.id === "aihubmix" ? "获取公开模型" : "拉取模型探活"}
-                            </Button>
-                            <Button
-                                variant="outline"
-                                disabled={testing || saving || probing}
-                                onClick={() => void handleTest()}
-                            >
-                                {testing ? "测试中…" : "测试连接"}
-                            </Button>
-                            <Button
-                                variant="brand"
-                                disabled={testing || saving || probing}
-                                onClick={() => void handleSave()}
-                            >
-                                {saving ? "保存中…" : "保存"}
-                            </Button>
-                        </div>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            </SidePanel>
         </div>
     );
 }

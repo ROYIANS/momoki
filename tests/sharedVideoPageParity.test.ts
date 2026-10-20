@@ -81,7 +81,8 @@ function nodes(value: unknown): Node[] {
     const node = value as Node;
     const children = node.type === PageHeader || node.type === PageState
         ? (node.type as (props: Record<string, unknown>) => unknown)(node.props) : node.props.children;
-    return [node, ...nodes(children), ...(node.type === ModuleLayout ? nodes(node.props.navigation) : [])];
+    // A side panel keeps its confirm/cancel in `footer`, outside its children.
+    return [node, ...nodes(children), ...(node.type === ModuleLayout ? nodes(node.props.navigation) : []), ...nodes(node.props.footer)];
 }
 function render(run: () => unknown, results: unknown[] = []) {host.cursor = 0; host.queryIndex = 0; host.queries = []; host.results = results; return nodes(run());}
 function scoped(node: unknown) {const element = node as Node; return (element.type as (props: unknown) => unknown)(element.props);}

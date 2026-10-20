@@ -34,7 +34,7 @@ import {setAgentTaskLifecycle} from "../commands/agentTasks";
 import {cancelTaskWrapup} from "../runtime/taskWrapup";
 import {Button} from "../../../ui/button";
 import {Textarea} from "../../../ui/textarea";
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "../../../ui/dialog";
+import {SidePanel} from "../../../app/layout/SidePanel";
 import "./taskWrapup.css";
 
 export type WrapupModelSelection = {
@@ -563,8 +563,9 @@ export function TaskWrapup({
                                         if (memory.projectId === candidate.projectId && closeMemory(candidate.epoch))
                                             setSavedMemory(memory);
                                     }}/>}
-        <Dialog open={historyOpen} onOpenChange={setHistoryOpen}><DialogContent
-            className="agent-task-dialog task-review-history"><DialogHeader><DialogTitle>总结历史</DialogTitle><DialogDescription>每次保存独立留存。旧总结仅供追溯，不代表当前工作已通过验收。</DialogDescription></DialogHeader>{state?.history.map((version) =>
+        <SidePanel open={historyOpen} onOpenChange={setHistoryOpen} kind="wrapup-history" width={480} title="总结历史"
+                   description="每次保存独立留存。旧总结仅供追溯，不代表当前工作已通过验收。">
+            {state?.history.map((version) =>
             <details key={`${version.id}:${version.revision}`}>
                 <summary>
                     <span>{version.confirmedAt ? "已确认" : version.status === "draft" ? "草稿" : version.status === "failed" ? "失败" : "中断"} · 版本 {version.revision}<small>{dateLabel(version.updatedAt)} · {version.author === "ai" ? "AI" : "人工"}</small></span>
@@ -572,6 +573,6 @@ export function TaskWrapup({
                 <ReviewDocument onPromote={source => void prepareMemory(source)} promotionPending={candidatePending}
                                 promotionDisabled={candidatePending || !!candidate} record={version}
                                 evidence={currentSources(version.snapshot.evidence)}/></details>)}
-        </DialogContent></Dialog>
+        </SidePanel>
     </div>;
 }

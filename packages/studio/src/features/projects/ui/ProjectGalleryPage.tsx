@@ -24,10 +24,10 @@ import {
     AlertDialogTitle,
 } from "../../../ui/alert-dialog";
 import {Button} from "../../../ui/button";
+import {SidePanel} from "../../../app/layout/SidePanel";
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
@@ -337,15 +337,21 @@ export function ProjectGalleryPage() {
                 </>}
             </div>
 
-            <Dialog open={creating} onOpenChange={(open) => {
+            <SidePanel open={creating} onOpenChange={(open) => {
                 if (!creatingRef.current) setCreating(open);
-            }}>
-                <DialogContent className="flex flex-col overflow-hidden sm:max-w-xl">
-                    <DialogHeader>
-                        <DialogTitle>新建项目</DialogTitle>
-                        <DialogDescription>选择视频、音频或音乐项目，也可以关联已有 IP。</DialogDescription>
-                    </DialogHeader>
-                    <div className="app-scroll min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
+            }} kind="project-create" width={520} title="新建项目" description="选择视频、音频或音乐项目，也可以关联已有 IP。"
+                       footer={<>
+                        <Button disabled={submitting} variant="outline" onClick={() => {
+                            if (!creatingRef.current) setCreating(false);
+                        }}>
+                            {creationAvailable ? "取消" : "关闭"}
+                        </Button>
+                        <Button disabled={!creationAvailable || !name.trim() || submitting} variant="brand"
+                                onClick={() => void handleCreate()}>
+                            {createLabel}
+                        </Button>
+</>}>
+                    <div className="space-y-4">
                         <fieldset disabled={submitting}>
                             <legend className="text-sm font-medium">创作类型</legend>
                             <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-5">
@@ -431,37 +437,23 @@ export function ProjectGalleryPage() {
                         </>}
                         {createError ? <p role="alert" className="text-destructive text-sm">{createError}</p> : null}
                     </div>
-                    <DialogFooter>
-                        <Button disabled={submitting} variant="outline" onClick={() => {
-                            if (!creatingRef.current) setCreating(false);
-                        }}>
-                            {creationAvailable ? "取消" : "关闭"}
-                        </Button>
-                        <Button disabled={!creationAvailable || !name.trim() || submitting} variant="brand"
-                                onClick={() => void handleCreate()}>
-                            {createLabel}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            </SidePanel>
 
-            <Dialog open={Boolean(binding)} onOpenChange={(open) => {
+            <SidePanel open={Boolean(binding)} onOpenChange={(open) => {
                 if (!open && !bindingRef.current) setBinding(undefined);
-            }}>
-                <DialogContent><DialogHeader><DialogTitle>项目所属 IP</DialogTitle><DialogDescription>{binding?.name} ·
-                    关联仅整理项目归属，不会改写已有内容。</DialogDescription></DialogHeader>
-                    {<ProjectIpPicker value={binding?.ipId ?? null}
-                                      onChange={(ipId) => setBinding((value) => value ? {...value, ipId} : value)}
-                                      disabled={bindingBusy}/>}
-                    {bindingError && <p role="alert" className="text-destructive text-sm">{bindingError}</p>}
-                    <DialogFooter><Button variant="outline" disabled={bindingBusy}
+            }} kind="project-ip-binding" width={420} title="项目所属 IP"
+                       description={`${binding?.name ?? ""} · 关联仅整理项目归属，不会改写已有内容。`}
+                       footer={<><Button variant="outline" disabled={bindingBusy}
                                           onClick={() => {
                                               if (!bindingRef.current) setBinding(undefined);
                                           }}>取消</Button>
                         <Button disabled={bindingBusy}
-                                onClick={() => void handleBinding()}>{bindingBusy ? "保存中…" : "保存"}</Button></DialogFooter>
-                </DialogContent>
-            </Dialog>
+                                onClick={() => void handleBinding()}>{bindingBusy ? "保存中…" : "保存"}</Button></>}>
+                    {<ProjectIpPicker value={binding?.ipId ?? null}
+                                      onChange={(ipId) => setBinding((value) => value ? {...value, ipId} : value)}
+                                      disabled={bindingBusy}/>}
+                    {bindingError && <p role="alert" className="text-destructive text-sm">{bindingError}</p>}
+            </SidePanel>
 
             <Dialog open={Boolean(renameId)} onOpenChange={(open) => {
                 if (!open && !renameRef.current) setRenameId(undefined);

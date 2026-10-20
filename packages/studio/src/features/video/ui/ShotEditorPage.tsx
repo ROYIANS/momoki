@@ -93,7 +93,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "../../../ui/dropdown-menu";
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "../../../ui/dialog";
+import {SidePanel} from "../../../app/layout/SidePanel";
 import {Input} from "../../../ui/input";
 import {Label} from "../../../ui/label";
 import {Popover, PopoverContent, PopoverTrigger} from "../../../ui/popover";
@@ -1055,19 +1055,14 @@ function ShotEditorPageContent({
                     </div>
                 </div>
 
-                <Dialog open={Boolean(relationShotId)} onOpenChange={(open) => {
+                <SidePanel open={Boolean(relationShotId)} onOpenChange={(open) => {
                     if (open) return;
                     if (relationStatus !== "saved") {
                         toast.error(relationStatus === "saving" ? "正在保存，请稍候" : "保存未成功，请先重试或放弃未保存的选择");
                         return;
                     }
                     setRelationShotId(undefined);
-                }}>
-                    <DialogContent className="max-h-[85dvh] overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle>镜头道具与风格</DialogTitle>
-                            <DialogDescription>选择自动保存。风格可跟随项目，也可为这条镜头单独指定。</DialogDescription>
-                        </DialogHeader>
+                }} kind="shot-relations" width={440} title="镜头道具与风格" description="选择自动保存。风格可跟随项目，也可为这条镜头单独指定。">
                         <Select value={relationShotId} onValueChange={setRelationShotId}
                                 disabled={relationStatus !== "saved"}>
                             <SelectTrigger aria-label="选择要编辑的镜头"
@@ -1087,8 +1082,7 @@ function ShotEditorPageContent({
                             {relationStatus === "error" && <Button variant="ghost"
                                                                    onClick={() => setRelationStatus("saved")}>放弃未保存的选择</Button>}
                         </div>}
-                    </DialogContent>
-                </Dialog>
+                </SidePanel>
 
                 <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
                     <AlertDialogContent>

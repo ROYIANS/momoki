@@ -98,10 +98,10 @@ describe("single-shot real DOM and product commands", () => {
         const tile = portal.querySelector<HTMLButtonElement>(`[aria-label^="镜头 "][aria-label$="首帧"]`)!;
         expect(tile).not.toBeNull();
         await act(async () => tile.click());
-        await settle(() => expect(document.querySelector('[role="dialog"]')).not.toBeNull());
+        await settle(() => expect(document.querySelector('.side-panel-sheet')).not.toBeNull());
         // Opening a clean media dialog is not unsaved work for either route owner.
         expect(originalGuards.every(guard => !guard.shouldBlockFn(locations))).toBe(true);
-        const prompt = document.querySelector<HTMLTextAreaElement>('[role="dialog"] textarea')!;
+        const prompt = document.querySelector<HTMLTextAreaElement>('.side-panel-sheet textarea')!;
         await act(async () => {
             Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")!.set!.call(prompt, "media draft");
             prompt.dispatchEvent(new Event("input", {bubbles: true}));

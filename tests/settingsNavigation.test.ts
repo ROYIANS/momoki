@@ -266,7 +266,8 @@ describe("application rail settings highlight", () => {
         expect(links.filter(link => link.props.to === "/settings")).toHaveLength(1);
         expect(links.at(-1)?.props.to).toBe("/settings");
         // The topbar brand opens About, never settings.
-        const header = tree.find(node => node.type === "header")!;
+        const topbar = tree.find(node => typeof node.type === "function" && node.type.name === "AppTopbar")!;
+        const header = (topbar.type as (props: unknown) => Node)(topbar.props);
         expect(nodes(header).filter(node => node.type === Link).map(node => node.props.to)).toEqual(["/about"]);
     });
 

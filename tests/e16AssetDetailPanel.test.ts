@@ -166,15 +166,15 @@ describe("asset detail real DOM and existing commands", () => {
         const originalGuards = [...blockers];
         const tile = portal.querySelector<HTMLButtonElement>('[aria-label^="角色 · "]')!;
         await act(async () => tile.click());
-        const prompt = document.querySelector<HTMLTextAreaElement>('[role="dialog"] textarea')!;
+        const prompt = document.querySelector<HTMLTextAreaElement>('.side-panel-sheet textarea')!;
         expect(prompt).toBeTruthy(); await act(async () => type(prompt, "Existing slot draft"));
         expect(originalGuards.every(guard => !guard.shouldBlockFn(locations))).toBe(true);
         expect([...blockers].some(guard => guard.shouldBlockFn(locations))).toBe(true);
         await select(second, "b-slot");
         expect(document.querySelector('[role="alertdialog"]')?.textContent).toContain("正在处理修改");
-        await click("继续编辑"); expect(document.querySelector('[role="dialog"] textarea')).toBe(prompt);
+        await click("继续编辑"); expect(document.querySelector('.side-panel-sheet textarea')).toBe(prompt);
         await click("保存");
-        await settle(() => expect(document.querySelector('[role="dialog"]')).toBeNull());
+        await settle(() => expect(document.querySelector('.side-panel-sheet')).toBeNull());
         const row = await db.characters.get(target.entityId);
         expect(Object.values(row!.slots).some(slot => slot.prompt === "Existing slot draft")).toBe(true);
         expect(portal.querySelector('[data-asset-detail]')?.getAttribute("aria-busy")).toBe("false");

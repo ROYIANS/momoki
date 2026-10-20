@@ -8,14 +8,7 @@ import type {Project} from "../../projects/models/project";
 import {createAgentTask} from "../commands/agentTasks";
 import {getTaskDisplayState, TASK_STATE_LABELS} from "../runtime/taskState";
 import {Button} from "../../../ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle
-} from "../../../ui/dialog";
+import {SidePanel} from "../../../app/layout/SidePanel";
 import {Input} from "../../../ui/input";
 import {Textarea} from "../../../ui/textarea";
 import {PageHeader, PageState, PageToolbar} from "../../../app/layout/PageLayout";
@@ -154,12 +147,13 @@ export function TaskBoard({tasks, runs, projects, onOpenTask, onBack}: {
                             </section>;
                         })}
                     </div>}
-            <Dialog open={creating} onOpenChange={(next) => {
+            <SidePanel open={creating} onOpenChange={(next) => {
                 if (!saveLock.current) setCreating(next);
-            }}>
-                <DialogContent className="agent-task-dialog" showCloseButton={!saving}>
-                    <DialogHeader><DialogTitle>新建任务</DialogTitle><DialogDescription>写下想完成的事情，步骤可以稍后补充。</DialogDescription></DialogHeader>
-                    <form className="agent-task-dialog-form" onSubmit={(event) => {
+            }} kind="task-create" width={460} title="新建任务" description="写下想完成的事情，步骤可以稍后补充。"
+                       footer={<><Button type="button" variant="ghost" disabled={saving}
+                                              onClick={() => setCreating(false)}>取消</Button><Button type="submit" form="agent-task-create-form"
+                                                                                                      disabled={saving || !projectId || !title.trim() || !goal.trim()}>{saving ? "创建中…" : "创建任务"}</Button></>}>
+                    <form id="agent-task-create-form" className="agent-task-dialog-form" onSubmit={(event) => {
                         event.preventDefault();
                         void create();
                     }}>
@@ -179,12 +173,8 @@ export function TaskBoard({tasks, runs, projects, onOpenTask, onBack}: {
                                                                                         rows={5} disabled={saving}
                                                                                         required/></label>
                         </div>
-                        <DialogFooter><Button type="button" variant="ghost" disabled={saving}
-                                              onClick={() => setCreating(false)}>取消</Button><Button type="submit"
-                                                                                                      disabled={saving || !projectId || !title.trim() || !goal.trim()}>{saving ? "创建中…" : "创建任务"}</Button></DialogFooter>
                     </form>
-                </DialogContent>
-            </Dialog>
+            </SidePanel>
         </section>
     </ModuleLayout>;
 }

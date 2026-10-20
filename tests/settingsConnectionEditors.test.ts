@@ -22,7 +22,7 @@ import {SettingsPage} from "@/features/settings/ui/SettingsPage";
 let root: Root;
 let container: HTMLDivElement;
 const search = () => container.querySelector<HTMLInputElement>('input[aria-label="搜索设置"]')!;
-const dialog = () => document.body.querySelector<HTMLElement>('[role="dialog"]');
+const dialog = () => document.body.querySelector<HTMLElement>('[data-slot="context-panel-content"]');
 const button = (label: string) => [...document.body.querySelectorAll<HTMLButtonElement>("button")]
     .find(element => element.textContent?.trim() === label)!;
 const click = (element: HTMLElement) => act(async () => {element.click();});
@@ -73,7 +73,7 @@ describe("settings search while editing connection credentials", () => {
         expect(search().autocomplete).toBe("off");
         expect(key.autocomplete).toBe("new-password");
 
-        const close = opened!.querySelector<HTMLButtonElement>('[data-slot="dialog-close"]')!;
+        const close = opened!.querySelector<HTMLButtonElement>('.context-panel-return')!;
         expect(close).not.toBeNull();
         await click(close);
         expect(dialog()).toBeNull();
@@ -148,7 +148,7 @@ describe("settings search while editing connection credentials", () => {
         const opened = dialog()!;
         await input(opened.querySelector<HTMLInputElement>('input[type="password"]')!, "tvly-saving-draft");
         const save = button("保存搜索连接");
-        const close = opened.querySelector<HTMLButtonElement>('[data-slot="dialog-close"]')!;
+        const close = opened.querySelector<HTMLButtonElement>('.context-panel-return')!;
         await act(async () => {save.click(); close.click();});
         expect(boundary.save).toHaveBeenCalledTimes(1);
         expect(dialog()).toBe(opened);

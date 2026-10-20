@@ -30,14 +30,7 @@ import {
     ContextPanelHeaderActions,
     ContextPanelTitle
 } from "../../../app/layout/context-panel";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle
-} from "../../../ui/dialog";
+import {SidePanel} from "../../../app/layout/SidePanel";
 import {Input} from "../../../ui/input";
 import {Textarea} from "../../../ui/textarea";
 import {TaskRecords} from "./TaskRecords";
@@ -380,12 +373,16 @@ function TaskInspectorContent({
                     disabled={projectUnavailable || busy || pending || reviewPending || reviewEditing}
                     onClick={() => void mutate(() => setAgentTaskLifecycle(task.id, "open"), "任务已重新打开")}><RotateCcw/>重新打开</Button></>}
             </footer>
-            <Dialog open={editor !== null} onOpenChange={(next) => {
+            <SidePanel open={editor !== null} onOpenChange={(next) => {
                 if (!next) requestDeparture(() => setEditor(null), () => {
                 });
-            }}><DialogContent className="agent-task-dialog"
-                              showCloseButton={!pending}><DialogHeader><DialogTitle>{editor === "goal" ? "编辑任务目标" : "编辑执行清单"}</DialogTitle><DialogDescription>{editor === "goal" ? "清晰的目标和完成标准，帮助每一次执行保持方向。" : "每行一个步骤，调整行的顺序即可排序。修改名称会将该步骤重置为待完成。"}</DialogDescription></DialogHeader>
-                <form onSubmit={(event) => {
+            }} kind="task-editor" width={460} title={editor === "goal" ? "编辑任务目标" : "编辑执行清单"}
+                       description={editor === "goal" ? "清晰的目标和完成标准，帮助每一次执行保持方向。" : "每行一个步骤，调整行的顺序即可排序。修改名称会将该步骤重置为待完成。"}
+                       footer={<><Button type="button" variant="ghost" disabled={pending}
+                                          onClick={() => requestDeparture(() => setEditor(null), () => {
+                                          })}>取消</Button><Button type="submit" form="task-editor-form"
+                                                                   disabled={!editable || (editor === "goal" && (!title.trim() || !goal.trim()))}>{pending ? "保存中…" : "保存"}</Button></>}>
+                <form id="task-editor-form" onSubmit={(event) => {
                     event.preventDefault();
                     if (editor === "goal") void mutate(() => updateAgentTask(task.id, {
                         title: title.trim(),
@@ -423,12 +420,8 @@ function TaskInspectorContent({
                                                                               setPlanText(event.target.value);
                                                                           }}
                                                                           placeholder={"明确故事主题\n完善人物关系\n确认最终设定"}/></label>}
-                    <DialogFooter><Button type="button" variant="ghost" disabled={pending}
-                                          onClick={() => requestDeparture(() => setEditor(null), () => {
-                                          })}>取消</Button><Button type="submit"
-                                                                   disabled={!editable || (editor === "goal" && (!title.trim() || !goal.trim()))}>{pending ? "保存中…" : "保存"}</Button></DialogFooter>
                 </form>
-            </DialogContent></Dialog>
+            </SidePanel>
         </ContextPanelContent>
     </ContextPanel>;
 }

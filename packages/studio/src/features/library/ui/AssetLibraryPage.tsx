@@ -26,14 +26,7 @@ import {
 } from "../../../ui/alert-dialog";
 import {Button} from "../../../ui/button";
 import {Checkbox} from "../../../ui/checkbox";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "../../../ui/dialog";
+import {SidePanel} from "../../../app/layout/SidePanel";
 import {Tabs, TabsList, TabsTrigger} from "../../../ui/tabs";
 import {WorldSettingPanel} from "../../video/ui/WorldSettingPanel";
 import {PageContent, PageHeader, PageState, PageToolbar} from "../../../app/layout/PageLayout";
@@ -377,19 +370,28 @@ function StudioAssetPicker({
     }
 
     return (
-        <Dialog
+        <SidePanel
             open={open}
             onOpenChange={(nextOpen) => {
                 if (copying) return;
                 if (!nextOpen) setSelected(new Set());
                 onOpenChange(nextOpen);
             }}
+            kind="studio-asset-picker" width={480}
+            title={`从工作室添加${TAB_COPY[tab].singular}`} description="添加后成为项目快照，可以独立修改。"
+            footer=<>
+                    <Button variant="outline" disabled={copying} onClick={closePicker}>
+                        取消
+                    </Button>
+                    <Button
+                        variant="brand"
+                        disabled={selected.size === 0 || copying}
+                        onClick={() => void copySelected()}
+                    >
+                        {copying ? "添加中…" : `添加 ${selected.size || ""}`}
+                    </Button>
+</>
         >
-            <DialogContent className="flex flex-col overflow-hidden">
-                <DialogHeader>
-                    <DialogTitle>从工作室添加{TAB_COPY[tab].singular}</DialogTitle>
-                    <DialogDescription>添加后成为项目快照，可以独立修改。</DialogDescription>
-                </DialogHeader>
                 <Input aria-label="搜索工作室资产" placeholder="搜索名称与设定…" value={query}
                        disabled={copying} onChange={(event) => setQuery(event.target.value)}/>
                 <div className="min-h-0 space-y-2 overflow-auto p-1">
@@ -431,20 +433,7 @@ function StudioAssetPicker({
                             ))
                         )}
                 </div>
-                <DialogFooter className="shrink-0">
-                    <Button variant="outline" disabled={copying} onClick={closePicker}>
-                        取消
-                    </Button>
-                    <Button
-                        variant="brand"
-                        disabled={selected.size === 0 || copying}
-                        onClick={() => void copySelected()}
-                    >
-                        {copying ? "添加中…" : `添加 ${selected.size || ""}`}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+        </SidePanel>
     );
 }
 

@@ -22,14 +22,7 @@ import {
 } from "../models/agentTaskRecords";
 import {CreatedEntityLinks} from "./CreatedEntityLinks";
 import {Button} from "../../../ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle
-} from "../../../ui/dialog";
+import {SidePanel} from "../../../app/layout/SidePanel";
 import {Input} from "../../../ui/input";
 import {Textarea} from "../../../ui/textarea";
 
@@ -237,11 +230,16 @@ export function TaskRecords({task, messages, editable, onDraftStateChange, reque
                         })}</div>}
                 </div>
             </details>)}
-        <Dialog open={!!editing} onOpenChange={(open) => {
+        <SidePanel open={!!editing} onOpenChange={(open) => {
             if (!open) requestLocalDeparture(() => publish(undefined));
-        }}><DialogContent className="agent-task-dialog agent-task-record-editor"
-                          showCloseButton={!pending}><DialogHeader><DialogTitle>{editing?.record ? "编辑工作记录" : "新建工作记录"}</DialogTitle><DialogDescription>保存后保留历史版本。编辑记录仅影响本文；目标与清单请在概览中调整。</DialogDescription></DialogHeader>{editing &&
-            <form onSubmit={(event) => {
+        }} kind="task-record-editor" width={520} title={editing?.record ? "编辑工作记录" : "新建工作记录"}
+                   description="保存后保留历史版本。编辑记录仅影响本文；目标与清单请在概览中调整。"
+                   footer={editing ? <><Button type="button" variant="ghost" disabled={pending}
+                                      onClick={() => requestLocalDeparture(() => publish(undefined))}>取消</Button><Button
+                    type="submit" form="task-record-form"
+                    disabled={pending || !editable || !editing.input.title.trim() || !editing.input.body.trim()}>{pending ? "保存中…" : "保存记录"}</Button></> : undefined}>
+        {editing &&
+            <form id="task-record-form" onSubmit={(event) => {
                 event.preventDefault();
                 void save();
             }}>
@@ -294,15 +292,12 @@ export function TaskRecords({task, messages, editable, onDraftStateChange, reque
                 </details>}
                 {error && <p className="agent-task-record-error"
                              role="alert">{error}。草稿仍在，可以复制内容后重新打开最新版本。</p>}
-                <DialogFooter><Button type="button" variant="ghost" disabled={pending}
-                                      onClick={() => requestLocalDeparture(() => publish(undefined))}>取消</Button><Button
-                    type="submit"
-                    disabled={pending || !editable || !editing.input.title.trim() || !editing.input.body.trim()}>{pending ? "保存中…" : "保存记录"}</Button></DialogFooter>
-            </form>}</DialogContent></Dialog>
-        <Dialog open={!!historyId} onOpenChange={(open) => {
+            </form>}
+        </SidePanel>
+        <SidePanel open={!!historyId} onOpenChange={(open) => {
             if (!open) setHistoryId(undefined);
-        }}><DialogContent
-            className="agent-task-dialog agent-task-record-editor"><DialogHeader><DialogTitle>历史版本</DialogTitle><DialogDescription>按保存时间留存，可展开查看当时的内容。</DialogDescription></DialogHeader>{history ? [...history].reverse().map((version) =>
+        }} kind="task-record-history" width={460} title="历史版本" description="按保存时间留存，可展开查看当时的内容。">
+            {history ? [...history].reverse().map((version) =>
             <details className="agent-task-record-version" key={version.versionId}>
                 <summary>
                     <span>版本 {version.revision} · {version.author === "ai" ? "助手" : "你"}</span><small>{dateLabel(version.updatedAt)}</small>
@@ -310,6 +305,6 @@ export function TaskRecords({task, messages, editable, onDraftStateChange, reque
                 <h3>{version.title}</h3><p
                 className="agent-task-muted">{KINDS[version.kind]} · {CLAIMS[version.claim]}</p><p
                 className="agent-task-record-body">{version.body}</p></details>) : <p role="status">正在读取历史…</p>}
-        </DialogContent></Dialog>
+        </SidePanel>
     </div>;
 }

@@ -29,14 +29,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "../
 import {PageState} from "../../../app/layout/PageLayout";
 import {Input} from "../../../ui/input";
 import {Textarea} from "../../../ui/textarea";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle
-} from "../../../ui/dialog";
+import {SidePanel} from "../../../app/layout/SidePanel";
 import {MediaPicker} from "../../library/ui/MediaPicker";
 import {MediaPreview} from "../../library/ui/MediaThumb";
 
@@ -204,11 +197,13 @@ function ProposalEditor({initialShot, shots, onClose, onSelect}: {
         }
     }
 
-    return <><Dialog open onOpenChange={(open) => {
+    return <><SidePanel open onOpenChange={(open) => {
         if (!open) leave(onClose);
-    }}><DialogContent className="flex flex-col overflow-hidden sm:max-w-2xl" showCloseButton={!busy}>
-        <DialogHeader><DialogTitle>准备镜头变更</DialogTitle><DialogDescription>保存后会展示变更前后对比，确认应用时才会修改镜头。</DialogDescription></DialogHeader>
-        <div className="min-h-0 space-y-4 overflow-y-auto p-1">
+    }} kind="shot-proposal" width={520} title="准备镜头变更" description="保存后会展示变更前后对比，确认应用时才会修改镜头。"
+                        footer={<><Button variant="ghost" disabled={busy}
+                                          onClick={() => leave(onClose)}>返回</Button><Button
+                            disabled={busy} onClick={() => void save()}>{busy ? "保存中…" : "保存并预览提案"}</Button></>}>
+        <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
                 <div className="grid gap-2"><Label htmlFor={`${editorId}-shot`}>目标镜头</Label><Select
                     value={initialShot.id}
@@ -251,10 +246,7 @@ function ProposalEditor({initialShot, shots, onClose, onSelect}: {
                     <p className="text-muted-foreground text-xs">图片可作为成片占位，完整交付仍需要视频。</p> : null}</div>}
             {error ? <p role="alert" className="text-destructive text-sm">{error}</p> : null}
         </div>
-        <DialogFooter className="shrink-0"><Button variant="ghost" disabled={busy}
-                                                   onClick={() => leave(onClose)}>返回</Button><Button
-            disabled={busy} onClick={() => void save()}>{busy ? "保存中…" : "保存并预览提案"}</Button></DialogFooter>
-    </DialogContent></Dialog>
+    </SidePanel>
         <AlertDialog open={!!discardAction} onOpenChange={(open) => {
             if (!open) setDiscardAction(undefined);
         }}>

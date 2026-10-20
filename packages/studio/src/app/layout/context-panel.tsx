@@ -35,6 +35,11 @@ function usePanel() {
     return value;
 }
 
+/** True under another panel's content: a panel opened from there is a sheet over it, not a replacement for it. */
+export function useInsidePanel(): boolean {
+    return useContext(PanelContext) !== null;
+}
+
 /** Feature-owned open/draft state; the frame arbitrates presentation only. */
 export function ContextPanel({open, onOpenChange, width = 400, title, kind, onRequestDeparture, children}: {
     open: boolean; onOpenChange: (open: boolean, reason?: ContextPanelHostCloseReason) => void; width?: number; children: ReactNode;

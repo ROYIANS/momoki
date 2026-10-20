@@ -1,7 +1,7 @@
 import {ReferenceAttachments} from "./ReferenceAttachments";
 import {ReferenceLibrary} from "./ReferenceLibrary";
 import {REFERENCE_ACCEPT} from "../../references/models/references";
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "../../../ui/dialog";
+import {SidePanel} from "../../../app/layout/SidePanel";
 import {ProjectPicker} from "./ProjectPicker";
 import {AgentControls, ComposerPlusMenu} from "./AgentControls";
 import {Dropdown, Input} from "antd";
@@ -323,12 +323,13 @@ export function FloatingComposer({
                 <ReferenceLibrary key={scope} projectId={projectId} open={libraryOpen} onOpenChange={setLibraryOpen}
                                   selected={attachments} onSelect={(attachment) => onAttachReference?.(attachment)}
                                   onImport={() => fileInput.current?.click()}/>}
-            <Dialog open={!!projectAction && !projectId} onOpenChange={(open) => {
+            <SidePanel open={!!projectAction && !projectId} onOpenChange={(open) => {
                 if (!open) setProjectAction(undefined);
-            }}><DialogContent
-                className="reference-dialog reference-project-dialog"><DialogHeader><DialogTitle>先为资料选择项目</DialogTitle>{projectLocked && <DialogDescription>当前对话未绑定项目且已开始，请新开一个项目对话导入资料。</DialogDescription>}</DialogHeader><ProjectPicker
-                projects={projects} projectId={projectId} locked={projectLocked} allowClear={false}
-                onChange={onProjectChange}/></DialogContent></Dialog>
+            }} kind="reference-project" width={420} title="先为资料选择项目"
+                       description={projectLocked ? "当前对话未绑定项目且已开始，请新开一个项目对话导入资料。" : undefined}>
+                <ProjectPicker projects={projects} projectId={projectId} locked={projectLocked} allowClear={false}
+                               onChange={onProjectChange}/>
+            </SidePanel>
             </>}
         >
                 <input ref={fileInput} type="file" accept={REFERENCE_ACCEPT} multiple hidden onChange={(event) => {

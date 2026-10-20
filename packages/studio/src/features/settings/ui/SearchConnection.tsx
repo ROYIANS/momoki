@@ -7,14 +7,7 @@ import {Button} from '../../../ui/button';
 import {Input} from '../../../ui/input';
 import {Checkbox} from '../../../ui/checkbox';
 import {Field} from '../../../ui/field';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle
-} from '../../../ui/dialog';
+import {SidePanel} from '../../../app/layout/SidePanel';
 
 export function SearchConnection({onEditorOpenChange}: { onEditorOpenChange?: (open: boolean) => void }) {
     const enabledId = useId();
@@ -85,17 +78,23 @@ export function SearchConnection({onEditorOpenChange}: { onEditorOpenChange?: (o
                 setOpen(true);
             }}>配置 Tavily</Button>
         </div>
-        <Dialog open={open} onOpenChange={(value) => {
+        <SidePanel open={open} onOpenChange={(value) => {
             if (mounted.current && !pending.current) {
                 setOpen(value);
                 onEditorOpenChange?.(value);
                 if (!value) setKey('');
             }
-        }}>
-            <DialogContent className="flex flex-col overflow-hidden">
-                <DialogHeader><DialogTitle>Tavily 联网搜索</DialogTitle><DialogDescription>密钥仅保存在本机，不进入项目备份或
-                    AI 上下文。保存不发送请求；测试仅查询鉴权，不执行搜索。</DialogDescription></DialogHeader>
-                <div className="grid min-h-0 gap-4 overflow-y-auto p-1">
+        }} kind="search-connection" width={440} title="Tavily 联网搜索"
+                   description="密钥仅保存在本机，不进入项目备份或 AI 上下文。保存不发送请求；测试仅查询鉴权，不执行搜索。"
+                   footer=<>
+                    {state?.configured && <Button variant="ghost" disabled={busy}
+                                                  onClick={() => void act('remove')}>移除搜索连接</Button>}
+                    <div className="flex flex-wrap gap-2"><Button variant="outline" disabled={busy}
+                                                                  onClick={() => void act('test')}>测试搜索连接</Button><Button
+                        disabled={busy || !key.trim() && !state?.configured}
+                        onClick={() => void act('save')}>保存搜索连接</Button></div>
+</>>
+                <div className="grid gap-4">
                     <Field label="Tavily API Key"><Input type="password" name="tavily-api-key" value={key}
                                                          disabled={busy}
                                                          onChange={(event) => setKey(event.target.value)}
@@ -108,15 +107,6 @@ export function SearchConnection({onEditorOpenChange}: { onEditorOpenChange?: (o
                     <p className="text-muted-foreground text-xs leading-5">启用后会为后续智能对话开启「联网调研」技能；你仍可在对话的技能菜单中关闭。搜索和读取网页可能消耗服务额度。</p>
                     {feedback && <p role="status" className="text-sm leading-6">{feedback}</p>}
                 </div>
-                <DialogFooter className="shrink-0 flex-wrap gap-2 sm:justify-between">
-                    {state?.configured && <Button variant="ghost" disabled={busy}
-                                                  onClick={() => void act('remove')}>移除搜索连接</Button>}
-                    <div className="flex flex-wrap gap-2"><Button variant="outline" disabled={busy}
-                                                                  onClick={() => void act('test')}>测试搜索连接</Button><Button
-                        disabled={busy || !key.trim() && !state?.configured}
-                        onClick={() => void act('save')}>保存搜索连接</Button></div>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+        </SidePanel>
     </section>;
 }
